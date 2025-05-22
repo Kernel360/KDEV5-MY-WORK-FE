@@ -24,6 +24,7 @@ export default defineConfig({
       "@layouts": "/src/layouts",
       "@styles": "/src/styles",
       "@theme": "/src/theme",
+      "@features": "/src/features",
     },
   },
 });
