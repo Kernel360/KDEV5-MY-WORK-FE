@@ -1,24 +1,15 @@
-/* src/index.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* src/index.css (또는 App.css) */
 
-@layer base {
-  html,
-  body {
-    @apply bg-[#F9FAFB] text-black font-sans;
-  }
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: #0a0a0a; /* 다크 백오피스 무드 */
+  font-family: "Pretendard", sans-serif;
+  color: white;
+}
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    @apply font-bold;
-  }
-
-  a {
-    @apply text-primary hover:underline;
-  }
+#root {
+  height: 100%;
 }
