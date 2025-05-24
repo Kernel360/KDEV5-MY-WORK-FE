@@ -7,7 +7,7 @@ import Drawer from "@mui/material/Drawer";
 export const Root = styled(Box)(({ theme }) => ({
   display: "flex",
   height: "100vh",
-  backgroundColor: "#1A1A1A",
+  backgroundColor: theme.palette.text.primary,
   position: "relative",
 }));
 
@@ -35,10 +35,8 @@ export const Main = styled(Box)(({ theme }) => ({
   component: "main",
   position: "relative",
   flexGrow: 1,
-  margin: theme.spacing(2),
-  padding: theme.spacing(4),
-  borderRadius: theme.shape.borderRadius * 2,
-  backgroundColor: "#ffffff",
-  height: `calc(100% - ${theme.spacing(4)})`,
+  margin: theme.spacing(1),
+  padding: theme.spacing(1),
+  backgroundColor: theme.palette.primary,
   overflowY: "auto",
 }));

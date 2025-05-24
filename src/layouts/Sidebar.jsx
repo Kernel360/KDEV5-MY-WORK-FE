@@ -19,6 +19,7 @@ import navItems from "../../constants/navItems";
 
 export default function Sidebar({ onClose }) {
   const navigate = useNavigate();
+  const currentPath = location.pathname;
 
   const handleItemClick = (path) => {
     onClose();
@@ -28,16 +29,12 @@ export default function Sidebar({ onClose }) {
   return (
     <SidebarRoot>
       {/* User Profile */}
-      <ProfileSection spacing={2}>
-        <Avatar src="/finalytic_logo.png" />
-        <Box>
-          <Typography variant="caption" color="text.secondary">
-            Team
-          </Typography>
-          <Typography variant="body1" fontWeight={600}>
-            Finalytic
-          </Typography>
-        </Box>
+      <ProfileSection>
+        <Avatar src="/toss_logo.png" />
+        <div className="profile-text">
+          <span className="profile-role">개발자</span>
+          <span className="profile-name">이수하</span>
+        </div>
       </ProfileSection>
 
       {/* Navigation */}
@@ -48,7 +45,7 @@ export default function Sidebar({ onClose }) {
             onClick={() => handleItemClick(path)}
             disablePadding
           >
-            <ListItemButton>
+            <ListItemButton selected={currentPath === path}>
               <ListItemIcon>
                 <Icon />
               </ListItemIcon>
