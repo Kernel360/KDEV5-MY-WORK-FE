@@ -2,8 +2,11 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
-// tsconfigPaths는 TS 쓸 때만 필요하므로 JS에서는 제외
-// import tsconfigPaths from 'vite-tsconfig-paths';
+import { dirname, resolve } from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export default defineConfig({
   plugins: [
@@ -16,15 +19,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      // 경로 별칭 예시
-      "@": "/src",
-      "@components": "/src/components",
-      "@pages": "/src/pages",
-      "@assets": "/src/assets",
-      "@layouts": "/src/layouts",
-      "@styles": "/src/styles",
-      "@theme": "/src/theme",
-      "@features": "/src/features",
+      "@": resolve(__dirname, "src"),
     },
   },
 });
