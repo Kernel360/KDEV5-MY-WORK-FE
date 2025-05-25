@@ -9,6 +9,7 @@ export const Root = styled(Box)(({ theme }) => ({
   height: "100vh",
   backgroundColor: theme.palette.text.primary,
   position: "relative",
+  overflow: "hidden",
 }));
 
 export const MobileToggleButton = styled(IconButton)(({ theme }) => ({
@@ -38,5 +39,5 @@ export const Main = styled(Box)(({ theme }) => ({
   margin: theme.spacing(1),
   padding: theme.spacing(1),
   backgroundColor: theme.palette.primary,
-  overflowY: "auto",
+  overflow: "hidden",
 }));
