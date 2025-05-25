@@ -9,13 +9,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export default defineConfig({
-  plugins: [
-    react(), // React 기본 플러그인
-    svgr(), // SVG → React 컴포넌트로 import 가능
-  ],
+  plugins: [react(), svgr()],
   server: {
-    port: 3000, // 개발 서버 포트 (원하면 변경)
-    open: true, // dev 서버 실행 시 브라우저 자동 오픈
+    port: 3000,
+    open: true,
   },
   resolve: {
     alias: {
