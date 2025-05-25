@@ -20,6 +20,7 @@ import {
   FormControl,
   InputLabel,
   TableSortLabel,
+  LinearProgress,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
@@ -146,11 +147,11 @@ export default function CustomTable({
       )}
 
       {/* 가로 스크롤 영역 */}
-      <Box sx={{ overflowX: "auto", flex: 1 }}>
+      <Box sx={{ flex: 1, overflow: "auto" }}>
         <Box
           sx={{
             height: "100%",
-            overflowY: "auto",
+            overflow: "auto",
             "&::-webkit-scrollbar": { width: 6 },
             "&::-webkit-scrollbar-thumb": {
               backgroundColor: theme.palette.grey[300],
@@ -186,7 +187,6 @@ export default function CustomTable({
                         }
                         onClick={() => handleSort(col.key)}
                         hideSortIcon={false}
-                        g
                         sx={{
                           "& .MuiTableSortLabel-icon": {
                             opacity: 1,
@@ -344,6 +344,27 @@ function renderCellContent(col, value, row, theme) {
           {action.label}
         </Button>
       ));
+
+    case "progress":
+      return (
+        <Box display="flex" alignItems="center" gap={1}>
+          <Box flexGrow={1}>
+            <LinearProgress
+              variant="determinate"
+              value={value ?? 0}
+              sx={{
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: (theme) => theme.palette.grey[200],
+                "& .MuiLinearProgress-bar": {
+                  backgroundColor: (theme) => theme.palette.primary.main,
+                },
+              }}
+            />
+          </Box>
+          <Typography variant="caption">{value ?? 0}%</Typography>
+        </Box>
+      );
 
     case "custom":
       return col.render ? col.render(value, row) : value;
