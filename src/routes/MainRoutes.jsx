@@ -1,7 +1,7 @@
 // src/routes/MainRoutes.jsx
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import ProjectPage from "@/features/projects/pages/ProjectPage";
+import ProjectPage from "@/features/project/pages/ProjectPage";
 // import LoginPage from "@features/auth/pages/LoginPage";
 import MainLayout from "@/layouts/MainLayout";
 
