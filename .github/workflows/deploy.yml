@@ -30,7 +30,7 @@ jobs:
 
       # 5) S3에 업로드
       - name: Sync to S3
-        uses: jakejarvis/s3-sync-action@v0.6.0
+        uses: jakejarvis/s3-sync-action@vv0.2.0
         with:
           args: --acl public-read --delete
         env:
