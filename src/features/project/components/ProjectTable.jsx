@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const columns = [
-  { key: "name", label: "제목", type: "text" },
+  { key: "name", label: "제목", type: "text", filter: true },
   {
     key: "step",
     label: "상태",
