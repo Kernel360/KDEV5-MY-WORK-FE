@@ -64,10 +64,8 @@ export const deleteProject = createAsyncThunk(
 const projectSlice = createSlice({
   name: "project",
   initialState: {
-    data: [],
+    list: [],
     current: null,
-    loading: false,
-    error: null,
   },
   reducers: {
     clearCurrentProject(state) {
@@ -76,7 +74,6 @@ const projectSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-
       .addCase(fetchProjects.fulfilled, (state, action) => {
         state.data = action.payload;
       })
@@ -87,7 +84,7 @@ const projectSlice = createSlice({
         state.data.push(action.payload);
       })
       .addCase(updateProject.fulfilled, (state, action) => {
-        const idx = state.list.findIndex((p) => p.id === action.payload.id);
+        const idx = state.data.findIndex((p) => p.id === action.payload.id);
         if (idx !== -1) state.data[idx] = action.payload;
       })
       .addCase(deleteProject.fulfilled, (state, action) => {
