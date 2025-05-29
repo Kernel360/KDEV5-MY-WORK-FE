@@ -297,9 +297,9 @@ function renderCellContent(col, value, row, theme) {
 
     case "status": {
       const statusMap = col.statusMap || {};
-      const statusInfo = statusMap[value] || { key: "neutral", label: value };
+      const statusInfo = statusMap[value] || { color: "neutral", label: value };
       const palette =
-        theme.palette.status[statusInfo.key] || theme.palette.status.neutral;
+        theme.palette.status[statusInfo.color] || theme.palette.status.neutral;
 
       return (
         <Chip
