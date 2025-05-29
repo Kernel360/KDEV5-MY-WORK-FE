@@ -25,7 +25,7 @@ const columns = [
 export default function ProjectTable() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { data: rawProjects } = useSelector((state) => state.project);
+  const { list: rawProjects } = useSelector((state) => state.project);
 
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
