@@ -75,7 +75,7 @@ const projectSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchProjects.fulfilled, (state, action) => {
-        state.data = action.payload;
+        state.list = action.payload;
       })
       .addCase(fetchProjectById.fulfilled, (state, action) => {
         state.current = action.payload;

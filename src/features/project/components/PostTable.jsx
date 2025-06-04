@@ -1,10 +1,10 @@
 // src/components/common/postTable/PostTable.jsx
-import React, { useState } from "react";
-import { LinearProgress, Stack, Typography, Avatar } from "@mui/material";
+import React, { useState, useMemo } from "react";
+import { LinearProgress, Stack, Typography, Chip } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import SectionTable from "@/components/common/sectionTable/SectionTable";
 
-// 샘플 데이터, 필요시 rows prop으로 오버라이드 가능합니다.
+// 샘플 데이터
 const defaultRows = [
   {
     id: 1,
@@ -33,47 +33,64 @@ export default function PostTable({ rows }) {
   const phaseTabs = ["전체", "기획", "디자인", "퍼블리싱", "개발", "검수"];
   const [selectedPhase, setSelectedPhase] = useState(phaseTabs[0]);
 
+  // 실제 사용할 데이터
   const dataRows = rows && rows.length ? rows : defaultRows;
-  const filteredRows =
-    selectedPhase === phaseTabs[0]
-      ? dataRows
-      : dataRows.filter((row) => row.status === selectedPhase);
 
+  // 단계별 필터링
+  const filteredRows = useMemo(() => {
+    if (selectedPhase === phaseTabs[0]) return dataRows;
+    return dataRows.filter((row) => row.status === selectedPhase);
+  }, [dataRows, selectedPhase]);
+
+  // "상태" 칩 렌더링 함수: theme.palette.status 구조 활용
   const getStatusChip = (status) => {
-    const statusMap = {
-      기획: theme.palette.status.warning,
-      디자인: theme.palette.status.success,
-      퍼블리싱: theme.palette.status.info,
-      개발: theme.palette.status.primary,
-      검수: theme.palette.status.error,
+    const map = {
+      기획: "warning",
+      디자인: "info",
+      퍼블리싱: "success",
+      개발: "primary",
+      검수: "error",
     };
-    const color = statusMap[status] || theme.palette.grey;
+
+    const statusKey = map[status];
+    const statusObj =
+      theme.palette.status[statusKey] ?? theme.palette.status.neutral;
+
     return (
-      <Avatar
-        variant="rounded"
+      <Chip
+        label={status}
+        size="small"
         sx={{
-          bgcolor: color.light,
-          color: color.main,
-          fontSize: 12,
-          px: 1,
+          backgroundColor: statusObj.bg,
+          color: statusObj.main,
+          borderRadius: "12px",
+          fontWeight: 500,
+          fontSize: 13,
         }}
-      >
-        {status}
-      </Avatar>
+      />
     );
   };
 
+  // 컬럼 정의: sortable을 true로 설정하면 헤더 클릭 시 정렬 가능
   const columns = [
-    { key: "title", label: "제목" },
+    {
+      key: "title",
+      label: "제목",
+      width: 200,
+      sortable: true,
+    },
     {
       key: "status",
       label: "상태",
-      renderCell: (row) => getStatusChip(row.status),
       width: 120,
+      sortable: true,
+      renderCell: (row) => getStatusChip(row.status),
     },
     {
       key: "progress",
       label: "진행도",
+      width: 140,
+      sortable: true,
       renderCell: (row) => (
         <Stack spacing={0.5}>
           <LinearProgress
@@ -96,21 +113,30 @@ export default function PostTable({ rows }) {
           </Typography>
         </Stack>
       ),
-      width: 140,
     },
-    { key: "dueDate", label: "마감일", width: 110 },
+    {
+      key: "dueDate",
+      label: "마감일",
+      width: 110,
+      sortable: true,
+    },
     {
       key: "assignee",
       label: "담당자",
+      width: 140,
+      sortable: true,
       renderCell: (row) => (
         <Stack direction="row" spacing={1} alignItems="center">
-          <Avatar src={row.assignee.avatar} sx={{ width: 24, height: 24 }} />
+          <img
+            src={row.assignee.avatar}
+            alt={row.assignee.name}
+            style={{ width: 24, height: 24, borderRadius: "50%" }}
+          />
           <Typography variant="body2" fontWeight={500}>
             {row.assignee.name}
           </Typography>
         </Stack>
       ),
-      width: 140,
     },
   ];
 
@@ -121,6 +147,7 @@ export default function PostTable({ rows }) {
       phases={phaseTabs}
       selectedPhase={selectedPhase}
       onPhaseChange={setSelectedPhase}
+      rowKey="id"
     />
   );
 }

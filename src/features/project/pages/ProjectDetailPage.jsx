@@ -19,6 +19,7 @@ import CreateRoundedIcon from "@mui/icons-material/CreateRounded";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import TaskIcon from "@mui/icons-material/AssignmentTurnedIn";
 import DownloadIcon from "@mui/icons-material/Download";
+import ProjectManagement from "../components/ProjectManagement";
 
 export default function ProjectDetailPage() {
   const { id } = useParams();
@@ -70,7 +71,10 @@ export default function ProjectDetailPage() {
             >
               삭제하기
             </CustomButton>
-            <CustomButton startIcon={<CreateRoundedIcon />}>
+            <CustomButton
+              startIcon={<CreateRoundedIcon />}
+              onClick={() => navigate(`/projects/${id}/edit`)}
+            >
               수정하기
             </CustomButton>
           </Stack>
@@ -108,7 +112,7 @@ export default function ProjectDetailPage() {
 
       <TabsWithContent
         tabs={[
-          { label: "단계 설정", icon: <VisibilityIcon /> },
+          { label: "프로젝트 관리", icon: <VisibilityIcon /> },
           { label: "업무 관리", icon: <TaskIcon /> },
           { label: "진척도 관리", icon: <DownloadIcon /> },
         ]}
@@ -116,7 +120,14 @@ export default function ProjectDetailPage() {
         onChange={(_, nv) => setTab(nv)}
         content={
           tab === 0 ? (
-            <Typography>단계 설정 콘텐츠</Typography>
+            <ProjectManagement
+              initialStages={["기획", "디자인", "퍼블리싱", "개발", "검수"]}
+              initialParticipants={[
+                { id: 1, name: "이수하", avatarUrl: "/avatar1.jpg" },
+
+                { id: 2, name: "김철수", avatarUrl: "/avatar2.jpg" },
+              ]}
+            />
           ) : tab === 1 ? (
             <PostTable />
           ) : (
