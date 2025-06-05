@@ -9,18 +9,10 @@ import {
 } from "@/features/project/projectSlice";
 import { fetchCompanies } from "@/features/company/companySlice";
 import { fetchMembers } from "@/features/member/memberSlice";
-import {
-  TextField,
-  MenuItem,
-  Button,
-  Paper,
-  Stack,
-  CircularProgress,
-} from "@mui/material";
+import { Box, Button, Stack } from "@mui/material";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
-
-const statusOptions = ["기획", "디자인", "퍼블리싱", "개발", "검수", "완료"];
+import ProjectForm from "../components/ProjectForm";
 
 export default function ProjectFormPage() {
   const { id } = useParams();
@@ -28,13 +20,14 @@ export default function ProjectFormPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Redux state
+  // Redux 상태 조회
   const { current, loading: projectLoading } = useSelector(
     (state) => state.project
   );
   const companies = useSelector((state) => state.company.data);
   const users = useSelector((state) => state.member.data);
 
+  // 로컬 폼 상태
   const [form, setForm] = useState({
     title: "",
     status: "기획",
@@ -44,14 +37,14 @@ export default function ProjectFormPage() {
     developerId: "",
   });
 
-  // Load project for edit
+  // 편집 모드일 때 기존 프로젝트 데이터 로드
   useEffect(() => {
     if (isEdit) {
       dispatch(fetchProjectById(id));
     }
   }, [dispatch, id, isEdit]);
 
-  // Populate form when project loaded
+  // current 데이터가 바뀌면 form 상태에 반영
   useEffect(() => {
     if (isEdit && current) {
       setForm({
@@ -65,16 +58,18 @@ export default function ProjectFormPage() {
     }
   }, [isEdit, current]);
 
-  // Load companies and members
+  // 처음 마운트 시 담당자·개발사 목록 로드
   useEffect(() => {
     dispatch(fetchMembers());
     dispatch(fetchCompanies());
   }, [dispatch]);
 
+  // 각 필드 변경 핸들러
   const handleChange = (key) => (e) => {
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
   };
 
+  // 제출 처리
   const handleSubmit = async () => {
     try {
       if (isEdit) {
@@ -86,109 +81,56 @@ export default function ProjectFormPage() {
       }
     } catch (err) {
       console.error(err);
-      // TODO: add toast/snackbar for error
+      // TODO: 에러 발생 시 스낵바/토스트 표시
     }
   };
 
-  // Show spinner while loading project data
-  if (isEdit && projectLoading) {
-    return (
-      <PageWrapper>
-        <CircularProgress
-          sx={{ position: "absolute", top: "50%", left: "50%" }}
-        />
-      </PageWrapper>
-    );
-  }
+  // 취소 시 뒤로 이동
+  const handleCancel = () => {
+    navigate(-1);
+  };
+
+  // 헤더 우측에 들어갈 버튼들
+  const headerAction = (
+    <Stack direction="row" spacing={2}>
+      <Button variant="outlined" onClick={handleCancel}>
+        취소
+      </Button>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleSubmit}
+        disabled={projectLoading || !form.title}
+      >
+        {projectLoading
+          ? isEdit
+            ? "로딩 중..."
+            : "로딩 중..."
+          : isEdit
+            ? "수정 저장"
+            : "생성"}
+      </Button>
+    </Stack>
+  );
 
   return (
     <PageWrapper>
-      <PageHeader title={isEdit ? "프로젝트 수정" : "프로젝트 생성"} />
-      <Paper sx={{ p: 4, mt: 2, borderRadius: 2, boxShadow: 2 }}>
-        <Stack spacing={4}>
-          <TextField
-            label="프로젝트 이름"
-            value={form.title}
-            onChange={handleChange("title")}
-            fullWidth
-          />
+      <PageHeader
+        title={isEdit ? "프로젝트 수정" : "프로젝트 생성"}
+        subtitle="새로운 프로젝트를 등록하여 업무 현황을 관리하세요."
+        action={headerAction}
+      />
 
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-            <TextField
-              label="시작일"
-              type="date"
-              value={form.startDate}
-              onChange={handleChange("startDate")}
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-            />
-            <TextField
-              label="종료일"
-              type="date"
-              value={form.endDate}
-              onChange={handleChange("endDate")}
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-            />
-          </Stack>
-
-          <TextField
-            select
-            label="상태"
-            value={form.status}
-            onChange={handleChange("status")}
-            fullWidth
-          >
-            {statusOptions.map((opt) => (
-              <MenuItem key={opt} value={opt}>
-                {opt}
-              </MenuItem>
-            ))}
-          </TextField>
-
-          <TextField
-            select
-            label="담당자"
-            value={form.assigneeId}
-            onChange={handleChange("assigneeId")}
-            fullWidth
-          >
-            {users.map((user) => (
-              <MenuItem key={user.id} value={user.id}>
-                {user.name}
-              </MenuItem>
-            ))}
-          </TextField>
-
-          <TextField
-            select
-            label="개발사"
-            value={form.developerId}
-            onChange={handleChange("developerId")}
-            fullWidth
-          >
-            {companies.map((comp) => (
-              <MenuItem key={comp.id} value={comp.id}>
-                {comp.name}
-              </MenuItem>
-            ))}
-          </TextField>
-
-          <Stack
-            direction="row"
-            justifyContent="flex-end"
-            spacing={2}
-            sx={{ mt: 2 }}
-          >
-            <Button variant="outlined" onClick={() => navigate(-1)}>
-              취소
-            </Button>
-            <Button variant="contained" color="primary" onClick={handleSubmit}>
-              {isEdit ? "수정 저장" : "생성"}
-            </Button>
-          </Stack>
-        </Stack>
-      </Paper>
+      <ProjectForm
+        form={form}
+        handleChange={handleChange}
+        handleSubmit={handleSubmit}
+        onCancel={handleCancel}
+        loading={projectLoading}
+        companies={companies}
+        users={users}
+        isEdit={isEdit}
+      />
     </PageWrapper>
   );
 }
