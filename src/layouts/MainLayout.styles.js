@@ -40,4 +40,5 @@ export const Main = styled(Box)(({ theme }) => ({
   padding: theme.spacing(1),
   backgroundColor: theme.palette.primary,
   overflow: "hidden",
+  borderRadius: 2,
 }));

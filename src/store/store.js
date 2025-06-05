@@ -42,4 +42,3 @@ export const store = configureStore({
     auth: preloadedAuth,
   },
 });
-

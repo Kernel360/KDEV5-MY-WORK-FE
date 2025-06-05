@@ -31,7 +31,6 @@ export default function TabsWithContent({
         value={value}
         onChange={onChange}
         sx={{
-          minHeight: 30,
           borderBottom: "1px solid",
           borderColor: "divider",
           "& .MuiTabs-indicator": {
