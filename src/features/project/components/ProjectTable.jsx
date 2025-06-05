@@ -1,7 +1,8 @@
+// src/features/project/components/ProjectTable.jsx
 import CustomTable from "@/components/table/CustomTable";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProjects } from "@/features/project/projectSlice";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 const columns = [
@@ -18,55 +19,72 @@ const columns = [
     },
   },
   { key: "progress", label: "진행도", type: "progress" },
-  { key: "end_at", label: "마감일", type: "date" },
+  { key: "endAt", label: "마감일", type: "date" },
   { key: "manager", label: "담당자", type: "avatar" },
 ];
 
 export default function ProjectTable() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { list: rawProjects } = useSelector((state) => state.project);
+
+  const { list: rawProjects, totalCount, status, error } = useSelector(
+    (state) => state.project
+  );
 
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
   const [searchText, setSearchText] = useState("");
 
+  const loadProjects = useCallback(() => {
+    dispatch(
+      fetchProjects({
+        page,
+        size: pageSize,
+        nameKeyword: searchText.trim(),
+      })
+    );
+  }, [dispatch, page, pageSize, searchText]);
+
   useEffect(() => {
-    dispatch(fetchProjects());
-  }, [dispatch]);
+    console.log("📤 ProjectTable mount → loadProjects 호출");
+    loadProjects();
+  }, [loadProjects]);
 
   const enrichedProjects = (rawProjects || []).map((p, idx) => ({
     ...p,
-    link: `https://example.com/${p.id}`,
-    progress: idx * 10,
+    progress: Math.min((idx + 1) * 10, 100),
     manager: {
-      name: `담당자 ${p.id}`,
-      src: `https://i.pravatar.cc/40?img=${p.id}`,
+      name: `담당자 ${p.id.slice(0, 4)}`,
+      src: `https://i.pravatar.cc/40?u=${p.id}`,
     },
   }));
-
-  const filtered = enrichedProjects.filter((p) =>
-    p.name.toLowerCase().includes(searchText.toLowerCase())
-  );
-  const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
+  console.log("enrichedProjects", enrichedProjects);
 
   return (
     <CustomTable
       columns={columns}
-      rows={paginated}
-      onRowClick={(row) => navigate(`/projects/${row.id}`)}
+      rows={enrichedProjects}
+      onRowClick={(row) => {
+        console.log("row", row);
+        navigate(`/projects/${row.id}`);
+      }}
       pagination={{
         page,
         size: pageSize,
-        total: filtered.length,
-        onPageChange: setPage,
+        total: totalCount || 0,
+        onPageChange: (newPage) => setPage(newPage),
       }}
       search={{
         key: "name",
         placeholder: "제목을 검색하세요",
         value: searchText,
-        onChange: setSearchText,
+        onChange: (newValue) => {
+          setPage(1);
+          setSearchText(newValue);
+        },
       }}
+      loading={status === "loading"}
+      error={error}
     />
   );
 }

@@ -12,17 +12,6 @@ import {
 } from "@mui/material";
 import CustomButton from "@/components/common/customButton/CustomButton";
 
-/**
- * SectionTable 컴포넌트 (정렬 기능 추가)
- *
- * props:
- * - columns: [{ key, label, renderCell?, width?, sortable? }]  // sortable 플래그 추가
- * - rows: 데이터 배열
- * - rowKey: 각 행의 고유키 (default: 'id')
- * - phases: 단계 버튼에 표시할 탭 목록 (optional)
- * - selectedPhase: 현재 선택된 단계 (optional)
- * - onPhaseChange: 단계 변경 시 호출할 콜백 (optional)
- */
 export default function SectionTable({
   columns,
   rows,
@@ -31,41 +20,33 @@ export default function SectionTable({
   selectedPhase,
   onPhaseChange,
 }) {
-  // 정렬 상태 관리
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
 
-  // 헤더 클릭 시 호출되는 정렬 핸들러
   const handleSort = (columnKey) => {
     setSortConfig((prev) => {
       if (prev.key === columnKey) {
-        // 같은 컬럼을 다시 클릭하면 asc↔desc 토글
         return {
           key: columnKey,
           direction: prev.direction === "asc" ? "desc" : "asc",
         };
       } else {
-        // 다른 컬럼 클릭 시 기본 asc
         return { key: columnKey, direction: "asc" };
       }
     });
   };
 
-  // 정렬된 행 배열을 메모이제이션
   const sortedRows = useMemo(() => {
     if (!sortConfig.key) {
       return rows;
     }
-    // 단순 비교 정렬 (숫자 or 문자열)
     return [...rows].sort((a, b) => {
       const aVal = a[sortConfig.key];
       const bVal = b[sortConfig.key];
 
-      // undefined/null 처리
       if (aVal == null && bVal == null) return 0;
       if (aVal == null) return sortConfig.direction === "asc" ? -1 : 1;
       if (bVal == null) return sortConfig.direction === "asc" ? 1 : -1;
 
-      // 숫자와 문자를 구분하여 비교
       if (typeof aVal === "number" && typeof bVal === "number") {
         return sortConfig.direction === "asc" ? aVal - bVal : bVal - aVal;
       }
@@ -79,7 +60,6 @@ export default function SectionTable({
 
   return (
     <>
-      {/* phases 옵션이 있으면 상단 필터 버튼 렌더링 */}
       {phases && onPhaseChange && (
         <Stack direction="row" spacing={1} mb={2}>
           {phases.map((phase) => (
