@@ -6,6 +6,7 @@ import ProjectFormPage from "@/features/project/pages/ProjectFormPage";
 import MainLayout from "@/layouts/MainLayout";
 import LoginPage from "@/features/auth/pages/LoginPage";
 import { useSelector } from "react-redux";
+import MemberPage from "@/features/member/pages/MemberPage";
 
 export default function MainRoutes() {
   // const isAuthenticated = useSelector((state) => state.auth.isAuthenticated) || false; // 예시: 로그인 상태 Redux에서 가져옴
@@ -31,6 +32,7 @@ export default function MainRoutes() {
         <Route path="/projects/:id" element={<ProjectDetailPage />} />
         <Route path="/projects/new" element={<ProjectFormPage />} />
         <Route path="/projects/:id/edit" element={<ProjectFormPage />} />
+        <Route path="/members" element={<MemberPage />} />
       </Route>
     </Routes>
   );

@@ -13,9 +13,9 @@ const columns = [
     type: "status",
     filter: true,
     statusMap: {
-      deleted: { key: "warning", label: "비활성됨" },
-      디자인: { key: "success", label: "디자인" },
-      개발: { key: "error", label: "개발" },
+      deleted: { color: "warning", label: "비활성됨" },
+      디자인: { color: "success", label: "디자인" },
+      개발: { color: "error", label: "개발" },
     },
   },
   { key: "progress", label: "진행도", type: "progress" },
