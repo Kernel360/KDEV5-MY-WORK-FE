@@ -1,4 +1,3 @@
-// src/features/project/components/ProjectManagement.jsx
 import React, { useState } from "react";
 import {
   Box,
@@ -37,8 +36,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 
 /**
- * StageCard 컴포넌트
- * - 카드 내부에서 useTheme()를 사용해 theme를 참조하도록 수정
+ * StageCard 컴포넌트 (생략)
  */
 function StageCard({ id, label, index }) {
   const theme = useTheme();
@@ -80,7 +78,6 @@ function StageCard({ id, label, index }) {
       {...attributes}
       {...listeners}
     >
-      {/* 드래그 아이콘 + 번호 + 라벨을 한 행에 */}
       <DragIndicatorIcon
         color={isDragging ? "primary" : "action"}
         sx={{ mr: 1.5 }}
@@ -123,17 +120,16 @@ export default function ProjectManagement({
 }) {
   const theme = useTheme();
 
-  // 단계 카드 순서 관리
+  // 단계 카드 상태
   const [stages, setStages] = useState(initialStages);
-
-  // 참여자 목록 관리
+  // 참여자 상태
   const [participants, setParticipants] = useState(initialParticipants);
   const [newParticipantName, setNewParticipantName] = useState("");
 
-  // DnD 센서 설정
+  // DnD 설정
   const sensors = useSensors(useSensor(PointerSensor));
 
-  // 드롭 이벤트 핸들러: 순서 교체
+  // 드래그 종료 시 순서 변경
   const handleDragEnd = (event) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
@@ -162,19 +158,31 @@ export default function ProjectManagement({
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 4, p: 2 }}>
-      {/* 1. 단계 설정 (가로 스크롤 없이, 줄바꿈) */}
-      <Box>
+    <Box
+      sx={{
+        flex: 1,                   // 부모로부터 남은 높이 전부 차지
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",       // 내부에서만 스크롤 제어
+      }}
+    >
+      {/* ─────────────────────────────────────────────────────────────── */}
+      {/* 1) 상단 ‘프로젝트 단계 설정’ – 고정 높이 */}
+      <Box sx={{ flexShrink: 0, p: 2 }}>
         <Typography variant="h6" fontWeight={600} gutterBottom>
           프로젝트 단계 설정
         </Typography>
         <Paper
           elevation={0}
           sx={{
+            width: "100%",
+            boxSizing: "border-box",
             p: 2,
             bgcolor: theme.palette.background.paper,
             borderRadius: 2,
             border: `1px solid ${theme.palette.divider}`,
+            display: "flex",
+            alignItems: "center",
           }}
         >
           <DndContext
@@ -192,23 +200,33 @@ export default function ProjectManagement({
                   flexDirection: "row",
                   flexWrap: "wrap",
                   justifyContent: "flex-start",
+                  alignItems: "center",
+                  width: "100%",
+                  boxSizing: "border-box",
                 }}
               >
                 {stages.map((stage, idx) => (
-                  <StageCard key={stage} id={stage} label={stage} index={idx} />
+                  <StageCard
+                    key={stage}
+                    id={stage}
+                    label={stage}
+                    index={idx}
+                  />
                 ))}
               </Box>
             </SortableContext>
           </DndContext>
         </Paper>
       </Box>
+      {/* ─────────────────────────────────────────────────────────────── */}
 
-      {/* 2. 참여자 관리 (조회, 추가, 삭제) */}
-      <Box>
+      {/* ─────────────────────────────────────────────────────────────── */}
+      {/* 2) 중간 ‘프로젝트 참여자 관리’ – 고정 높이 */}
+      <Box sx={{ flexShrink: 0, px: 2, mb: 2 }}>
         <Typography variant="h6" fontWeight={600} gutterBottom>
           프로젝트 참여자 관리
         </Typography>
-        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
           <TextField
             size="small"
             placeholder="이름을 입력하세요"
@@ -229,8 +247,36 @@ export default function ProjectManagement({
         <Paper
           elevation={0}
           sx={{
+            width: "100%",
+            boxSizing: "border-box",
             border: `1px solid ${theme.palette.divider}`,
             borderRadius: 2,
+          }}
+        >
+          {/* 상단에 입력부만 고정하고, 아래 목록은 별도로 스크롤 영역 만들기 */}
+          <Box sx={{ maxHeight: 0, visibility: "hidden" }} />{/* 더미 */}
+        </Paper>
+      </Box>
+      {/* ─────────────────────────────────────────────────────────────── */}
+
+      {/* ─────────────────────────────────────────────────────────────── */}
+      {/* 3) 하단 ‘스크롤 영역’ – flex:1, overflowY: “auto” */}
+      <Box
+        sx={{
+          flex: 1,
+          px: 2,
+          overflowY: "auto",
+          overflowX: "hidden",
+        }}
+      >
+        <Paper
+          elevation={0}
+          sx={{
+            width: "100%",
+            boxSizing: "border-box",
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: 2,
+            p: 1,
           }}
         >
           <List disablePadding>
@@ -271,6 +317,7 @@ export default function ProjectManagement({
           </List>
         </Paper>
       </Box>
+      {/* ─────────────────────────────────────────────────────────────── */}
     </Box>
   );
 }

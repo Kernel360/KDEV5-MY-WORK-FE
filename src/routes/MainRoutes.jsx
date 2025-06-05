@@ -13,7 +13,6 @@ export default function MainRoutes() {
   
   return (
     <Routes>
-      {/* 기본 루트 경로 처리 */}
       <Route
         path="/"
         element={
@@ -25,10 +24,8 @@ export default function MainRoutes() {
         }
       />
 
-      {/* 로그인 페이지 */}
       <Route path="/login" element={<LoginPage />} />
 
-      {/* 프로젝트 관련 페이지 */}
       <Route element={<MainLayout />}>
         <Route path="/projects" element={<ProjectPage />} />
         <Route path="/projects/:id" element={<ProjectDetailPage />} />
