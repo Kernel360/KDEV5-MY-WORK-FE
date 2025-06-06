@@ -97,7 +97,7 @@ export default function CustomTable({
         sx={{
           backgroundColor: theme.palette.background.paper,
           borderRadius: 2,
-          overflow: "hidden",
+          overflow: "hidden",   
           border: "1px solid",
           borderColor: theme.palette.divider,
           display: "flex",

@@ -1,5 +1,5 @@
 // src/features/project/components/ProjectTable.jsx
-import CustomTable from "@/components/table/CustomTable";
+import CustomTable from "@/components/common/customTable/CustomTable";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProjects } from "@/features/project/projectSlice";
 import { useEffect, useState, useCallback } from "react";
