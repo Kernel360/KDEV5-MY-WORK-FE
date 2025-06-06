@@ -1,6 +1,5 @@
-
+// src/components/ProjectManagement.jsx
 import React, { useEffect, useState } from "react";
-
 import {
   Box,
   Paper,
@@ -17,7 +16,6 @@ import {
   Tooltip,
   Chip,
   Stack,
-  useTheme,
 } from "@mui/material";
 import { InfoOutlined } from "@mui/icons-material";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
@@ -111,24 +109,14 @@ function StageCard({ id, label, index }) {
   );
 }
 
-/**
- * ProjectManagement 컴포넌트
- * - 1) 프로젝트 단계 설정
- * - 2) 프로젝트 참여자 관리 (직원 리스트 Autocomplete)
- * - 3) 선택된 참여자 목록(칩 형태) + 삭제 버튼
- */
 export default function ProjectManagement({
   initialStages = ["기획", "디자인", "퍼블리싱", "개발", "검수"],
+  initialParticipants = [],
 }) {
-
   const theme = useMuiTheme();
-  const [stages, setStages] = useState(initialStages); // 단계 카드 배열
-
-  // 직원 목록(API에서 받아올 예정)
-  const [allEmployees, setAllEmployees] = useState([]); // { id, name, avatarUrl }
-  // 선택된 참여자(직원) 상태
-  const [selectedEmployees, setSelectedEmployees] = useState([]);
-
+  const [stages, setStages] = useState(initialStages);
+  const [allEmployees, setAllEmployees] = useState([]);
+  const [selectedEmployees, setSelectedEmployees] = useState(initialParticipants);
 
   // DnD 설정
   const sensors = useSensors(useSensor(PointerSensor));
@@ -142,22 +130,13 @@ export default function ProjectManagement({
     }
   };
 
-  // 백엔드에서 직원 목록을 받아오는 예시(fetch)
   useEffect(() => {
     fetch("/api/employees")
       .then((res) => res.json())
-      .then((data) => {
-        // data는 [{ id, name, avatarUrl }, ...] 형식이라고 가정
-        setAllEmployees(data);
-      })
-      .catch((err) => {
-        console.error("직원 목록을 가져오는 중 오류 발생:", err);
-        // 오류 시 기본값 할당
-        setAllEmployees([]);
-      });
+      .then((data) => setAllEmployees(data))
+      .catch(() => setAllEmployees([]));
   }, []);
 
-  // 선택된 직원 리스트에서 삭제
   const handleRemoveEmployee = (empId) => {
     setSelectedEmployees((prev) => prev.filter((emp) => emp.id !== empId));
   };
@@ -165,88 +144,63 @@ export default function ProjectManagement({
   return (
     <Box
       sx={{
-        height: "100%",
         display: "flex",
         flexDirection: "column",
+        height: "100%",
+        minHeight: 0,
+        width: "100%",     // 반드시 부모 폭을 100%로 채움
+        overflow: "hidden",
       }}
     >
-      <Box sx={{ flexShrink: 0 }}>
+      {/* 프로젝트 단계 카드 영역 */}
+      <Box sx={{ my: 2, width: "100%", overflowX: "auto" }}>
         <Stack direction="row" alignItems="center" spacing={1}>
-          <Typography variant="h6" fontWeight={600} sx={{ mb: 0.5 }}>
+          <Typography variant="h6" fontWeight={600}>
             1. 프로젝트 단계 설정
           </Typography>
-          <Tooltip title="  드래그하여 단계를 변경할 수 있습니다.">
+          <Tooltip title="드래그하여 단계를 변경할 수 있습니다.">
             <InfoOutlined fontSize="small" color="action" />
           </Tooltip>
         </Stack>
         <Divider sx={{ mt: 1, mb: 2 }} />
-        <Paper
-          elevation={2}
-          sx={{
-            width: "100%",
-            boxSizing: "border-box",
-            p: 2,
-            maxWidth: "100%",
-            border: "none",
-            boxShadow: "none",
-          }}
-        >
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext
-              items={stages}
-              strategy={horizontalListSortingStrategy}
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={stages} strategy={horizontalListSortingStrategy}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                flexWrap: "nowrap",
+                width: "max-content",
+                boxSizing: "border-box",
+                py: 1,
+              }}
             >
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "row",
-                  flexWrap: "wrap",
-                  justifyContent: "flex-start",
-                  alignItems: "center",
-                  width: "100%",
-                  boxSizing: "border-box",
-                }}
-              >
-                {stages.map((stage, idx) => (
-                  <StageCard
-                    key={stage}
-                    id={stage}
-                    label={stage}
-                    index={idx}
-                  />
-                ))}
-              </Box>
-            </SortableContext>
-          </DndContext>
-        </Paper>
+              {stages.map((stage, idx) => (
+                <StageCard key={stage} id={stage} label={stage} index={idx} />
+              ))}
+            </Box>
+          </SortableContext>
+        </DndContext>
       </Box>
 
-
-      <Box sx={{ flexShrink: 0 }}>
+      {/* 프로젝트 참여자 관리 */}
+      <Box sx={{ mb: 2, width: "100%" }}>
         <Stack direction="row" alignItems="center" spacing={1}>
-          <Typography variant="h6" fontWeight={600} sx={{ mb: 0.5 }}>
+          <Typography variant="h6" fontWeight={600}>
             2. 프로젝트 참여자 관리
           </Typography>
-          <Tooltip title=" 직원 목록에서 참여 직원을 선택하세요. (다중 선택 가능)">
+          <Tooltip title="직원 목록에서 참여 직원을 선택하세요. (다중 선택 가능)">
             <InfoOutlined fontSize="small" color="action" />
           </Tooltip>
-
         </Stack>
         <Divider sx={{ mt: 1, mb: 2 }} />
-
         <Autocomplete
           multiple
           options={allEmployees}
           disableCloseOnSelect
           getOptionLabel={(option) => option.name}
           value={selectedEmployees}
-          onChange={(event, newValue) => {
-            setSelectedEmployees(newValue);
-          }}
+          onChange={(event, newValue) => setSelectedEmployees(newValue)}
           renderOption={(props, option, { selected }) => (
             <Box
               component="li"
@@ -269,12 +223,7 @@ export default function ProjectManagement({
                 {option.name}
               </Typography>
               {selected && (
-                <Chip
-                  label="선택됨"
-                  size="small"
-                  color="primary"
-                  sx={{ ml: 1 }}
-                />
+                <Chip label="선택됨" size="small" color="primary" sx={{ ml: 1 }} />
               )}
             </Box>
           )}
@@ -314,32 +263,39 @@ export default function ProjectManagement({
           }}
         />
       </Box>
+
+      {/* 선택된 참여자 리스트 */}
       <Box
         sx={{
-          flex: 1,
+          flexGrow: 1,
+          minHeight: 0,
+          width: "100%",
           display: "flex",
           flexDirection: "column",
+          overflow: "hidden",
         }}
       >
         <Paper
           elevation={2}
           sx={{
-            flex: 1,
             p: 1,
             borderRadius: 2,
             bgcolor: theme.palette.background.paper,
+            boxShadow: "none",
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
             overflow: "hidden",
           }}
         >
           {selectedEmployees.length === 0 ? (
             <Box
               sx={{
-                height: "100%",
+                flexGrow: 1,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 color: theme.palette.text.disabled,
-                boxShadow: "none",
               }}
             >
               아직 선택된 참여자가 없습니다.
@@ -347,7 +303,8 @@ export default function ProjectManagement({
           ) : (
             <Box
               sx={{
-                height: "100%",
+                flexGrow: 1,
+                minHeight: 0,
                 overflowY: "auto",
                 "&::-webkit-scrollbar": { width: 6 },
                 "&::-webkit-scrollbar-thumb": {
@@ -371,11 +328,7 @@ export default function ProjectManagement({
                       </ListItemAvatar>
                       <ListItemText
                         primary={
-                          <Typography
-                            variant="body1"
-                            fontWeight={500}
-                            sx={{ fontSize: 15 }}
-                          >
+                          <Typography variant="body1" fontWeight={500} sx={{ fontSize: 15 }}>
                             {emp.name}
                           </Typography>
                         }

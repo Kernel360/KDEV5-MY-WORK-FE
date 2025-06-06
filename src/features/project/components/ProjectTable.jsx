@@ -46,7 +46,6 @@ export default function ProjectTable() {
   }, [dispatch, page, pageSize, searchText]);
 
   useEffect(() => {
-    console.log("📤 ProjectTable mount → loadProjects 호출");
     loadProjects();
   }, [loadProjects]);
 

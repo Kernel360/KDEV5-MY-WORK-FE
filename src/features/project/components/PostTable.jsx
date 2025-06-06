@@ -1,6 +1,6 @@
 // src/components/common/postTable/PostTable.jsx
 import React, { useState, useMemo } from "react";
-import { LinearProgress, Stack, Typography, Chip } from "@mui/material";
+import { LinearProgress, Stack, Typography, Chip, Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import SectionTable from "@/components/common/sectionTable/SectionTable";
 
@@ -42,7 +42,7 @@ export default function PostTable({ rows }) {
     return dataRows.filter((row) => row.status === selectedPhase);
   }, [dataRows, selectedPhase]);
 
-  // "상태" 칩 렌더링 함수: theme.palette.status 구조 활용
+  // "상태" 칩 렌더링 함수
   const getStatusChip = (status) => {
     const map = {
       기획: "warning",
@@ -71,7 +71,7 @@ export default function PostTable({ rows }) {
     );
   };
 
-  // 컬럼 정의: sortable을 true로 설정하면 헤더 클릭 시 정렬 가능
+  // 컬럼 정의
   const columns = [
     {
       key: "title",
@@ -141,13 +141,17 @@ export default function PostTable({ rows }) {
   ];
 
   return (
-    <SectionTable
-      columns={columns}
-      rows={filteredRows}
-      phases={phaseTabs}
-      selectedPhase={selectedPhase}
-      onPhaseChange={setSelectedPhase}
-      rowKey="id"
-    />
+    // 테이블이 부모 폭을 넘지 않도록 감싸는 Box에 width:100%와 overflowX:auto 지정
+    <Box sx={{ width: "100%", overflowX: "auto", }}>
+      <SectionTable
+        columns={columns}
+        rows={filteredRows}
+        phases={phaseTabs}
+        selectedPhase={selectedPhase}
+        onPhaseChange={setSelectedPhase}
+        rowKey="id"
+        sx={{ width: "100%" }} // SectionTable 자체에도 100% 폭을 줘서 부모 폭을 따르게 함
+      />
+    </Box>
   );
 }

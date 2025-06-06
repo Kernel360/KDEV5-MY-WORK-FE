@@ -40,7 +40,6 @@ export default function ProjectDetailPage() {
     setConfirmOpen(false);
   };
 
-  // 아직 데이터가 로딩 중이라면 로딩 스피너
   if (!data) {
     return (
       <PageWrapper>
@@ -60,8 +59,19 @@ export default function ProjectDetailPage() {
 
   return (
     <PageWrapper>
-      <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-        <Box sx={{ flexShrink: 0 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100vh",
+          width: "100%",
+          maxWidth: "100%",
+          boxSizing: "border-box",
+          overflowX: "hidden",
+        }}
+      >
+        {/* 1. PageHeader */}
+        <Box sx={{ flexShrink: 0, width: "100%" }}>
           <PageHeader
             title={data.name}
             subtitle={`프로젝트 ID: ${data.id}`}
@@ -97,8 +107,8 @@ export default function ProjectDetailPage() {
           onConfirm={handleDelete}
         />
 
-        {/* 요약 카드 영역 - 고정 높이 */}
-        <Box sx={{ flexShrink: 0 }}>
+        {/* 2. SummaryCard */}
+        <Box sx={{ flexShrink: 0, width: "100%" }}>
           <SummaryCard
             schema={[
               {
@@ -121,15 +131,19 @@ export default function ProjectDetailPage() {
           />
         </Box>
 
-        {/* 탭 컨텐츠 영역 - 남은 공간 모두 차지 */}
+        {/* 3. TabsWithContent 래핑 박스 */}
         <Box
           sx={{
+            /* flexGrow:1 으로 '헤더+카드' 제외한 남은 세로 공간 모두 차지 */
             flexGrow: 1,
-            pb: 3,
             display: "flex",
             flexDirection: "column",
-            height: "100%",
-            overflow: "hidden",
+            minHeight: 0,
+
+            /* mx:3 을 주고, 부모 폭 내에서만 크기 계산이 되도록 flex 설정 */
+            mx: 3,
+            flex: 1,            // → 부모(Box)에서 가능한 폭만큼 차지
+            minWidth: 0,        // → overflow 처리를 위해 반드시 필요
           }}
         >
           <TabsWithContent
@@ -140,56 +154,30 @@ export default function ProjectDetailPage() {
             ]}
             value={tab}
             onChange={(_, nv) => setTab(nv)}
+            containerSx={{
+              flexGrow: 1,
+              minHeight: 0,
+
+              /* 탭 콘텐츠가 가로로 넘칠 때 내부에서만 스크롤하도록 */
+              overflowX: "auto",
+
+              /* 부모 폭 내에서만 차지 (mx=3 만큼 양쪽 여유가 생겨도 그 안에서만 폭 계산) */
+              flex: 1,
+              minWidth: 0,
+            }}
             content={
               tab === 0 ? (
-                <Box
-                  sx={{
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    overflow: "hidden",
-                    bgcolor: "background.paper",
-                  }}
-                >
-                  <ProjectManagement
-                    initialStages={[
-                      "기획",
-                      "디자인",
-                      "퍼블리싱",
-                      "개발",
-                      "검수",
-                    ]}
-                    initialParticipants={[
-                      { id: 1, name: "이수하", avatarUrl: "/avatar1.jpg" },
-                      { id: 2, name: "김철수", avatarUrl: "/avatar2.jpg" },
-                    ]}
-                  />
-                </Box>
+                <ProjectManagement
+                  initialStages={["기획", "디자인", "퍼블리싱", "개발", "검수"]}
+                  initialParticipants={[
+                    { id: 1, name: "이수하", avatarUrl: "/avatar1.jpg" },
+                    { id: 2, name: "김철수", avatarUrl: "/avatar2.jpg" },
+                  ]}
+                />
               ) : tab === 1 ? (
-                <Box
-                  sx={{
-                    height: "100%",
-                    overflow: "hidden",
-                    bgcolor: "background.paper",
-                  }}
-                >
-                  <PostTable />
-                </Box>
+                <PostTable />
               ) : (
-                <Box
-                  sx={{
-                    height: "100%",
-                    overflow: "auto",
-                    p: 2,
-                    "&::-webkit-scrollbar": { width: 6 },
-                    "&::-webkit-scrollbar-thumb": {
-                      backgroundColor: (theme) => theme.palette.grey[300],
-                      borderRadius: 4,
-                    },
-                  }}
-                >
-                  <Typography>진척도 관리 콘텐츠</Typography>
-                </Box>
+                <Typography>진척도 관리 콘텐츠</Typography>
               )
             }
           />
