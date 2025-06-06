@@ -9,6 +9,7 @@ import {
   TableRow,
   Stack,
   TableSortLabel,
+  Box
 } from "@mui/material";
 import CustomButton from "@/components/common/customButton/CustomButton";
 
@@ -59,7 +60,7 @@ export default function SectionTable({
   }, [rows, sortConfig]);
 
   return (
-    <>
+    <Box sx={{width: "100%"}}>
       {phases && onPhaseChange && (
         <Stack direction="row" spacing={1} mb={2}>
           {phases.map((phase) => (
@@ -131,6 +132,6 @@ export default function SectionTable({
           </TableBody>
         </Table>
       </TableContainer>
-    </>
+    </Box>
   );
 }

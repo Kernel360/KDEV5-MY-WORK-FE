@@ -86,7 +86,6 @@ export default function CustomTable({
   return (
     <Box
       sx={{
-        // backgroundColor: theme.palette.background.default,
         flexGrow: 1,
         px: 3,
         pb: 3,
@@ -154,16 +153,15 @@ export default function CustomTable({
           </Box>
         )}
 
-        {/* 가로 스크롤 영역 */}
-        <Box sx={{ flex: 1, overflow: "auto" }}>
+        <Box sx={{ flex: 1, overflow: "auto"}}>
           <Box
             sx={{
-              height: "100%",
-              overflow: "auto",
+              height: "66vh",
               "&::-webkit-scrollbar": { width: 6 },
               "&::-webkit-scrollbar-thumb": {
                 backgroundColor: theme.palette.grey[300],
-                borderRadius: 4,
+                borderRadius: 2,
+                overflow: "auto"
               },
             }}
           >
@@ -242,11 +240,9 @@ export default function CustomTable({
                   </TableRow>
                 ))}
               </TableBody>
+                 
             </Table>
-          </Box>
-        </Box>
-
-        {pagination && (
+                {pagination && (
           <Box p={2}>
             <Stack direction="row" justifyContent="flex-end">
               <Pagination
@@ -258,6 +254,9 @@ export default function CustomTable({
             </Stack>
           </Box>
         )}
+          </Box>
+   
+        </Box>
       </Paper>
     </Box>
   );
