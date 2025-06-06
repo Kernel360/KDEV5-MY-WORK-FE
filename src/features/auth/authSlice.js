@@ -1,14 +1,11 @@
-// src/features/auth/authSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import * as authAPI from "@/api/auth";
 
-// Thunks
 export const login = createAsyncThunk(
   "auth/login",
   async (credentials, thunkAPI) => {
     try {
       const response = await authAPI.login(credentials);
-      console.log('response', response.data.data)
       return response.data.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data || "Login failed");
@@ -21,8 +18,7 @@ export const reissueToken = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const response = await authAPI.reissueToken();
-      // response.data: { accessToken, expiresAt, ... }
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data || "Reissue failed");
     }
@@ -41,7 +37,6 @@ export const logout = createAsyncThunk(
   }
 );
 
-// 초기 상태를 localStorage에서 복원
 const storedToken = localStorage.getItem("accessToken");
 const storedExpiresAt = localStorage.getItem("expiresAt");
 const storedUserJson = localStorage.getItem("user");
@@ -50,21 +45,19 @@ const initialUser = storedUserJson ? JSON.parse(storedUserJson) : null;
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    user: initialUser,                // { id, name, role } or null
-    accessToken: storedToken || null, // 복원된 토큰
+    user: initialUser,                
+    accessToken: storedToken || null, 
     expiresAt: storedExpiresAt || null,
     status: "idle",
     error: null,
   },
   reducers: {
     clearAuthState(state) {
-      // Redux state 초기화
       state.user = null;
       state.accessToken = null;
       state.expiresAt = null;
       state.status = "idle";
       state.error = null;
-      // localStorage에서 모두 제거
       localStorage.removeItem("accessToken");
       localStorage.removeItem("expiresAt");
       localStorage.removeItem("user");
@@ -75,24 +68,23 @@ const authSlice = createSlice({
       // === LOGIN ===
       .addCase(login.pending, (state) => {
         state.status = "loading";
-        state.error = null;
+        state.error  = null;
       })
       .addCase(login.fulfilled, (state, action) => {
-        state.status = "succeeded";
+        state.status      = "succeeded";
         state.accessToken = action.payload.accessToken;
-        state.expiresAt = action.payload.expiresAt;
+        state.expiresAt   = action.payload.expiresAt;
         state.user = {
-          id: action.payload.memberId,
+          id:   action.payload.memberId,
           name: action.payload.memberName,
           role: action.payload.memberRole,
         };
-        // localStorage에 저장
         localStorage.setItem("accessToken", action.payload.accessToken);
-        localStorage.setItem("expiresAt", action.payload.expiresAt);
+        localStorage.setItem("expiresAt",   action.payload.expiresAt);
         localStorage.setItem(
           "user",
           JSON.stringify({
-            id: action.payload.memberId,
+            id:   action.payload.memberId,
             name: action.payload.memberName,
             role: action.payload.memberRole,
           })
@@ -100,45 +92,43 @@ const authSlice = createSlice({
       })
       .addCase(login.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.payload;
+        state.error  = action.payload;
       })
 
       // === REISSUE TOKEN ===
       .addCase(reissueToken.pending, (state) => {
         state.status = "loading";
-        state.error = null;
+        state.error  = null;
       })
       .addCase(reissueToken.fulfilled, (state, action) => {
         state.accessToken = action.payload.accessToken;
-        state.expiresAt = action.payload.expiresAt;
-        state.status = "succeeded";
-        // localStorage 업데이트
+        state.expiresAt   = action.payload.expiresAt;
+        state.status      = "succeeded";
         localStorage.setItem("accessToken", action.payload.accessToken);
-        localStorage.setItem("expiresAt", action.payload.expiresAt);
+        localStorage.setItem("expiresAt",   action.payload.expiresAt);
       })
       .addCase(reissueToken.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.payload;
+        state.error  = action.payload;
       })
 
       // === LOGOUT ===
       .addCase(logout.pending, (state) => {
         state.status = "loading";
-        state.error = null;
+        state.error  = null;
       })
       .addCase(logout.fulfilled, (state) => {
-        state.status = "idle";
-        state.user = null;
+        state.status      = "idle";
+        state.user        = null;
         state.accessToken = null;
-        state.expiresAt = null;
-        // localStorage 제거
+        state.expiresAt   = null;
         localStorage.removeItem("accessToken");
         localStorage.removeItem("expiresAt");
         localStorage.removeItem("user");
       })
       .addCase(logout.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.payload;
+        state.error  = action.payload;
       });
   },
 });

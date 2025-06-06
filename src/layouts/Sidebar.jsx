@@ -1,6 +1,7 @@
 // src/components/layout/Sidebar.jsx
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import {
   Box,
   ListItemButton,
@@ -9,6 +10,8 @@ import {
   Typography,
   Avatar,
 } from "@mui/material";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+
 import {
   SidebarRoot,
   ProfileSection,
@@ -17,8 +20,13 @@ import {
 } from "./Sidebar.styles";
 import navItems from "../../constants/navItems";
 
+import { logout as logoutThunk, clearAuthState } from "@/features/auth/authSlice";
+
 export default function Sidebar({ onClose }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
+
   const currentPath = location.pathname;
 
   const handleItemClick = (path) => {
@@ -26,18 +34,32 @@ export default function Sidebar({ onClose }) {
     navigate(path);
   };
 
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutThunk()).unwrap();
+
+      dispatch(clearAuthState());
+
+      onClose();
+      navigate("/login");
+    } catch (err) {
+      console.error("로그아웃 실패:", err);
+    }
+  };
+
   return (
     <SidebarRoot>
-      {/* User Profile */}
+      {/* 1. User Profile */}
       <ProfileSection>
         <Avatar src="/toss_logo.png" />
-        <div className="profile-text">
-          <span className="profile-role">개발자</span>
-          <span className="profile-name">이수하</span>
+        <div className="profile-text" style={{ marginLeft: 8 }}>
+          <Typography variant="body2">
+            개발자
+          </Typography>
+          <Typography variant="subtitle1">이수하</Typography>
         </div>
       </ProfileSection>
 
-      {/* Navigation */}
       <NavList>
         {navItems.map(({ text, icon: Icon, path }) => (
           <NavItem
@@ -54,6 +76,20 @@ export default function Sidebar({ onClose }) {
           </NavItem>
         ))}
       </NavList>
+
+      <Box sx={{ mt: "auto" }}>
+        <NavItem onClick={handleLogout} disablePadding>
+          <ListItemButton>
+            <ListItemIcon>
+              <ExitToAppIcon sx={{ color: "background.default" }} />
+            </ListItemIcon>
+            <ListItemText
+              primary="로그아웃"
+              primaryTypographyProps={{ color: "background.default" }}
+            />
+          </ListItemButton>
+        </NavItem>
+      </Box>
     </SidebarRoot>
   );
 }
