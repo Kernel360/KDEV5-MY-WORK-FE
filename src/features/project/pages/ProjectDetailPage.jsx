@@ -60,28 +60,31 @@ export default function ProjectDetailPage() {
 
   return (
     <PageWrapper>
-        <PageHeader
-          title={data.name}
-          subtitle={`프로젝트 ID: ${data.id}`}
-          action={
-            <Stack direction="row" spacing={1}>
-              <CustomButton
-                kind="danger"
-                startIcon={<DeleteRoundedIcon />}
-                onClick={() => setConfirmOpen(true)}
-              >
-                삭제하기
-              </CustomButton>
-              <CustomButton
-                startIcon={<CreateRoundedIcon />}
-                onClick={() => navigate(`/projects/${id}/edit`)}
-              >
-                수정하기
-              </CustomButton>
-            </Stack>
-          }
-          noPaddingBottom
-        />
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+        <Box sx={{ flexShrink: 0 }}>
+          <PageHeader
+            title={data.name}
+            subtitle={`프로젝트 ID: ${data.id}`}
+            action={
+              <Stack direction="row" spacing={1}>
+                <CustomButton
+                  kind="danger"
+                  startIcon={<DeleteRoundedIcon />}
+                  onClick={() => setConfirmOpen(true)}
+                >
+                  삭제하기
+                </CustomButton>
+                <CustomButton
+                  startIcon={<CreateRoundedIcon />}
+                  onClick={() => navigate(`/projects/${id}/edit`)}
+                >
+                  수정하기
+                </CustomButton>
+              </Stack>
+            }
+            noPaddingBottom
+          />
+        </Box>
 
         <ConfirmDialog
           open={confirmOpen}
@@ -94,59 +97,104 @@ export default function ProjectDetailPage() {
           onConfirm={handleDelete}
         />
 
-        <SummaryCard
-          schema={[
-            { key: "status", label: "상태", type: "status", color: "warning" },
-            { key: "period", label: "기간", type: "text" },
-            { key: "assignee", label: "담당자", type: "avatar" },
-            { key: "developer", label: "개발사", type: "avatar" },
-          ]}
-          data={{
-            status: "진행 중",
-            period: "2024.01.01 ~ 2024.06.30",
-            assignee: { name: "이수하", avatar: "/toss_logo.png" },
-            developer: { name: "비엔시스템", avatar: "/toss_logo.png" },
+        {/* 요약 카드 영역 - 고정 높이 */}
+        <Box sx={{ flexShrink: 0 }}>
+          <SummaryCard
+            schema={[
+              {
+                key: "status",
+                label: "상태",
+                type: "status",
+                color: "warning",
+              },
+              { key: "period", label: "기간", type: "text" },
+              { key: "assignee", label: "담당자", type: "avatar" },
+              { key: "developer", label: "개발사", type: "avatar" },
+            ]}
+            data={{
+              status: "진행 중",
+              period: "2024.01.01 ~ 2024.06.30",
+              assignee: { name: "이수하", avatar: "/toss_logo.png" },
+              developer: { name: "비엔시스템", avatar: "/toss_logo.png" },
+            }}
+            noMarginBottom
+          />
+        </Box>
+
+        {/* 탭 컨텐츠 영역 - 남은 공간 모두 차지 */}
+        <Box
+          sx={{
+            flexGrow: 1,
+            pb: 3,
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            overflow: "hidden",
           }}
-          noMarginBottom
-        />
-<TabsWithContent
-          tabs={[
-            { label: "프로젝트 관리", icon: <VisibilityIcon /> },
-            { label: "업무 관리", icon: <TaskIcon /> },
-            { label: "진척도 관리", icon: <DownloadIcon /> },
-          ]}
-          value={tab}
-          onChange={(_, nv) => setTab(nv)}
-          content={
-            tab === 0 ? (
-              <Box
-                sx={{
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  overflow: "hidden",
-                  height: "100%",    // 부모(TabsWithContent)로부터 100% 높이 물려받음
-                }}
-              >
+        >
+          <TabsWithContent
+            tabs={[
+              { label: "프로젝트 관리", icon: <VisibilityIcon /> },
+              { label: "업무 관리", icon: <TaskIcon /> },
+              { label: "진척도 관리", icon: <DownloadIcon /> },
+            ]}
+            value={tab}
+            onChange={(_, nv) => setTab(nv)}
+            content={
+              tab === 0 ? (
+                <Box
+                  sx={{
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    overflow: "hidden",
+                    bgcolor: "background.paper",
+                  }}
+                >
                   <ProjectManagement
-                    initialStages={["기획", "디자인", "퍼블리싱", "개발", "검수"]}
+                    initialStages={[
+                      "기획",
+                      "디자인",
+                      "퍼블리싱",
+                      "개발",
+                      "검수",
+                    ]}
                     initialParticipants={[
                       { id: 1, name: "이수하", avatarUrl: "/avatar1.jpg" },
                       { id: 2, name: "김철수", avatarUrl: "/avatar2.jpg" },
                     ]}
                   />
                 </Box>
-            ) 
-            : tab === 1 ? 
+              ) : tab === 1 ? (
+                <Box
+                  sx={{
+                    height: "100%",
+                    overflow: "hidden",
+                    bgcolor: "background.paper",
+                  }}
+                >
                   <PostTable />
-            : (
-              <Box sx={{ flex: 1, p: 2, overflowY: "auto", height: "100%" }}>
-                <Typography>진척도 관리 콘텐츠</Typography>
-              </Box>
-            )
-          }
-        />
-        
+                </Box>
+              ) : (
+                <Box
+                  sx={{
+                    height: "100%",
+                    overflow: "auto",
+                    p: 2,
+                    "&::-webkit-scrollbar": { width: 6 },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor: (theme) => theme.palette.grey[300],
+                      borderRadius: 4,
+                    },
+                  }}
+                >
+                  <Typography>진척도 관리 콘텐츠</Typography>
+                </Box>
+              )
+            }
+          />
+        </Box>
+      </Box>
     </PageWrapper>
   );
 }

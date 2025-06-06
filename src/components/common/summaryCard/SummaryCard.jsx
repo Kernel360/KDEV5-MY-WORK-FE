@@ -21,12 +21,6 @@ import {
   infoValueSx,
 } from "./SummaryCard.styles";
 
-/**
- * SummaryCard 컴포넌트
- * @param {Array} schema - [{ key, label, type: 'text'|'status'|'avatar'|'progress'|'link'|'boolean', color }] 형태의 필드 정의
- * @param {object} data - schema에 맞는 키를 가진 데이터 객체
- * @param {boolean} noMarginBottom - 하단 여백 제거 여부
- */
 export default function SummaryCard({
   schema = [],
   data = {},

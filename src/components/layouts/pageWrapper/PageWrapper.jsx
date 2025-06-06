@@ -1,19 +1,19 @@
-import { Paper } from "@mui/material";
+import React from "react";
+import { Box } from "@mui/material";
 
 export default function PageWrapper({ children }) {
   return (
-    <Paper
-      elevation={0}
+    <Box
       sx={{
-        height: "100%",
         display: "flex",
         flexDirection: "column",
+        height: "100vh",
+        backgroundColor: (theme) => theme.palette.background.default,
         overflow: "hidden",
-        bgcolor: "background.default",
-        borderRadius: 4,
+        borderRadius: 2,
       }}
     >
       {children}
-    </Paper>
+    </Box>
   );
 }

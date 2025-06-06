@@ -1,22 +1,26 @@
-import React, { useState } from "react";
+
+import React, { useEffect, useState } from "react";
+
 import {
   Box,
-  Stack,
-  Card,
+  Paper,
   Typography,
-  IconButton,
-  TextField,
-  Button,
+  Divider,
+  Card,
   Avatar,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
   ListItemSecondaryAction,
-  Divider,
-  Paper,
+  IconButton,
+  Tooltip,
+  Chip,
+  Stack,
+  useTheme,
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
+import { InfoOutlined } from "@mui/icons-material";
+import { useTheme as useMuiTheme } from "@mui/material/styles";
 import {
   DndContext,
   closestCenter,
@@ -33,13 +37,11 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
+import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
 
-/**
- * StageCard 컴포넌트 (생략)
- */
 function StageCard({ id, label, index }) {
-  const theme = useTheme();
+  const theme = useMuiTheme();
   const {
     attributes,
     listeners,
@@ -48,6 +50,7 @@ function StageCard({ id, label, index }) {
     transition,
     isDragging,
   } = useSortable({ id });
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -110,26 +113,26 @@ function StageCard({ id, label, index }) {
 
 /**
  * ProjectManagement 컴포넌트
+ * - 1) 프로젝트 단계 설정
+ * - 2) 프로젝트 참여자 관리 (직원 리스트 Autocomplete)
+ * - 3) 선택된 참여자 목록(칩 형태) + 삭제 버튼
  */
 export default function ProjectManagement({
   initialStages = ["기획", "디자인", "퍼블리싱", "개발", "검수"],
-  initialParticipants = [
-    { id: 1, name: "이수하", avatarUrl: "/avatar1.jpg" },
-    { id: 2, name: "김철수", avatarUrl: "/avatar2.jpg" },
-  ],
 }) {
-  const theme = useTheme();
 
-  // 단계 카드 상태
-  const [stages, setStages] = useState(initialStages);
-  // 참여자 상태
-  const [participants, setParticipants] = useState(initialParticipants);
-  const [newParticipantName, setNewParticipantName] = useState("");
+  const theme = useMuiTheme();
+  const [stages, setStages] = useState(initialStages); // 단계 카드 배열
+
+  // 직원 목록(API에서 받아올 예정)
+  const [allEmployees, setAllEmployees] = useState([]); // { id, name, avatarUrl }
+  // 선택된 참여자(직원) 상태
+  const [selectedEmployees, setSelectedEmployees] = useState([]);
+
 
   // DnD 설정
   const sensors = useSensors(useSensor(PointerSensor));
 
-  // 드래그 종료 시 순서 변경
   const handleDragEnd = (event) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
@@ -139,50 +142,53 @@ export default function ProjectManagement({
     }
   };
 
-  // 참여자 추가
-  const handleAddParticipant = () => {
-    const name = newParticipantName.trim();
-    if (!name) return;
-    const nextId =
-      participants.length > 0
-        ? Math.max(...participants.map((p) => p.id)) + 1
-        : 1;
-    const newParticipant = { id: nextId, name, avatarUrl: undefined };
-    setParticipants((prev) => [...prev, newParticipant]);
-    setNewParticipantName("");
-  };
+  // 백엔드에서 직원 목록을 받아오는 예시(fetch)
+  useEffect(() => {
+    fetch("/api/employees")
+      .then((res) => res.json())
+      .then((data) => {
+        // data는 [{ id, name, avatarUrl }, ...] 형식이라고 가정
+        setAllEmployees(data);
+      })
+      .catch((err) => {
+        console.error("직원 목록을 가져오는 중 오류 발생:", err);
+        // 오류 시 기본값 할당
+        setAllEmployees([]);
+      });
+  }, []);
 
-  // 참여자 삭제
-  const handleRemoveParticipant = (id) => {
-    setParticipants((prev) => prev.filter((p) => p.id !== id));
+  // 선택된 직원 리스트에서 삭제
+  const handleRemoveEmployee = (empId) => {
+    setSelectedEmployees((prev) => prev.filter((emp) => emp.id !== empId));
   };
 
   return (
     <Box
       sx={{
-        flex: 1,                   // 부모로부터 남은 높이 전부 차지
+        height: "100%",
         display: "flex",
         flexDirection: "column",
-        overflow: "hidden",       // 내부에서만 스크롤 제어
       }}
     >
-      {/* ─────────────────────────────────────────────────────────────── */}
-      {/* 1) 상단 ‘프로젝트 단계 설정’ – 고정 높이 */}
-      <Box sx={{ flexShrink: 0, p: 2 }}>
-        <Typography variant="h6" fontWeight={600} gutterBottom>
-          프로젝트 단계 설정
-        </Typography>
+      <Box sx={{ flexShrink: 0 }}>
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <Typography variant="h6" fontWeight={600} sx={{ mb: 0.5 }}>
+            1. 프로젝트 단계 설정
+          </Typography>
+          <Tooltip title="  드래그하여 단계를 변경할 수 있습니다.">
+            <InfoOutlined fontSize="small" color="action" />
+          </Tooltip>
+        </Stack>
+        <Divider sx={{ mt: 1, mb: 2 }} />
         <Paper
-          elevation={0}
+          elevation={2}
           sx={{
             width: "100%",
             boxSizing: "border-box",
             p: 2,
-            bgcolor: theme.palette.background.paper,
-            borderRadius: 2,
-            border: `1px solid ${theme.palette.divider}`,
-            display: "flex",
-            alignItems: "center",
+            maxWidth: "100%",
+            border: "none",
+            boxShadow: "none",
           }}
         >
           <DndContext
@@ -218,106 +224,182 @@ export default function ProjectManagement({
           </DndContext>
         </Paper>
       </Box>
-      {/* ─────────────────────────────────────────────────────────────── */}
 
-      {/* ─────────────────────────────────────────────────────────────── */}
-      {/* 2) 중간 ‘프로젝트 참여자 관리’ – 고정 높이 */}
-      <Box sx={{ flexShrink: 0, px: 2, mb: 2 }}>
-        <Typography variant="h6" fontWeight={600} gutterBottom>
-          프로젝트 참여자 관리
-        </Typography>
-        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-          <TextField
-            size="small"
-            placeholder="이름을 입력하세요"
-            value={newParticipantName}
-            onChange={(e) => setNewParticipantName(e.target.value)}
-            sx={{ width: { xs: "100%", sm: 240 } }}
-          />
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<AddIcon />}
-            onClick={handleAddParticipant}
-            sx={{ boxShadow: "none", textTransform: "none" }}
-          >
-            추가
-          </Button>
+
+      <Box sx={{ flexShrink: 0 }}>
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <Typography variant="h6" fontWeight={600} sx={{ mb: 0.5 }}>
+            2. 프로젝트 참여자 관리
+          </Typography>
+          <Tooltip title=" 직원 목록에서 참여 직원을 선택하세요. (다중 선택 가능)">
+            <InfoOutlined fontSize="small" color="action" />
+          </Tooltip>
+
         </Stack>
-        <Paper
-          elevation={0}
-          sx={{
-            width: "100%",
-            boxSizing: "border-box",
-            border: `1px solid ${theme.palette.divider}`,
-            borderRadius: 2,
-          }}
-        >
-          {/* 상단에 입력부만 고정하고, 아래 목록은 별도로 스크롤 영역 만들기 */}
-          <Box sx={{ maxHeight: 0, visibility: "hidden" }} />{/* 더미 */}
-        </Paper>
-      </Box>
-      {/* ─────────────────────────────────────────────────────────────── */}
+        <Divider sx={{ mt: 1, mb: 2 }} />
 
-      {/* ─────────────────────────────────────────────────────────────── */}
-      {/* 3) 하단 ‘스크롤 영역’ – flex:1, overflowY: “auto” */}
+        <Autocomplete
+          multiple
+          options={allEmployees}
+          disableCloseOnSelect
+          getOptionLabel={(option) => option.name}
+          value={selectedEmployees}
+          onChange={(event, newValue) => {
+            setSelectedEmployees(newValue);
+          }}
+          renderOption={(props, option, { selected }) => (
+            <Box
+              component="li"
+              {...props}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                "&:hover": { bgcolor: theme.palette.action.hover },
+                py: 0.5,
+              }}
+            >
+              <Avatar
+                src={option.avatarUrl}
+                alt={option.name}
+                sx={{ width: 30, height: 30, mr: 1 }}
+              >
+                {option.name[0]}
+              </Avatar>
+              <Typography variant="body1" sx={{ flexGrow: 1 }}>
+                {option.name}
+              </Typography>
+              {selected && (
+                <Chip
+                  label="선택됨"
+                  size="small"
+                  color="primary"
+                  sx={{ ml: 1 }}
+                />
+              )}
+            </Box>
+          )}
+          renderTags={(tagValue, getTagProps) =>
+            tagValue.map((option, index) => (
+              <Chip
+                label={option.name}
+                avatar={
+                  <Avatar
+                    src={option.avatarUrl}
+                    alt={option.name}
+                    sx={{ width: 24, height: 24 }}
+                  >
+                    {option.name[0]}
+                  </Avatar>
+                }
+                {...getTagProps({ index })}
+                key={option.id}
+                onDelete={() => handleRemoveEmployee(option.id)}
+                sx={{ mr: 0.5, mb: 0.5 }}
+              />
+            ))
+          }
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="outlined"
+              placeholder="직원 이름을 검색하세요"
+              size="small"
+            />
+          )}
+          sx={{
+            width: { xs: "100%", sm: 360 },
+            "& .MuiOutlinedInput-root": {
+              bgcolor: theme.palette.background.paper,
+            },
+          }}
+        />
+      </Box>
       <Box
         sx={{
           flex: 1,
-          px: 2,
-          overflowY: "auto",
-          overflowX: "hidden",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <Paper
-          elevation={0}
+          elevation={2}
           sx={{
-            width: "100%",
-            boxSizing: "border-box",
-            border: `1px solid ${theme.palette.divider}`,
-            borderRadius: 2,
+            flex: 1,
             p: 1,
+            borderRadius: 2,
+            bgcolor: theme.palette.background.paper,
+            overflow: "hidden",
           }}
         >
-          <List disablePadding>
-            {participants.map((p, idx) => (
-              <React.Fragment key={p.id}>
-                <ListItem sx={{ px: 2, py: 1 }}>
-                  <ListItemAvatar>
-                    <Avatar
-                      src={p.avatarUrl}
-                      alt={p.name}
-                      sx={{ width: 32, height: 32 }}
-                    >
-                      {p.name[0]}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={
-                      <Typography variant="body2" fontWeight={500}>
-                        {p.name}
-                      </Typography>
-                    }
-                  />
-                  <ListItemSecondaryAction>
-                    <IconButton
-                      edge="end"
-                      color="error"
-                      onClick={() => handleRemoveParticipant(p.id)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </ListItemSecondaryAction>
-                </ListItem>
-                {idx < participants.length - 1 && (
-                  <Divider component="li" variant="inset" />
-                )}
-              </React.Fragment>
-            ))}
-          </List>
+          {selectedEmployees.length === 0 ? (
+            <Box
+              sx={{
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: theme.palette.text.disabled,
+                boxShadow: "none",
+              }}
+            >
+              아직 선택된 참여자가 없습니다.
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                height: "100%",
+                overflowY: "auto",
+                "&::-webkit-scrollbar": { width: 6 },
+                "&::-webkit-scrollbar-thumb": {
+                  backgroundColor: theme.palette.grey[300],
+                  borderRadius: 3,
+                },
+              }}
+            >
+              <List disablePadding>
+                {selectedEmployees.map((emp, idx) => (
+                  <React.Fragment key={emp.id}>
+                    <ListItem sx={{ px: 2, py: 1.5 }}>
+                      <ListItemAvatar>
+                        <Avatar
+                          src={emp.avatarUrl}
+                          alt={emp.name}
+                          sx={{ width: 36, height: 36, mr: 1 }}
+                        >
+                          {emp.name[0]}
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={
+                          <Typography
+                            variant="body1"
+                            fontWeight={500}
+                            sx={{ fontSize: 15 }}
+                          >
+                            {emp.name}
+                          </Typography>
+                        }
+                      />
+                      <ListItemSecondaryAction>
+                        <IconButton
+                          edge="end"
+                          color="error"
+                          onClick={() => handleRemoveEmployee(emp.id)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                    {idx < selectedEmployees.length - 1 && (
+                      <Divider component="li" variant="fullWidth" />
+                    )}
+                  </React.Fragment>
+                ))}
+              </List>
+            </Box>
+          )}
         </Paper>
       </Box>
-      {/* ─────────────────────────────────────────────────────────────── */}
     </Box>
   );
 }
