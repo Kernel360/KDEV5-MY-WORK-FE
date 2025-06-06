@@ -44,7 +44,6 @@ export default function LoginPage() {
 
     const result = await dispatch(login(form));
     if (login.fulfilled.match(result)) {
-        console.log('result', result)
       const { memberRole, memberId } = result.payload;
       if (memberRole === "ROLE_SYSTEM_ADMIN") {
         navigate("/projects");
@@ -76,9 +75,7 @@ export default function LoginPage() {
         setSnackbarOpen(true);
       }
     } else {
-      // 로그인 실패(잘못된 이메일/비밀번호 등)
       console.error("로그인 실패:", result.payload || result.error);
-      // error 상태가 Redux에 저장되어 있으므로 화면에 메시지가 이미 표시됨
     }
   };
 

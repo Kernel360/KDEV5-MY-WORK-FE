@@ -7,7 +7,7 @@ export default function PageWrapper({ children }) {
       sx={{
         display: "flex",
         flexDirection: "column",
-        height: "100vh",
+        height: "96vh",
         backgroundColor: (theme) => theme.palette.background.default,
         overflow: "hidden",
         borderRadius: 2,
