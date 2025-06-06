@@ -101,11 +101,25 @@ const authSlice = createSlice({
         state.error  = null;
       })
       .addCase(reissueToken.fulfilled, (state, action) => {
+        state.status      = "succeeded";
         state.accessToken = action.payload.accessToken;
         state.expiresAt   = action.payload.expiresAt;
-        state.status      = "succeeded";
+        state.user = {
+          id:   action.payload.memberId,
+          name: action.payload.memberName,
+          role: action.payload.memberRole,
+        };
         localStorage.setItem("accessToken", action.payload.accessToken);
         localStorage.setItem("expiresAt",   action.payload.expiresAt);
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            id:   action.payload.memberId,
+            name: action.payload.memberName,
+            role: action.payload.memberRole,
+          })
+        );
+        
       })
       .addCase(reissueToken.rejected, (state, action) => {
         state.status = "failed";
