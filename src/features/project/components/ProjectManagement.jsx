@@ -1,4 +1,6 @@
+
 import React, { useEffect, useState } from "react";
+
 import {
   Box,
   Paper,
@@ -38,11 +40,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 
-/**
- * StageCard 컴포넌트
- * - 단계 순서를 드래그로 변경할 수 있습니다.
- * - 번호(순번)가 항상 앞에 표시됩니다.
- */
 function StageCard({ id, label, index }) {
   const theme = useMuiTheme();
   const {
@@ -123,6 +120,7 @@ function StageCard({ id, label, index }) {
 export default function ProjectManagement({
   initialStages = ["기획", "디자인", "퍼블리싱", "개발", "검수"],
 }) {
+
   const theme = useMuiTheme();
   const [stages, setStages] = useState(initialStages); // 단계 카드 배열
 
@@ -131,10 +129,10 @@ export default function ProjectManagement({
   // 선택된 참여자(직원) 상태
   const [selectedEmployees, setSelectedEmployees] = useState([]);
 
-  // DnD 센서 설정
+
+  // DnD 설정
   const sensors = useSensors(useSensor(PointerSensor));
 
-  // 단계 카드 드래그 종료 시 순서 변경
   const handleDragEnd = (event) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
@@ -185,6 +183,8 @@ export default function ProjectManagement({
         <Paper
           elevation={2}
           sx={{
+            width: "100%",
+            boxSizing: "border-box",
             p: 2,
             maxWidth: "100%",
             border: "none",
@@ -212,13 +212,20 @@ export default function ProjectManagement({
                 }}
               >
                 {stages.map((stage, idx) => (
-                  <StageCard key={stage} id={stage} label={stage} index={idx} />
+                  <StageCard
+                    key={stage}
+                    id={stage}
+                    label={stage}
+                    index={idx}
+                  />
                 ))}
               </Box>
             </SortableContext>
           </DndContext>
         </Paper>
       </Box>
+
+
       <Box sx={{ flexShrink: 0 }}>
         <Stack direction="row" alignItems="center" spacing={1}>
           <Typography variant="h6" fontWeight={600} sx={{ mb: 0.5 }}>
@@ -227,6 +234,7 @@ export default function ProjectManagement({
           <Tooltip title=" 직원 목록에서 참여 직원을 선택하세요. (다중 선택 가능)">
             <InfoOutlined fontSize="small" color="action" />
           </Tooltip>
+
         </Stack>
         <Divider sx={{ mt: 1, mb: 2 }} />
 

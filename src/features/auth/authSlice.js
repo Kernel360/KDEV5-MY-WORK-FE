@@ -8,7 +8,7 @@ export const login = createAsyncThunk(
   async (credentials, thunkAPI) => {
     try {
       const response = await authAPI.login(credentials);
-      console.log("response", response.data.data);
+      console.log('response', response.data.data)
       return response.data.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data || "Login failed");
@@ -29,14 +29,17 @@ export const reissueToken = createAsyncThunk(
   }
 );
 
-export const logout = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
-  try {
-    await authAPI.logout();
-    return true;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error.response?.data || "Logout failed");
+export const logout = createAsyncThunk(
+  "auth/logout",
+  async (_, thunkAPI) => {
+    try {
+      await authAPI.logout();
+      return true;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data || "Logout failed");
+    }
   }
-});
+);
 
 // 초기 상태를 localStorage에서 복원
 const storedToken = localStorage.getItem("accessToken");
@@ -47,7 +50,7 @@ const initialUser = storedUserJson ? JSON.parse(storedUserJson) : null;
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    user: initialUser, // { id, name, role } or null
+    user: initialUser,                // { id, name, role } or null
     accessToken: storedToken || null, // 복원된 토큰
     expiresAt: storedExpiresAt || null,
     status: "idle",
