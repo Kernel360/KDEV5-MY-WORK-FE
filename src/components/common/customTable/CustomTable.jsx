@@ -64,7 +64,6 @@ export default function CustomTable({
     // 필터 적용
     if (filter && filter.key) {
       const { key, value } = filter;
-      if (value !== "") {
         result = result.filter(
           (row) =>
             row[key] ===
@@ -107,12 +106,10 @@ export default function CustomTable({
           borderRadius: 2,
           border: `1px solid ${theme.palette.divider}`,
           display: "flex",
-          flexDirection: "column",
-          flex: 1,
+          flexDirection: "column",          flex: 1,
           overflow: "hidden",
         }}
       >
-        {/* 검색 & 필터 */}
         <Box p={2} bgcolor={theme.palette.background.default}>
           <Stack direction="row" spacing={2} alignItems="center">
             {filter && filter.key && (
@@ -226,6 +223,7 @@ export default function CustomTable({
                   hover
                   onClick={() => onRowClick?.(row)}
                 >
+
                   {columns.map((col) => (
                     <TableCell
                       key={col.key}
@@ -244,7 +242,6 @@ export default function CustomTable({
               ))}
             </TableBody>
           </Table>
-
           {pagination && (
             <Box p={2}>
               <Stack direction="row" justifyContent="flex-end">

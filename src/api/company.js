@@ -1,7 +1,12 @@
 import api from "./api";
 
-export const getCompanies = () => api.get("/companies");
-export const getCompanyById = (id) => api.get(`/companies/${id}`);
-export const createCompany = (data) => api.post("/companies", data);
-export const updateCompany = (id, data) => api.put(`/companies/${id}`, data);
-export const deleteCompany = (id) => api.delete(`/companies/${id}`);
+export function getCompanies(params) {
+  return api.get("/api/companies", { params });
+}
+
+export const generateCompanyId = () => api.post("/api/companies/id/generate");
+export const getCompanyById = (id) => api.get(`/api/companies/${id}`);
+export const createCompany = (data) => api.post("/api/companies", data);
+export const updateCompany = (id, data) =>
+  api.put(`/api/companies/${id}`, data);
+export const deleteCompany = (id) => api.delete(`/api/companies/${id}`);
