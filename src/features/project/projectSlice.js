@@ -1,23 +1,16 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import * as projectAPI from "@/api/project";
 
-
 export const fetchProjects = createAsyncThunk(
   "project/fetchProjects",
   async (
-    {
-      page,
-      size,
-      keyword = null,
-      keywordType = null,
-      deleted,
-    },
+    { page, size, keyword = null, keywordType = null, deleted },
     thunkAPI
   ) => {
     try {
       const params = { page };
 
-      if (keyword)       params.nameKeyword = keyword;
+      if (keyword) params.nameKeyword = keyword;
       // if (keywordType)   params.keywordType = keywordType;
       if (deleted !== null) params.deleted = deleted;
 
@@ -42,7 +35,9 @@ export const fetchProjectById = createAsyncThunk(
       const response = await projectAPI.getProjectById(id);
       return response.data.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response?.data || "프로젝트 상세 조회 실패");
+      return thunkAPI.rejectWithValue(
+        error.response?.data || "프로젝트 상세 조회 실패"
+      );
     }
   }
 );
@@ -52,13 +47,14 @@ export const createProject = createAsyncThunk(
   async (data, thunkAPI) => {
     try {
       const response = await projectAPI.createProject(data);
-      return response.data.data; 
+      return response.data.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response?.data || "프로젝트 생성 실패");
+      return thunkAPI.rejectWithValue(
+        error.response?.data || "프로젝트 생성 실패"
+      );
     }
   }
 );
-
 
 export const updateProject = createAsyncThunk(
   "project/updateProject",
@@ -67,7 +63,9 @@ export const updateProject = createAsyncThunk(
       const response = await projectAPI.updateProject(id, data);
       return response.data.data; // 수정된 프로젝트 객체
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response?.data || "프로젝트 수정 실패");
+      return thunkAPI.rejectWithValue(
+        error.response?.data || "프로젝트 수정 실패"
+      );
     }
   }
 );
@@ -82,7 +80,9 @@ export const deleteProject = createAsyncThunk(
       await projectAPI.deleteProject(id);
       return id; // 삭제한 ID
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response?.data || "프로젝트 삭제 실패");
+      return thunkAPI.rejectWithValue(
+        error.response?.data || "프로젝트 삭제 실패"
+      );
     }
   }
 );
@@ -91,11 +91,12 @@ export const deleteProject = createAsyncThunk(
 // Slice 정의
 // ================================
 const projectSlice = createSlice({
-  name: "project",
+  name: "project", // 도메인 이름 설정하면 해당 state 의 키 값이 된다.
   initialState: {
-    list: [],         // 페이징된 프로젝트 배열
-    totalCount: 0,    // 총 프로젝트 수
-    current: null,    // 단건 조회용
+    // 도메인의 이름의 value
+    list: [], // 페이징된 프로젝트 배열 (페이징 된 값을 보관하는 장소)
+    totalCount: 0, // 총 프로젝트 수
+    current: null, // 단건 조회용
     loading: false,
     error: null,
   },
@@ -112,9 +113,10 @@ const projectSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchProjects.fulfilled, (state, action) => {
+        // action : 인터페이스(응답오면 payload 로 response body 저장), redux: 구현체
         state.loading = false;
-        state.list = action.payload.projects;
-        state.totalCount = action.payload.totalCount;
+        state.list = action.payload.projects; // 프로젝트 목록 데이터 가져오기 + project 도메인의 list 변수 넣는다.
+        state.totalCount = action.payload.totalCount; // 프로젝트 목록 데이터 총 갯수 가져오기
       })
       .addCase(fetchProjects.rejected, (state, action) => {
         state.loading = false;
