@@ -45,7 +45,7 @@ export default function LoginPage() {
     const result = await dispatch(login(form));
     if (login.fulfilled.match(result)) {
       const { memberRole, memberId } = result.payload;
-      if (memberRole === "ROLE_SYSTEM_ADMIN") {
+      if (memberRole !== "ROLE_USER") {
         navigate("/projects");
         return;
       }

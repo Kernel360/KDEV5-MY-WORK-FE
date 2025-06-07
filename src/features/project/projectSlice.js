@@ -1,10 +1,16 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import * as projectAPI from "@/api/project";
 
+
 export const fetchProjects = createAsyncThunk(
   "project/fetchProjects",
   async (
-    { page, size, keyword = null, keywordType = null, deleted },
+    {
+      page,
+      size,
+      keyword = null,
+      keywordType = null,
+      deleted,
     thunkAPI
   ) => {
     try {

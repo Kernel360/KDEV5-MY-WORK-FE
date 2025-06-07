@@ -49,6 +49,7 @@ export default function TabsWithContent({
             sx={{
               textTransform: "none",
               fontWeight: "500",
+              mb:3,
               px: 2,
               color: "text.primary",
               "&.Mui-selected": {

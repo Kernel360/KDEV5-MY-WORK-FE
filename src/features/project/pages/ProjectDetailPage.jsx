@@ -168,11 +168,6 @@ export default function ProjectDetailPage() {
             content={
               tab === 0 ? (
                 <ProjectManagement
-                  initialStages={["기획", "디자인", "퍼블리싱", "개발", "검수"]}
-                  initialParticipants={[
-                    { id: 1, name: "이수하", avatarUrl: "/avatar1.jpg" },
-                    { id: 2, name: "김철수", avatarUrl: "/avatar2.jpg" },
-                  ]}
                 />
               ) : tab === 1 ? (
                 <PostTable />
