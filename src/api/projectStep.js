@@ -19,6 +19,5 @@ export const createProjectStages = (data) =>
  * @param {string} projectId - 프로젝트 UUID
  * @param {Array<{ stepId: string, name: string, order: number }>} steps
  */
-
 export const updateProjectStages = (projectId, projectStepUpdateWebRequests) =>
   api.put(`/api/projects/${projectId}/steps`, projectStepUpdateWebRequests );

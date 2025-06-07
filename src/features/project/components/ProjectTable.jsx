@@ -72,7 +72,6 @@ export default function ProjectTable() {
   }));
 
   return (
-
       <CustomTable
         columns={columns}
         rows={enrichedProjects}
