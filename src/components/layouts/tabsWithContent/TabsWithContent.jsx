@@ -23,6 +23,7 @@ export default function TabsWithContent({
         borderColor: "divider",
         overflow: "hidden",
         px:3,
+        mb: 3,
         ...containerSx,
       }}
     >
@@ -49,7 +50,6 @@ export default function TabsWithContent({
             sx={{
               textTransform: "none",
               fontWeight: "500",
-              mb:3,
               px: 2,
               color: "text.primary",
               "&.Mui-selected": {
@@ -62,7 +62,6 @@ export default function TabsWithContent({
         ))}
       </Tabs>
 
-      {/* ─── 2. 콘텐츠 영역 (스크롤 가능) ───────────────── */}
       <Box
         sx={{
           flexGrow: 1,
@@ -72,10 +71,7 @@ export default function TabsWithContent({
           ...contentSx,
         }}
       >
-        {/* 
-          콘텐츠 컴포넌트를 감싸서, 
-          내부에서 스크롤이 잘 동작하려면 이 Box를 통해 크기를 100%로 고정해야 한다 
-        */}
+      
         <Box
           sx={{
             width: "100%",   // 자식 콘텐츠가 부모 가로 폭을 완전히 채움

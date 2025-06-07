@@ -15,7 +15,7 @@ export function createPostId() {
  * 게시글 생성
  * POST /api/posts
  *
- * @param {{ id: string; title: string; content: string; projectStepId?: string; /* 기타 생성 필드 */ }} data
+ * @param {{ id: string; title: string; content: string; projectStepId?: string;}} data
  * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<PostCreateWebResponse>
  */
 export function createPost(data) {
@@ -27,8 +27,7 @@ export function createPost(data) {
  * PUT /api/posts/{postId}
  *
  * @param {string} postId - 수정할 게시글의 UUID
- * @param {{ title?: string; content?: string; /* 기타 수정 필드 */ }} data
- * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<PostUpdateWebResponse>
+ * @param {{ title?: string; content?: string;}}
  */
 export function updatePost(postId, data) {
   return api.put(`/api/posts/${postId}`, data);

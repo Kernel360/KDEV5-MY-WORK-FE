@@ -142,7 +142,7 @@ export default function PostTable({ rows }) {
 
   return (
     // 테이블이 부모 폭을 넘지 않도록 감싸는 Box에 width:100%와 overflowX:auto 지정
-    <Box sx={{ width: "100%", overflowX: "auto", }}>
+    <Box sx={{ width: "100%", overflowX: "auto", mt:2}}>
       <SectionTable
         columns={columns}
         rows={filteredRows}
