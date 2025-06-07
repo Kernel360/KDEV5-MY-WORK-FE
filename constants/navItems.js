@@ -9,7 +9,7 @@ const navItems = [
   {
     text: "개발사 관리",
     icon: DeveloperModeRoundedIcon,
-    path: "/companies",
+    path: "/dev-companies",
     roles: ["ROLE_SYSTEM_ADMIN"],
   },
   {
