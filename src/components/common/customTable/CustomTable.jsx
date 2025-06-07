@@ -1,25 +1,27 @@
+// src/components/common/customTable/CustomTable.jsx
 import React, { useState, useMemo, useEffect } from "react";
 import {
+  Box,
+  Paper,
   Table,
   TableHead,
   TableRow,
   TableCell,
   TableBody,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TableSortLabel,
+  Pagination,
+  Stack,
   Checkbox,
   Avatar,
   Typography,
   Chip,
-  Button,
   Link,
-  Stack,
-  Pagination,
-  Paper,
-  Box,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
-  TableSortLabel,
+  Button,
   LinearProgress,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
@@ -27,312 +29,239 @@ import { useTheme } from "@mui/material/styles";
 export default function CustomTable({
   columns,
   rows,
-  pagination = false,
-  search = null,
+  pagination = null,
   onRowClick,
+  search = null,
+  filter = null,
 }) {
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
-  const [filters, setFilters] = useState({});
-  const [dynamicFilterOptions, setDynamicFilterOptions] = useState({});
   const theme = useTheme();
 
-  useEffect(() => {
-    const newFilterOptions = {};
-    columns.forEach((col) => {
-      if (col.filter) {
-        const values = new Set(rows.map((r) => r[col.key]).filter(Boolean));
-        newFilterOptions[col.key] = Array.from(values);
-      }
-    });
-    setDynamicFilterOptions(newFilterOptions);
-  }, [columns, rows]);
-
-  const handleSort = (key) => {
+  // 정렬 설정
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+  const handleSort = (key) =>
     setSortConfig((prev) => ({
       key,
       direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
     }));
-  };
 
+  // 검색 설정
+  const [searchKey, setSearchKey] = useState(search?.key || "");
+  const [searchText, setSearchText] = useState(search?.value || "");
+
+  // 필터와 검색을 조합한 행 목록
+  const filteredRows = useMemo(() => {
+    let result = rows;
+
+    // 검색 적용
+    if (search && searchKey) {
+      const kw = searchText.toLowerCase();
+      result = result.filter((row) =>
+        row[searchKey]?.toString().toLowerCase().includes(kw)
+      );
+    }
+
+    // 필터 적용
+    if (filter && filter.key) {
+      const { key, value } = filter;
+      if (value !== "") {
+        result = result.filter((row) => row[key] ===
+          // boolean 문자열 혹은 기본 값
+          (value === "true" ? true : value === "false" ? false : value)
+        );
+      }
+    }
+
+    return result;
+  }, [rows, searchKey, searchText, search, filter]);
+
+  // 정렬 적용
   const sortedRows = useMemo(() => {
-    if (!sortConfig.key) return rows;
-    return [...rows].sort((a, b) => {
+    if (!sortConfig.key) return filteredRows;
+    return [...filteredRows].sort((a, b) => {
       const aVal = a[sortConfig.key];
       const bVal = b[sortConfig.key];
       if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
       if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
       return 0;
     });
-  }, [rows, sortConfig]);
+  }, [filteredRows, sortConfig]);
 
-  const filteredRows = useMemo(() => {
-    const keyword = search?.value?.toLowerCase?.() || "";
-    return sortedRows.filter((row) => {
-      const matchesSearch = search?.key
-        ? row[search.key]?.toString()?.toLowerCase()?.includes(keyword)
-        : true;
-      const matchesFilter = Object.entries(filters).every(([key, value]) => {
-        if (!value) return true;
-        return row[key] === value;
-      });
-      return matchesSearch && matchesFilter;
-    });
-  }, [sortedRows, filters, search]);
-
-  const pageCount = pagination?.total
-    ? Math.ceil(pagination.total / pagination.size)
+  const pageCount = pagination
+    ? Math.ceil(pagination.total / 10)
     : 1;
 
   return (
-    <Box
-      sx={{
-        flexGrow: 1,
-        px: 3,
-        pb: 3,
-      }}
-    >
+    <Box sx={{ flexGrow: 1, px: 3, pb: 3 }}>
       <Paper
         elevation={0}
         sx={{
-          backgroundColor: theme.palette.background.paper,
+          bgcolor: theme.palette.background.paper,
           borderRadius: 2,
-          overflow: "hidden",   
-          border: "1px solid",
-          borderColor: theme.palette.divider,
+          border: `1px solid ${theme.palette.divider}`,
           display: "flex",
           flexDirection: "column",
           height: "100%",
+          overflow: "hidden",
         }}
       >
-        {(Object.keys(dynamicFilterOptions).length > 0 || search) && (
-          <Box p={2} sx={{ backgroundColor: theme.palette.background.default }}>
-            <Stack direction="row" spacing={2} alignItems="center">
-              {Object.entries(dynamicFilterOptions).map(([key, options]) => (
-                <FormControl key={key} size="small" sx={{ minWidth: 120 }}>
-                  <InputLabel>
-                    {columns.find((c) => c.key === key)?.label || key}
-                  </InputLabel>
+        <Box p={2} bgcolor={theme.palette.background.default}>
+          <Stack direction="row" spacing={2} alignItems="center">
+            {filter && filter.key && (
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>{columns.find((c) => c.key === filter.key)?.label}</InputLabel>
+                <Select
+                  value={filter.value}
+                  onChange={(e) => {
+                    filter.onChange?.(e.target.value);
+                  }}
+                  label={columns.find((c) => c.key === filter.key)?.label}
+                >
+                  {filter.options.map((opt) => (
+                    <MenuItem key={String(opt.value)} value={opt.value}>
+                      {opt.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+
+            {search && (
+              <>
+                <FormControl size="small" sx={{ minWidth: 120 }}>
+                  <InputLabel>검색 조건</InputLabel>
                   <Select
-                    value={filters[key] || ""}
-                    onChange={(e) =>
-                      setFilters({ ...filters, [key]: e.target.value })
-                    }
-                    label={key}
+                    value={searchKey}
+                    onChange={(e) => {
+                      setSearchKey(e.target.value);
+                      setSearchText("");
+                      search.onKeyChange?.(e.target.value);
+                    }}
+                    label="검색 조건"
                   >
-                    <MenuItem value="">전체</MenuItem>
-                    {options.map((opt) => (
-                      <MenuItem key={opt} value={opt}>
-                        {opt}
-                      </MenuItem>
-                    ))}
+                    <MenuItem value="">선택</MenuItem>
+                    {columns
+                      .filter((c) => c.searchable)
+                      .map((c) => (
+                        <MenuItem key={c.key} value={c.key}>
+                          {c.label}
+                        </MenuItem>
+                      ))}
                   </Select>
                 </FormControl>
-              ))}
-              {search && (
-                <Box flex={1}>
-                  <input
-                    type="text"
-                    placeholder={search.placeholder || "검색"}
-                    value={search.value}
-                    onChange={(e) => search.onChange(e.target.value)}
-                    style={{
-                      width: "100%",
-                      height: 36,
-                      padding: "0 12px",
-                      fontSize: 13,
-                      borderRadius: 8,
-                      border: `1px solid ${theme.palette.divider}`,
-                      outline: "none",
-                      background: theme.palette.background.paper,
-                      color: theme.palette.text.primary,
+                {searchKey && (
+                  <TextField
+                    size="small"
+                    placeholder={search.placeholder || "검색어 입력"}
+                    value={searchText}
+                    onChange={(e) => {
+                      setSearchText(e.target.value);
+                      search.onChange?.(e.target.value);
                     }}
+                    sx={{ flex: 1 }}
                   />
-                </Box>
-              )}
-            </Stack>
-          </Box>
-        )}
+                )}
+              </>
+            )}
+          </Stack>
+        </Box>
 
-        <Box sx={{ flex: 1, overflow: "auto"}}>
-          <Box
-            sx={{
-              height: "66vh",
-              "&::-webkit-scrollbar": { width: 6 },
-              "&::-webkit-scrollbar-thumb": {
-                backgroundColor: theme.palette.grey[300],
-                borderRadius: 2,
-                overflow: "auto"
-              },
-            }}
-          >
-            <Table size="small" stickyHeader>
-              <TableHead>
-                <TableRow
-                  sx={{ backgroundColor: theme.palette.background.default }}
-                >
+        <Box sx={{ flex: 1, overflow: "auto" }}>
+          <Table size="small" stickyHeader>
+            <TableHead>
+              <TableRow sx={{ bgcolor: theme.palette.background.default }}>
+                {columns.map((col) => (
+                  <TableCell
+                    key={col.key}
+                    sortDirection={
+                      sortConfig.key === col.key ? sortConfig.direction : false
+                    }
+                    sx={{ fontWeight: 600, fontSize: 13, color: theme.palette.text.primary }}
+                  >
+                    {col.sortable ? (
+                      <TableSortLabel
+                        active={sortConfig.key === col.key}
+                        direction={
+                          sortConfig.key === col.key ? sortConfig.direction : "asc"
+                        }
+                        onClick={() => handleSort(col.key)}
+                      >
+                        {col.label}
+                      </TableSortLabel>
+                    ) : (
+                      col.label
+                    )}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {sortedRows.map((row, idx) => (
+                <TableRow key={idx} hover onClick={() => onRowClick?.(row)}>
                   {columns.map((col) => (
                     <TableCell
                       key={col.key}
                       sx={{
-                        fontWeight: 600,
                         fontSize: 13,
-                        color: theme.palette.text.primary,
+                        color: theme.palette.text.secondary,
                         whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
                       }}
-                      sortDirection={
-                        sortConfig.key === col.key
-                          ? sortConfig.direction
-                          : false
-                      }
                     >
-                      {col.sortable ? (
-                        <TableSortLabel
-                          active={sortConfig.key === col.key}
-                          direction={
-                            sortConfig.key === col.key
-                              ? sortConfig.direction
-                              : "asc"
-                          }
-                          onClick={() => handleSort(col.key)}
-                          hideSortIcon={false}
-                          sx={{
-                            "& .MuiTableSortLabel-icon": {
-                              opacity: 1,
-                              color: theme.palette.grey[300],
-                            },
-                          }}
-                        >
-                          {col.label}
-                        </TableSortLabel>
-                      ) : (
-                        col.label
-                      )}
+                      {renderCell(col, row[col.key], row, theme)}
                     </TableCell>
                   ))}
                 </TableRow>
-              </TableHead>
-
-              <TableBody>
-                {filteredRows.map((row, rowIndex) => (
-                  <TableRow
-                    key={rowIndex}
-                    hover
-                    sx={{
-                      "&:hover": { backgroundColor: theme.palette.grey[100] },
-                    }}
-                    onClick={() => onRowClick?.(row)}
-                  >
-                    {columns.map((col) => (
-                      <TableCell
-                        key={col.key}
-                        sx={{
-                          fontSize: 13,
-                          color: theme.palette.text.secondary,
-                          whiteSpace: "nowrap",
-                          maxWidth: 200,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
-                        {renderCellContent(col, row[col.key], row, theme)}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-                 
-            </Table>
-                {pagination && (
-          <Box p={2}>
-            <Stack direction="row" justifyContent="flex-end">
-              <Pagination
-                count={pageCount}
-                page={pagination.page}
+              ))}
+            </TableBody>
+          </Table>
+          {pagination && (
+            <Box p={2}>
+              <Stack direction="row" justifyContent="flex-end">
+                <Pagination
+                  count={pageCount}
+                  page={pagination.page}
                 onChange={(e, value) => pagination.onPageChange(value)}
-                size="small"
-              />
-            </Stack>
-          </Box>
-        )}
-          </Box>
-   
+                  size="small"
+                />
+              </Stack>
+            </Box>
+          )}
         </Box>
       </Paper>
     </Box>
   );
 }
 
-function renderCellContent(col, value, row, theme) {
+function renderCell(col, value, row, theme) {
   switch (col.type) {
     case "checkbox":
       return <Checkbox checked={!!value} disabled size="small" />;
 
     case "avatar":
-      if (typeof value === "object" && value?.src && value?.name) {
-        return (
-          <Box display="flex" alignItems="center" gap={1}>
-            <Avatar
-              src={value.src}
-              alt={value.name}
-              sx={{ width: 28, height: 28 }}
-            />
-            <Typography variant="body2" noWrap>
-              {value.name}
-            </Typography>
-          </Box>
-        );
-      } else {
-        return (
-          <Typography variant="body2" color="text.disabled">
-            -
-          </Typography>
-        );
-      }
+      return value?.src && value?.name ? (
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Avatar src={value.src} sx={{ width: 28, height: 28 }} />
+          <Typography variant="body2" noWrap>{value.name}</Typography>
+        </Stack>
+      ) : (
+        <Typography variant="body2" color="text.disabled">-</Typography>
+      );
 
     case "tag":
-      return (
-        <Chip label={value} size="small" color="default" variant="outlined" />
-      );
+      return <Chip label={value} size="small" variant="outlined" />;
 
     case "status": {
-      const statusMap = col.statusMap || {};
-      const statusInfo = statusMap[value] || { color: "neutral", label: value };
-      const palette =
-        theme.palette.status[statusInfo.color] || theme.palette.status.neutral;
-
-      return (
-        <Chip
-          label={statusInfo.label}
-          size="small"
-          sx={{
-            backgroundColor: palette.bg,
-            color: palette.main,
-            borderRadius: "12px",
-            fontWeight: 500,
-            fontSize: 13,
-            border: "none",
-          }}
-        />
-      );
+      const info = col.statusMap?.[value] || { label: value, color: "neutral" };
+      const pal = theme.palette.status?.[info.color] || theme.palette.status.neutral;
+      return <Chip label={info.label} size="small" sx={{ bgcolor: pal.bg, color: pal.main, fontSize:13, fontWeight:500 }} />;
     }
 
     case "link":
-      return (
-        <Link
-          href={value}
-          target="_blank"
-          underline="hover"
-          sx={{ fontSize: 13 }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {value}
-        </Link>
-      );
+      return <Link href={value} target="_blank" underline="hover" onClick={(e) => e.stopPropagation()} sx={{ fontSize:13 }}>{value}</Link>;
 
     case "date":
-      return isNaN(new Date(value))
-        ? "-"
-        : new Date(value).toLocaleDateString();
+      return isNaN(new Date(value)) ? "-" : new Date(value).toLocaleDateString();
 
     case "number":
       return <Typography variant="body2">{value}</Typography>;
@@ -341,39 +270,20 @@ function renderCellContent(col, value, row, theme) {
       return value ? "Yes" : "No";
 
     case "action":
-      return (col.actions || []).map((action, idx) => (
-        <Button
-          key={idx}
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            action.onClick(row);
-          }}
-          variant={action.variant || "outlined"}
-        >
-          {action.label}
+      return col.actions?.map((act, i) => (
+        <Button key={i} size="small" variant={act.variant||"outlined"} onClick={(e) => { e.stopPropagation(); act.onClick(row); }}>
+          {act.label}
         </Button>
       ));
 
     case "progress":
       return (
-        <Box display="flex" alignItems="center" gap={1}>
+        <Stack direction="row" spacing={1} alignItems="center">
           <Box flexGrow={1}>
-            <LinearProgress
-              variant="determinate"
-              value={value ?? 0}
-              sx={{
-                height: 8,
-                borderRadius: 4,
-                backgroundColor: (theme) => theme.palette.grey[200],
-                "& .MuiLinearProgress-bar": {
-                  backgroundColor: (theme) => theme.palette.primary.main,
-                },
-              }}
-            />
+            <LinearProgress variant="determinate" value={value ?? 0} sx={{ height:8, borderRadius:1,'& .MuiLinearProgress-bar': { bgcolor: theme.palette.primary.main } }} />
           </Box>
           <Typography variant="caption">{value ?? 0}%</Typography>
-        </Box>
+        </Stack>
       );
 
     case "custom":

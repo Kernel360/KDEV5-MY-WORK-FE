@@ -1,15 +1,25 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import * as projectAPI from "@/api/project";
 
+
 export const fetchProjects = createAsyncThunk(
   "project/fetchProjects",
-  async ({ page, size, nameKeyword, memberId = null, deleted = null }, thunkAPI) => {
+  async (
+    {
+      page,
+      size,
+      keyword = null,
+      keywordType = null,
+      deleted,
+    },
+    thunkAPI
+  ) => {
     try {
-      const params = {};
-      params.page = page;
-      if (memberId)     params.memberId = memberId;
-      if (nameKeyword)  params.nameKeyword = nameKeyword;
-      if (deleted !== null) params.deleted = deleted; 
+      const params = { page };
+
+      if (keyword)       params.nameKeyword = keyword;
+      // if (keywordType)   params.keywordType = keywordType;
+      if (deleted !== null) params.deleted = deleted;
 
       const response = await projectAPI.getProjects(params);
 
@@ -18,11 +28,12 @@ export const fetchProjects = createAsyncThunk(
         totalCount: response.data.data.totalCount,
       };
     } catch (err) {
-      return thunkAPI.rejectWithValue(err.response?.data || "Failed to fetch projects");
+      return thunkAPI.rejectWithValue(
+        err.response?.data || "Failed to fetch projects"
+      );
     }
   }
 );
-
 
 export const fetchProjectById = createAsyncThunk(
   "project/fetchProjectById",
