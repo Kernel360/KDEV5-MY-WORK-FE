@@ -11,7 +11,7 @@ import { Box } from "@mui/material";
 export default function ProjectPage() {
   const navigate = useNavigate();
 
-  const { totalCount } = useSelector((state) => state.project);
+  const { totalCount } = useSelector((state) => state.company);
 
   return (
     <PageWrapper>

@@ -4,11 +4,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Box } from "@mui/material";
 import CustomTable from "@/components/common/customTable/CustomTable";
-import { fetchProjects } from "@/features/project/projectSlice";
+import { fetchCompanies } from "@/features/company/companySlice";
 
 // 테이블 컬럼 정의
 const columns = [
-  { key: "name", label: "제목", type: "text", searchable: true },
   { key: "companyName", label: "회사명", type: "text", searchable: true },
   {
     key: "businessNumber",
@@ -24,11 +23,11 @@ export default function ProjectTable() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const {
-    list: rawProjects,
+    // companySlice 와 값 맞춰야 함
+    list: companies, // list 에서 사용할 변수 명 : rawProjects
     totalCount,
-    status,
     error,
-  } = useSelector((state) => state.project);
+  } = useSelector((state) => state.company); // 도메인 이름으로 설정
 
   // 페이지 및 검색/필터 상태
   const [page, setPage] = useState(1);
@@ -47,33 +46,26 @@ export default function ProjectTable() {
   ];
 
   // 데이터 로드 함수
-  const loadProjects = useCallback(() => {
+  const loadCompany = useCallback(() => {
     const params = { page };
     if (searchText.trim()) params.keyword = searchText.trim();
+    params.companyType = "DEV";
     if (searchKey) params.keywordType = searchKey;
-    if (filterValue !== "") params[filterKey] = filterValue === "true";
-    dispatch(fetchProjects(params));
+    if (filterValue) params[filterKey] = filterValue;
+
+    dispatch(fetchCompanies(params));
   }, [dispatch, page, searchKey, searchText, filterValue]);
 
   useEffect(() => {
-    loadProjects();
-  }, [loadProjects]);
+    loadCompany();
+  }, [loadCompany]);
 
-  // 프로젝트 데이터 가공
-  const enrichedProjects = (rawProjects || []).map((p, idx) => ({
-    ...p,
-    progress: Math.min((idx + 1) * 10, 100),
-    manager: {
-      name: `담당자 ${p.id.slice(0, 4)}`,
-      src: `https://i.pravatar.cc/40?u=${p.id}`,
-    },
-  }));
-
+  // 프로젝트 데이터 가공 필요하면 여기서 추가
   return (
     <Box>
       <CustomTable
         columns={columns}
-        rows={enrichedProjects}
+        rows={companies}
         pagination={{
           page,
           total: totalCount,
