@@ -4,6 +4,8 @@ import projectReducer from "@/features/project/projectSlice";
 import memberReducer from "@/features/member/memberSlice";
 import companyReducer from "@/features/company/companySlice";
 import authReducer from "@/features/auth/authSlice";
+import projectStepReducer from "@/features/project/projectStepSlice";
+
 
 const preloadedAuth = (() => {
   try {
@@ -37,6 +39,7 @@ export const store = configureStore({
     member: memberReducer,
     company: companyReducer,
     auth: authReducer,
+    projectStep: projectStepReducer
   },
   preloadedState: {
     auth: preloadedAuth,

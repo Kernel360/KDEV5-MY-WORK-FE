@@ -3,7 +3,7 @@ export function getRoleLabel(role) {
     case "ROLE_SYSTEM_ADMIN":
       return "시스템 관리자";
     case "ROLE_DEV_ADMIN":
-      return "ROLE개발 관리자";
+      return "개발 관리자";
     case "ROLE_CLIENT_ADMIN":
       return "고객사 관리자";
     case "ROLE_SER":

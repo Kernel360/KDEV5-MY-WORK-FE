@@ -1,5 +1,5 @@
 // src/components/common/customTable/CustomTable.jsx
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Box,
   Paper,
@@ -41,7 +41,8 @@ export default function CustomTable({
   const handleSort = (key) =>
     setSortConfig((prev) => ({
       key,
-      direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
+      direction:
+        prev.key === key && prev.direction === "asc" ? "desc" : "asc",
     }));
 
   // 검색 설정
@@ -64,9 +65,10 @@ export default function CustomTable({
     if (filter && filter.key) {
       const { key, value } = filter;
       if (value !== "") {
-        result = result.filter((row) => row[key] ===
-          // boolean 문자열 혹은 기본 값
-          (value === "true" ? true : value === "false" ? false : value)
+        result = result.filter(
+          (row) =>
+            row[key] ===
+            (value === "true" ? true : value === "false" ? false : value)
         );
       }
     }
@@ -86,12 +88,18 @@ export default function CustomTable({
     });
   }, [filteredRows, sortConfig]);
 
-  const pageCount = pagination
-    ? Math.ceil(pagination.total / 10)
-    : 1;
+  const pageCount = pagination ? Math.ceil(pagination.total / 10) : 1;
 
   return (
-    <Box sx={{ flexGrow: 1, px: 3, pb: 3 }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",  // 부모로부터 height 상속
+        px: 3,
+        pb: 3,
+      }}
+    >
       <Paper
         elevation={0}
         sx={{
@@ -100,20 +108,21 @@ export default function CustomTable({
           border: `1px solid ${theme.palette.divider}`,
           display: "flex",
           flexDirection: "column",
-          height: "100%",
+          flex: 1,
           overflow: "hidden",
         }}
       >
+        {/* 검색 & 필터 */}
         <Box p={2} bgcolor={theme.palette.background.default}>
           <Stack direction="row" spacing={2} alignItems="center">
             {filter && filter.key && (
               <FormControl size="small" sx={{ minWidth: 120 }}>
-                <InputLabel>{columns.find((c) => c.key === filter.key)?.label}</InputLabel>
+                <InputLabel>
+                  {columns.find((c) => c.key === filter.key)?.label}
+                </InputLabel>
                 <Select
                   value={filter.value}
-                  onChange={(e) => {
-                    filter.onChange?.(e.target.value);
-                  }}
+                  onChange={(e) => filter.onChange?.(e.target.value)}
                   label={columns.find((c) => c.key === filter.key)?.label}
                 >
                   {filter.options.map((opt) => (
@@ -165,8 +174,21 @@ export default function CustomTable({
           </Stack>
         </Box>
 
-        <Box sx={{ flex: 1, overflow: "auto" }}>
-          <Table size="small" stickyHeader>
+        {/* 테이블 컨테이너 (스크롤) */}
+        <Box
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            minHeight: 0,
+            overflowX: "auto",
+            overflowY: "auto",
+          }}
+        >
+          <Table
+            size="small"
+            stickyHeader
+            sx={{ minWidth: "max-content" }}
+          >
             <TableHead>
               <TableRow sx={{ bgcolor: theme.palette.background.default }}>
                 {columns.map((col) => (
@@ -181,7 +203,9 @@ export default function CustomTable({
                       <TableSortLabel
                         active={sortConfig.key === col.key}
                         direction={
-                          sortConfig.key === col.key ? sortConfig.direction : "asc"
+                          sortConfig.key === col.key
+                            ? sortConfig.direction
+                            : "asc"
                         }
                         onClick={() => handleSort(col.key)}
                       >
@@ -194,9 +218,14 @@ export default function CustomTable({
                 ))}
               </TableRow>
             </TableHead>
+
             <TableBody>
               {sortedRows.map((row, idx) => (
-                <TableRow key={idx} hover onClick={() => onRowClick?.(row)}>
+                <TableRow
+                  key={idx}
+                  hover
+                  onClick={() => onRowClick?.(row)}
+                >
                   {columns.map((col) => (
                     <TableCell
                       key={col.key}
@@ -215,13 +244,14 @@ export default function CustomTable({
               ))}
             </TableBody>
           </Table>
+
           {pagination && (
             <Box p={2}>
               <Stack direction="row" justifyContent="flex-end">
                 <Pagination
                   count={pageCount}
                   page={pagination.page}
-                onChange={(e, value) => pagination.onPageChange(value)}
+                  onChange={(e, value) => pagination.onPageChange(value)}
                   size="small"
                 />
               </Stack>
@@ -237,58 +267,88 @@ function renderCell(col, value, row, theme) {
   switch (col.type) {
     case "checkbox":
       return <Checkbox checked={!!value} disabled size="small" />;
-
     case "avatar":
       return value?.src && value?.name ? (
         <Stack direction="row" spacing={1} alignItems="center">
           <Avatar src={value.src} sx={{ width: 28, height: 28 }} />
-          <Typography variant="body2" noWrap>{value.name}</Typography>
+          <Typography variant="body2" noWrap>
+            {value.name}
+          </Typography>
         </Stack>
       ) : (
-        <Typography variant="body2" color="text.disabled">-</Typography>
+        <Typography variant="body2" color="text.disabled">
+          -
+        </Typography>
       );
-
     case "tag":
       return <Chip label={value} size="small" variant="outlined" />;
-
     case "status": {
       const info = col.statusMap?.[value] || { label: value, color: "neutral" };
-      const pal = theme.palette.status?.[info.color] || theme.palette.status.neutral;
-      return <Chip label={info.label} size="small" sx={{ bgcolor: pal.bg, color: pal.main, fontSize:13, fontWeight:500 }} />;
+      const pal =
+        theme.palette.status?.[info.color] || theme.palette.status.neutral;
+      return (
+        <Chip
+          label={info.label}
+          size="small"
+          sx={{ bgcolor: pal.bg, color: pal.main, fontSize: 13, fontWeight: 500 }}
+        />
+      );
     }
-
     case "link":
-      return <Link href={value} target="_blank" underline="hover" onClick={(e) => e.stopPropagation()} sx={{ fontSize:13 }}>{value}</Link>;
-
+      return (
+        <Link
+          href={value}
+          target="_blank"
+          underline="hover"
+          onClick={(e) => e.stopPropagation()}
+          sx={{ fontSize: 13 }}
+        >
+          {value}
+        </Link>
+      );
     case "date":
-      return isNaN(new Date(value)) ? "-" : new Date(value).toLocaleDateString();
-
+      return isNaN(new Date(value))
+        ? "-"
+        : new Date(value).toLocaleDateString();
     case "number":
       return <Typography variant="body2">{value}</Typography>;
-
     case "boolean":
       return value ? "Yes" : "No";
-
     case "action":
       return col.actions?.map((act, i) => (
-        <Button key={i} size="small" variant={act.variant||"outlined"} onClick={(e) => { e.stopPropagation(); act.onClick(row); }}>
+        <Button
+          key={i}
+          size="small"
+          variant={act.variant || "outlined"}
+          onClick={(e) => {
+            e.stopPropagation();
+            act.onClick(row);
+          }}
+        >
           {act.label}
         </Button>
       ));
-
     case "progress":
       return (
         <Stack direction="row" spacing={1} alignItems="center">
           <Box flexGrow={1}>
-            <LinearProgress variant="determinate" value={value ?? 0} sx={{ height:8, borderRadius:1,'& .MuiLinearProgress-bar': { bgcolor: theme.palette.primary.main } }} />
+            <LinearProgress
+              variant="determinate"
+              value={value ?? 0}
+              sx={{
+                height: 8,
+                borderRadius: 1,
+                "& .MuiLinearProgress-bar": {
+                  bgcolor: theme.palette.primary.main,
+                },
+              }}
+            />
           </Box>
           <Typography variant="caption">{value ?? 0}%</Typography>
         </Stack>
       );
-
     case "custom":
       return col.render ? col.render(value, row) : value;
-
     default:
       return value;
   }

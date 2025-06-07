@@ -72,7 +72,6 @@ export default function ProjectTable() {
   }));
 
   return (
-    <Box>
       <CustomTable
         columns={columns}
         rows={enrichedProjects}
@@ -107,6 +106,5 @@ export default function ProjectTable() {
         loading={status === "loading"}
         error={error}
       />
-    </Box>
   );
 }
