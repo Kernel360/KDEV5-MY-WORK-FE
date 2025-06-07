@@ -1,9 +1,49 @@
+// src/api/project.js
 import api from "./api";
 
+/**
+ * 프로젝트 목록 조회
+ * - 페이지 번호, 멤버 ID, 프로젝트명 키워드, 삭제 여부 등의 검색 조건을 params로 전달합니다.
+ * @param {{ page: number; memberId?: string; nameKeyword?: string; deleted?: boolean }} params
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<ProjectListWebResponse>
+ */
 export function getProjects(params) {
   return api.get("/api/projects", { params });
 }
-export const getProjectById = (id) => api.get(`api/projects/${id}`);
-export const createProject = (data) => api.post("api/projects", data);
-export const updateProject = (id, data) => api.put(`api/projects/${id}`, data);
-export const deleteProject = (id) => api.delete(`api/projects/${id}`);
+
+/**
+ * 단일 프로젝트 조회
+ * - URL PathVariable로 전달된 projectId로 특정 프로젝트 상세 조회
+ * @param {string} id - 조회할 프로젝트의 UUID
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<ProjectDetailWebResponse>
+ */
+export const getProjectById = (id) =>
+  api.get(`/api/projects/${id}`);
+
+/**
+ * 프로젝트 생성
+ * - RequestBody로 ProjectCreateWebRequest 형태의 데이터 전달
+ * @param {{ name: string; description?: string; }} data
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<ProjectCreateWebResponse>
+ */
+export const createProject = (data) =>
+  api.post("/api/projects", data);
+
+/**
+ * 프로젝트 수정
+ * - PathVariable로 projectId, RequestBody로 ProjectUpdateWebRequest DTO 전달
+ * @param {string} id - 수정할 프로젝트의 UUID
+ * @param {{ name?: string; description?: string;  }} data
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<ProjectUpdateWebResponse>
+ */
+export const updateProject = (id, data) =>
+  api.put(`/api/projects/${id}`, data);
+
+/**
+ * 프로젝트 삭제
+ * - RequestBody로 ProjectDeleteWebRequest DTO 전달
+ * @param {{ id: string }} data - 삭제할 프로젝트의 UUID를 포함한 객체
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<ProjectDeleteWebResponse>
+ */
+export const deleteProject = (data) =>
+  api.delete("/api/projects", { data });
