@@ -13,8 +13,7 @@ const SEARCH_TYPES = [
 ];
 
 const columns = [
-  { key: "avatar", label: "이름", type: "avatar" },
-  { key: "name", label: "이름", type: "text", searchable: true },
+  { key: "name", label: "이름", type: "avatar", searchable: true },
   { key: "email", label: "이메일", type: "text", searchable: true },
   { key: "position", label: "직책", type: "text", searchable: true },
   { key: "department", label: "부서", type: "text", searchable: true },
@@ -60,7 +59,7 @@ export default function MemberTable() {
 
   const drawMember = (members || [] ).map((p, idx)=> ({
     ...p,
-    avatar: {
+    name: {
         name: p.name,
         src: `https://i.pravatar.cc/40?u=${p.id}`,
     }
