@@ -20,6 +20,7 @@ export default function SectionTable({
   phases,
   selectedPhase,
   onPhaseChange,
+  onRowClick,
 }) {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
 
@@ -119,7 +120,7 @@ export default function SectionTable({
 
           <TableBody>
             {sortedRows.map((row) => (
-              <TableRow key={row[rowKey]} hover>
+         <TableRow key={row[rowKey]} hover onClick={() => onRowClick?.(row)} sx={{ cursor: 'pointer' }}>
                 {columns.map((col) => (
                   <TableCell key={col.key}>
                     {col.renderCell
