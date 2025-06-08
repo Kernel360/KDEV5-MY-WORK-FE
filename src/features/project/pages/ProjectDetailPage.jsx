@@ -20,6 +20,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import TaskIcon from "@mui/icons-material/AssignmentTurnedIn";
 import DownloadIcon from "@mui/icons-material/Download";
 import ProjectManagement from "../management/pages/ProjectManagement";
+import dayjs from "dayjs";
 
 export default function ProjectDetailPage() {
    const { id } = useParams();
@@ -27,8 +28,9 @@ export default function ProjectDetailPage() {
   const location = useLocation();                                   // ← 추가
   const dispatch = useDispatch();
   const projectState = useSelector((state) => state.project) || {};
-  const { current: data } = projectState;
+  const { current: project } = projectState;
   const [confirmOpen, setConfirmOpen] = useState(false);
+  console.log('project', project)
 
   // URL 에서 탭 결정: /projects/:id/management  → 0, /tasks → 1, /progress → 2
   const tabMap = {
@@ -53,11 +55,11 @@ export default function ProjectDetailPage() {
   }, [dispatch, id]);
 
   const handleDelete = () => {
-  dispatch(deleteProject(data.id)).then(() => navigate("/projects"));
+  dispatch(deleteProject(project.id)).then(() => navigate("/projects"));
   setConfirmOpen(false);
 };
 
-  if (!data) {
+  if (!project) {
     return (
       <PageWrapper>
         <Box>
@@ -83,8 +85,8 @@ export default function ProjectDetailPage() {
         {/* 1. PageHeader */}
         <Box sx={{ flexShrink: 0, width: "100%" }}>
           <PageHeader
-            title={data.name}
-            subtitle={`프로젝트 ID: ${data.id}`}
+            title={project.name}
+            subtitle={project.detail}
             action={
               <Stack direction="row" spacing={1}>
                 <CustomButton
@@ -120,23 +122,20 @@ export default function ProjectDetailPage() {
         {/* 2. SummaryCard */}
         <Box sx={{ flexShrink: 0, width: "100%" }}>
           <SummaryCard
-            schema={[
-              {
-                key: "status",
-                label: "상태",
-                type: "status",
-                color: "warning",
-              },
-              { key: "period", label: "기간", type: "text" },
-              { key: "assignee", label: "담당자", type: "avatar" },
-              { key: "developer", label: "개발사", type: "avatar" },
-            ]}
-            data={{
-              status: "진행 중",
-              period: "2024.01.01 ~ 2024.06.30",
-              assignee: { name: "이수하", avatar: "/toss_logo.png" },
-              developer: { name: "비엔시스템", avatar: "/toss_logo.png" },
-            }}
+          schema={[
+    {
+      key: "step",
+      label: "상태",
+      type: "status",
+      colorMap: { INIT: "warning", IN_PROGRESS: "info", DONE: "success" }
+    },
+    { key: "period", label: "기간", type: "text" },
+  ]}
+             data={{
+    // API로 받은 step 그대로
+    step: project.step,
+    period: `${dayjs(project.startAt).format("YYYY.MM.DD")} ~ ${dayjs(project.endAt).format("YYYY.MM.DD")}`,
+  }}
             noMarginBottom
           />
         </Box>
@@ -157,7 +156,7 @@ export default function ProjectDetailPage() {
           }}
           content={
             tab === 0 ? (
-              <ProjectManagement projectId={id} />
+              <ProjectManagement />
             ) : tab === 1 ? (
               <PostTable />
             ) : (
