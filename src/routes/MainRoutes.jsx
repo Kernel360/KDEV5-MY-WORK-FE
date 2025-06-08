@@ -11,6 +11,8 @@ import MemberPage from "@/features/member/pages/MemberPage";
 import MemberFormPage from "@/features/member/pages/MemberFormPage";
 import LoginPage from "@/features/auth/pages/LoginPage";
 import MainLayout from "@/layouts/MainLayout";
+import MemberDetailPage from "@/features/member/pages/MemberDetailPage";
+
 
 export default function MainRoutes() {
   // const isAuthenticated = useSelector((state) => state.auth.isAuthenticated) || false;
@@ -45,10 +47,10 @@ export default function MainRoutes() {
 
         <Route path="/projects/new"         element={<ProjectFormPage />} />
         <Route path="/projects/:id/edit"    element={<ProjectFormPage />} />
-
+        <Route path="/members/:id" element={<MemberDetailPage />} />
+        <Route path="/members/new" element={<MemberFormPage />} />
         <Route path="/members"      element={<MemberPage />} />
         <Route path="/dev-companies" element={<DevCompanyPage />} />
-        <Route path="/members/new" element={<MemberFormPage />} />
       </Route>
     </Routes>
   );
