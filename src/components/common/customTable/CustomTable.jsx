@@ -56,9 +56,21 @@ export default function CustomTable({
     // 검색 적용
     if (search && searchKey) {
       const kw = searchText.toLowerCase();
-      result = result.filter((row) =>
-        row[searchKey]?.toString().toLowerCase().includes(kw)
-      );
+      result = result.filter((row) => {
+        let cell = row[searchKey];
+        // avatar 같은 객체는 name 프로퍼티로 검색
+        if (cell && typeof cell === "object") {
+          if ("name" in cell) {
+            cell = cell.name;
+          } else {
+            cell = JSON.stringify(cell);
+          }
+        }
+        return cell
+          ?.toString()
+          .toLowerCase()
+          .includes(kw);
+      });
     }
 
     // 필터 적용
