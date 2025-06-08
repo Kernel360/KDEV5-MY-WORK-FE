@@ -1,7 +1,7 @@
 // src/pages/project/ProjectDetailPage.jsx
 import React, { useState, useEffect } from "react";
 import { Stack, Box, CircularProgress, Typography } from "@mui/material";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom"; 
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,44 +13,54 @@ import ConfirmDialog from "@/components/common/confirmDialog/ConfirmDialog";
 import CustomButton from "@/components/common/customButton/CustomButton";
 import SummaryCard from "@/components/common/summaryCard/SummaryCard";
 import TabsWithContent from "@/components/layouts/tabsWithContent/TabsWithContent";
-import PostTable from "../components/PostTable";
+import PostTable from "../post/components/PostTable";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import CreateRoundedIcon from "@mui/icons-material/CreateRounded";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import TaskIcon from "@mui/icons-material/AssignmentTurnedIn";
 import DownloadIcon from "@mui/icons-material/Download";
-import ProjectManagement from "../components/ProjectManagement";
+import ProjectManagement from "../management/pages/ProjectManagement";
 
 export default function ProjectDetailPage() {
-  const { id } = useParams();
+   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();                                   // ← 추가
   const dispatch = useDispatch();
   const projectState = useSelector((state) => state.project) || {};
   const { current: data } = projectState;
-
-  const [tab, setTab] = useState(0);
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  // URL 에서 탭 결정: /projects/:id/management  → 0, /tasks → 1, /progress → 2
+  const tabMap = {
+    management: 0,
+    tasks:      1,
+    progress:   2,
+  };
+  // pathname segments 중 마지막 부분으로 탭 인덱스 가져오기
+  const segments = location.pathname.split("/");
+  const currentTab = tabMap[segments[segments.length - 1]] ?? 0;
+
+  const [tab, setTab] = useState(currentTab);
+  // 탭 변경 시 URL 이동
+  const handleTabChange = (_, newIndex) => {
+    setTab(newIndex);
+    const routeKeys = ["management", "tasks", "progress"];
+    navigate(`/projects/${id}/${routeKeys[newIndex]}`);
+  };
 
   useEffect(() => {
     dispatch(fetchProjectById(id));
   }, [dispatch, id]);
 
   const handleDelete = () => {
-    dispatch(deleteProject(data.id)).then(() => navigate("/projects"));
-    setConfirmOpen(false);
-  };
+  dispatch(deleteProject(data.id)).then(() => navigate("/projects"));
+  setConfirmOpen(false);
+};
 
   if (!data) {
     return (
       <PageWrapper>
-        <Box
-          sx={{
-            flex: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+        <Box>
           <CircularProgress />
         </Box>
       </PageWrapper>
@@ -132,51 +142,30 @@ export default function ProjectDetailPage() {
         </Box>
 
         {/* 3. TabsWithContent 래핑 박스 */}
-        <Box
-          sx={{
-            /* flexGrow:1 으로 '헤더+카드' 제외한 남은 세로 공간 모두 차지 */
-            flexGrow: 1,
-            display: "flex",
-            flexDirection: "column",
-            minHeight: 0,
-
-            /* mx:3 을 주고, 부모 폭 내에서만 크기 계산이 되도록 flex 설정 */
-            mx: 3,
-            flex: 1,            // → 부모(Box)에서 가능한 폭만큼 차지
-            minWidth: 0,        // → overflow 처리를 위해 반드시 필요
+        <Box sx={{ flexGrow:1, display:"flex", flexDirection:"column", mx:3, flex:1, minWidth:0 }}>
+        <TabsWithContent
+          tabs={[
+            { label: "프로젝트 관리", icon: <VisibilityIcon /> },
+            { label: "업무 관리",     icon: <TaskIcon /> },
+            { label: "진척도 관리",   icon: <DownloadIcon /> },
+          ]}
+          value={tab}
+          onChange={handleTabChange} 
+          containerSx={{
+            flexGrow:1, minHeight:0,
+            overflowX:"auto", flex:1, minWidth:0
           }}
-        >
-          <TabsWithContent
-            tabs={[
-              { label: "프로젝트 관리", icon: <VisibilityIcon /> },
-              { label: "업무 관리", icon: <TaskIcon /> },
-              { label: "진척도 관리", icon: <DownloadIcon /> },
-            ]}
-            value={tab}
-            onChange={(_, nv) => setTab(nv)}
-            containerSx={{
-              flexGrow: 1,
-              minHeight: 0,
-
-              /* 탭 콘텐츠가 가로로 넘칠 때 내부에서만 스크롤하도록 */
-              overflowX: "auto",
-
-              /* 부모 폭 내에서만 차지 (mx=3 만큼 양쪽 여유가 생겨도 그 안에서만 폭 계산) */
-              flex: 1,
-              minWidth: 0,
-            }}
-            content={
-              tab === 0 ? (
-                <ProjectManagement
-                />
-              ) : tab === 1 ? (
-                <PostTable />
-              ) : (
-                <Typography>진척도 관리 콘텐츠</Typography>
-              )
-            }
-          />
-        </Box>
+          content={
+            tab === 0 ? (
+              <ProjectManagement projectId={id} />
+            ) : tab === 1 ? (
+              <PostTable />
+            ) : (
+              <Typography>진척도 관리 콘텐츠</Typography>
+            )
+          }
+        />
+      </Box>
       </Box>
     </PageWrapper>
   );

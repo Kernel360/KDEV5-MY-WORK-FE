@@ -2,28 +2,31 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import * as projectStepAPI from "@/api/projectStep";
 
-// 1. fetchProjectStages: 프로젝트 단계 목록 조회
+// 1) fetchProjectStages: 프로젝트 단계 목록 조회
 export const fetchProjectStages = createAsyncThunk(
   "projectStep/fetchProjectStages",
   async (projectId, thunkAPI) => {
     try {
       const response = await projectStepAPI.getProjectStages(projectId);
-      console.log('response', response)
-      return response.data.data; // assuming { data: { data: [...] } }
+      return response.data.data; 
     } catch (err) {
       return thunkAPI.rejectWithValue(err.response?.data || "Failed to fetch stages");
     }
   }
 );
 
-// 2. createProjectStages: 단계 일괄 생성
+// 2) createProjectStages: 단계 일괄 생성 → 생성 후 바로 목록 재조회
 export const createProjectStages = createAsyncThunk(
   "projectStep/createProjectStages",
-  async (payload, thunkAPI) => {
-    // payload: { projectId, steps }
+  async ({ projectId, projectSteps }, thunkAPI) => {
     try {
-      const response = await projectStepAPI.createProjectStages(payload);
-      return response.data.data; // 서버가 반환하는 새 단계 목록
+      // 1) 단계 생성 API 호출
+      await projectStepAPI.createProjectStages({projectId, 
+       projectSteps},
+      );
+      // 2) 생성 직후, 다시 목록을 조회
+      const fresh = await projectStepAPI.getProjectStages(projectId);
+      return fresh.data.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(err.response?.data || "Failed to create stages");
     }
@@ -37,7 +40,6 @@ export const updateProjectStages = createAsyncThunk(
   "projectSteps/updateProjectStages",
   async ({ projectId, projectStepUpdateWebRequests }, thunkAPI) => {
     try {
-      console.log("payload", projectStepUpdateWebRequests);
       // 컨트롤러가 기대하는 body 형태로 래핑
       const response = await projectStepAPI.updateProjectStages(
         projectId,
@@ -56,9 +58,9 @@ export const updateProjectStages = createAsyncThunk(
 const projectStepSlice = createSlice({
   name: "projectStep",
   initialState: {
-    items: [],        // 단계 목록
-    loading: false,   // 로딩 상태
-    error: null,      // 에러 메시지
+    items: [],
+    loading: false,
+    error: null,
   },
   reducers: {
     clearProjectSteps(state) {
@@ -75,7 +77,6 @@ const projectStepSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchProjectStages.fulfilled, (state, action) => {
-      
         state.loading = false;
         state.items = action.payload.steps;
       })
@@ -90,8 +91,9 @@ const projectStepSlice = createSlice({
         state.error = null;
       })
       .addCase(createProjectStages.fulfilled, (state, action) => {
+        console.log('action', action)
         state.loading = false;
-        state.items = action.payload;
+        state.items = action.payload.steps;
       })
       .addCase(createProjectStages.rejected, (state, action) => {
         state.loading = false;
@@ -104,7 +106,6 @@ const projectStepSlice = createSlice({
         state.error = null;
       })
       .addCase(updateProjectStages.fulfilled, (state, action) => {
-         console.log(action, "action")
         state.loading = false;
         state.items = action.payload.projectSteps;
       })
