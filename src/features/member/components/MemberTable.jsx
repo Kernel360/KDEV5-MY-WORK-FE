@@ -4,12 +4,21 @@ import { fetchMembers } from "@/features/member/memberSlice";
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
+const SEARCH_TYPES = [
+  { value: "name", label: "이름" },
+  { value: "email", label: "이메일" },
+  { value: "position", label: "직책" },
+  { value: "department", label: "부서" },
+  { value: "phoneNumber", label: "연락처" },
+];
+
 const columns = [
   { key: "avatar", label: "이름", type: "avatar" },
-  { key: "email", label: "이메일", type: "text"},
-  { key: "position", label: "직책", type: "text" },
-  { key: "department", label: "부서", type: "text" },
-  { key: "phoneNumber", label: "연락처", type: "text" },
+  { key: "name", label: "이름", type: "text", searchable: true },
+  { key: "email", label: "이메일", type: "text", searchable: true },
+  { key: "position", label: "직책", type: "text", searchable: true },
+  { key: "department", label: "부서", type: "text", searchable: true },
+  { key: "phoneNumber", label: "연락처", type: "text", searchable: true },
   {
     key: "deleted",
     label: "상태",
@@ -39,8 +48,8 @@ export default function MemberTable() {
     dispatch(
       fetchMembers({
         page,
-        keyword: null,
-        keywordType: null,
+        keyword: keyword || null,
+        keywordType: keyword ? keywordType.toUpperCase() : null,
       })
     );
   }, [dispatch, page, keywordType, keyword]);
@@ -56,6 +65,7 @@ export default function MemberTable() {
         src: `https://i.pravatar.cc/40?u=${p.id}`,
     }
   }));
+
   return (
     <CustomTable
       columns={columns}
@@ -70,12 +80,16 @@ export default function MemberTable() {
         onPageChange: (newPage) => setPage(newPage),
       }}
       search={{
-        key: "name",
-        placeholder: "이름을 검색하세요",
+        key: keywordType,
+        placeholder: "검색어를 입력하세요",
         value: keyword,
         onChange: (newValue) => {
           setPage(1);
           setKeyword(newValue);
+        },
+        onKeyChange: (newType) => {
+          setPage(1);
+          setKeywordType(newType);
         },
       }}
       loading={status === "loading"}

@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import * as companyAPI from "@/api/company";
+import { getCompanyListOnlyIdName } from "@/api/company";
 
 export const fetchCompanies = createAsyncThunk(
   "company/fetchCompanies",
@@ -79,12 +80,26 @@ export const deleteCompany = createAsyncThunk(
   }
 );
 
+// 회사 ID/이름만 가져오는 thunk
+export const fetchCompanyListOnlyIdName = createAsyncThunk(
+  "company/fetchCompanyListOnlyIdName",
+  async (_, thunkAPI) => {
+    try {
+      const response = await getCompanyListOnlyIdName();
+      return response.data.data; // { companies: [...] }
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data || "Error");
+    }
+  }
+);
+
 const companySlice = createSlice({
   name: "company",
   initialState: {
     list: [],
     current: null,
     error: null,
+    companyListOnlyIdName: [], // 새로 추가
   },
   reducers: {
     clearCurrentCompany(state) {
@@ -104,6 +119,19 @@ const companySlice = createSlice({
         state.totalCount = action.payload.data.totalCount;
       })
       .addCase(fetchCompanies.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // 회사 ID/이름만 가져오는 thunk
+      .addCase(fetchCompanyListOnlyIdName.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchCompanyListOnlyIdName.fulfilled, (state, action) => {
+        state.companyListOnlyIdName = action.payload.companies;
+        state.loading = false;
+      })
+      .addCase(fetchCompanyListOnlyIdName.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

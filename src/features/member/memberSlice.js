@@ -5,14 +5,7 @@ export const fetchMembers = createAsyncThunk(
   "member/fetchMembers",
   async ({ page, keyword, keywordType }, thunkAPI) => {
     try {
-
-     const params = {};
-     params.page = page;
-     if (keyword) params.keyword = keyword;
-     if (keywordType) params.keywordType = keywordType;
-
-
-      const response = await memberAPI.getMembers(params);
+      const response = await memberAPI.findMembers(page, keyword, keywordType);
       return response.data.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data || "Error");
@@ -42,6 +35,7 @@ const memberSlice = createSlice({
     .addCase(fetchMembers.fulfilled, (state, action) => {
       state.list = action.payload.members;
       state.totalCount = action.payload.totalCount;
+      state.loading = false;
     })
     .addCase(fetchMembers.rejected, (state, action) => {
       state.loading = false;

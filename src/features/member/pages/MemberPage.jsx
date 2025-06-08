@@ -8,10 +8,10 @@ import { useNavigate } from "react-router-dom";
 import { Add } from "@mui/icons-material";
 import { Box } from "@mui/material";
 
-export default function ProjectPage() {
+export default function MemberPage() {
   const navigate = useNavigate();
 
-  const { totalCount } = useSelector((state) => state.project);
+  const { totalCount } = useSelector((state) => state.member);
 
   return (
     <PageWrapper>

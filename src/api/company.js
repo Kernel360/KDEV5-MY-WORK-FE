@@ -10,3 +10,4 @@ export const createCompany = (data) => api.post("/api/companies", data);
 export const updateCompany = (id, data) =>
   api.put(`/api/companies/${id}`, data);
 export const deleteCompany = (id) => api.delete(`/api/companies/${id}`);
+export const getCompanyListOnlyIdName = () => api.get("/api/companies/company-list");

@@ -8,6 +8,7 @@ import ProjectDetailPage from "@/features/project/pages/ProjectDetailPage";
 import ProjectFormPage from "@/features/project/pages/ProjectFormPage";
 import DevCompanyPage from "@/features/company/pages/DevCompanyPage";
 import MemberPage from "@/features/member/pages/MemberPage";
+import MemberFormPage from "@/features/member/pages/MemberFormPage";
 import LoginPage from "@/features/auth/pages/LoginPage";
 import MainLayout from "@/layouts/MainLayout";
 
@@ -47,6 +48,7 @@ export default function MainRoutes() {
 
         <Route path="/members"      element={<MemberPage />} />
         <Route path="/dev-companies" element={<DevCompanyPage />} />
+        <Route path="/members/new" element={<MemberFormPage />} />
       </Route>
     </Routes>
   );
