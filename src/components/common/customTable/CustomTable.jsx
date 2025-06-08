@@ -25,6 +25,7 @@ import {
   LinearProgress,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import dayjs from "dayjs";
 
 export default function CustomTable({
   columns,
@@ -318,10 +319,10 @@ function renderCell(col, value, row, theme) {
           {value}
         </Link>
       );
-    case "date":
-      return isNaN(new Date(value))
-        ? "-"
-        : new Date(value).toLocaleDateString();
+  case "date":
+    return dayjs(value).isValid()
+      ? dayjs(value).format("YYYY.MM.DD")
+      : "-";
     case "number":
       return <Typography variant="body2">{value}</Typography>;
     case "boolean":

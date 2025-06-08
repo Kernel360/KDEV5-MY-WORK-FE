@@ -5,7 +5,7 @@ import ProjectStepManager from "../components/ProjectStepManager/ProjectStepMana
 import CustomButton from "@/components/common/customButton/CustomButton";
 import { IconButton, Tooltip } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded"
-// import ProjectMemberSelector from "../components/members/ProjectMemberSelector";
+import ProjectMemberSelector from "../components/ProjectMemberSelector";
 
 const ROLE_SYSTEM_ADMIN = "ROLE_SYSTEM_ADMIN";
 const ROLE_DEV_ADMIN    = "ROLE_DEV_ADMIN";
@@ -50,20 +50,15 @@ export default function useProjectSections({
         />
       ),
     },
-    // {
-    //   key: "devMembers",
-    //   roles: [ROLE_SYSTEM_ADMIN, ROLE_DEV_ADMIN],
-    //   title: "개발사 직원 관리",
-    //   tooltip: "우리 회사 직원 목록에서 프로젝트 참여 직원을 선택하세요. (다중 선택 가능)",
-    //   content: (
-    //     <ProjectMemberSelector
-    //       allEmployees={allEmployees}
-    //       selectedEmployees={selectedEmployees}
-    //       onChange={handleChangeMembers}
-    //       onRemove={handleRemoveMember}
-    //     />
-    //   ),
-    // },
+    {
+      key: "devMembers",
+      roles: [ROLE_SYSTEM_ADMIN, ROLE_DEV_ADMIN],
+      title: "개발사 직원 관리",
+      tooltip: "우리 회사 직원 목록에서 프로젝트 참여 직원을 선택하세요. (다중 선택 가능)",
+      content: (
+        <ProjectMemberSelector/>
+      ),
+    },
     // {
     //   key: "clientMembers",
     //   roles: [ROLE_SYSTEM_ADMIN, ROLE_CLIENT_ADMIN],
