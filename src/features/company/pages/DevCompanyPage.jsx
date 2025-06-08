@@ -29,7 +29,7 @@ export default function ProjectPage() {
           action={
             <CustomButton
               startIcon={<Add />}
-              onClick={() => navigate("/projects/new")}
+              onClick={() => navigate("/dev-companies/new")}
             >
               회사 생성
             </CustomButton>

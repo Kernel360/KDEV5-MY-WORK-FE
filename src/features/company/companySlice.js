@@ -23,9 +23,12 @@ export const createCompanyId = createAsyncThunk(
   "company/generateCompanyId",
   async (_, thunkAPI) => {
     try {
+      console.log("회사 ID 생성 API 호출 시작");
       const response = await companyAPI.generateCompanyId();
+      console.log("회사 ID 생성 API 응답:", response);
       return response.data;
     } catch (error) {
+      console.error("회사 ID 생성 API 에러:", error);
       return thunkAPI.rejectWithValue(error.response?.data || "Error");
     }
   }
@@ -44,10 +47,10 @@ export const fetchCompanyById = createAsyncThunk(
 );
 
 export const createCompany = createAsyncThunk(
-  "company/fetchCompanyById",
+  "company/createCompany",
   async (data, thunkAPI) => {
     try {
-      const response = await companyAPI.updateCompany(data);
+      const response = await companyAPI.createCompany(data);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data || "Error");
@@ -106,6 +109,21 @@ const companySlice = createSlice({
         state.totalCount = action.payload.data.totalCount;
       })
       .addCase(fetchCompanies.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // ===== 회사 ID 생성 =====
+      .addCase(createCompanyId.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createCompanyId.fulfilled, (state, action) => {
+        console.log("state: ", state);
+        console.log("action: ", action);
+        state.loading = false;
+        state.current = action.payload;
+      })
+      .addCase(createCompanyId.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
