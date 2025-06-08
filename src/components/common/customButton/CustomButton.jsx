@@ -18,6 +18,11 @@ const StyledButton = styled(Button)(({ theme, kind }) => {
       "&:hover": {
         backgroundColor: theme.palette.primary.dark,
       },
+        "&.Mui-disabled": {
+       backgroundColor: theme.palette.primary.main,
+       color: theme.palette.primary.contrastText,
+       opacity: 0.5,              // 원하는 투명도 조절
+     },
     },
     ghost: {
       backgroundColor: "transparent",
@@ -26,6 +31,10 @@ const StyledButton = styled(Button)(({ theme, kind }) => {
       "&:hover": {
         backgroundColor: theme.palette.grey[100],
       },
+      "&.Mui-disabled": {
+       color: theme.palette.action.disabled,
+       borderColor: theme.palette.action.disabledBackground,
+     },
     },
     danger: {
       backgroundColor: theme.palette.error.main,
@@ -33,6 +42,11 @@ const StyledButton = styled(Button)(({ theme, kind }) => {
       "&:hover": {
         backgroundColor: theme.palette.error.dark,
       },
+      "&.Mui-disabled": {
+       backgroundColor: theme.palette.error.main,
+       color: "#fff",
+       opacity: 0.5,
+     },
     },
   };
 

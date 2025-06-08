@@ -115,8 +115,6 @@ const companySlice = createSlice({
       })
       .addCase(fetchCompanies.fulfilled, (state, action) => {
         state.loading = false;
-        console.log("state: ", state);
-        console.log("action: ", action);
         state.list = action.payload.data.companies;
         state.totalCount = action.payload.data.totalCount;
       })
