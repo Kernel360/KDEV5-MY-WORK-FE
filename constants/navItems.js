@@ -15,7 +15,7 @@ const navItems = [
   {
     text: "고객사 관리",
     icon: BusinessRoundedIcon,
-    path: "/clients",
+    path: "/client-companies",
     roles: ["ROLE_SYSTEM_ADMIN"],
   },
   {
