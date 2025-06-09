@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import CustomButton from "@/components/common/custombutton/CustomButton";
+import CustomButton from "@/components/common/customButton/CustomButton";
 
 export default function SectionTable({
   columns,
