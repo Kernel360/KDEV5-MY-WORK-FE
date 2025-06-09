@@ -6,7 +6,9 @@ import ProjectPage from "@/features/project/pages/ProjectPage";
 import ProjectDetailPage from "@/features/project/pages/ProjectDetailPage";
 import ProjectFormPage from "@/features/project/pages/ProjectFormPage";
 import DevCompanyPage from "@/features/company/pages/DevCompanyPage";
+import ClientCompanyPage from "@/features/company/pages/ClientCompanyPage";
 import DevCompanyFormPage from "@/features/company/pages/DevCompanyFormPage";
+import ClientCompanyFormPage from "@/features/company/pages/ClientCompanyFormPage";
 import MainLayout from "@/layouts/MainLayout";
 import LoginPage from "@/features/auth/pages/LoginPage";
 import MemberPage from "@/features/member/pages/MemberPage";
@@ -55,6 +57,9 @@ export default function MainRoutes() {
 
         <Route path="/dev-companies" element={<DevCompanyPage />} />
         <Route path="/dev-companies/new" element={<DevCompanyFormPage />} />
+
+        <Route path="/client-companies" element={<ClientCompanyPage />} />
+        <Route path="/client-companies/new" element={<ClientCompanyFormPage />} />
       </Route>
 
       <Route
