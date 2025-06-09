@@ -8,7 +8,7 @@ import useProjectSections from "../hooks/useProjectSections";
 import TextInputDialog from "@/components/common/textInputDialog/TextInputDialog";
 import { createProjectStages } from "@/features/project/projectStepSlice";
 
-export default function ProjectManagement({ initialParticipants = [] }) {
+export default function ProjectManagement() {
   const dispatch = useDispatch();
   const { id: projectId } = useParams();
   const userRole = useSelector((state) => state.auth.user.role);

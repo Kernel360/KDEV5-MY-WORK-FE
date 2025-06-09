@@ -75,6 +75,24 @@ export const deleteProject = createAsyncThunk(
   }
 );
 
+
+/**
+ * 프로젝트 멤버 목록 조회
+ * @param {{ companyId: string; projectId: string }} params
+ */
+export const fetchProjectMembers = createAsyncThunk(
+  "project/fetchProjectMembers",
+  async ({ companyId, projectId }, thunkAPI) => {
+    try {
+      const response = await projectAPI.getProjectMembers({ companyId, projectId });
+      return response.data.data.members; // WebResponse 구조에 맞춰 adjust
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.response?.data || "프로젝트 멤버 조회 실패");
+    }
+  }
+);
+
+
 const projectSlice = createSlice({
   name: "project",
   initialState: {
@@ -83,10 +101,17 @@ const projectSlice = createSlice({
     current: null,
     loading: false,
     error: null,
+
+    members: [],
+    membersLoading: false,
+    membersError: null,
   },
   reducers: {
     clearCurrentProject(state) {
       state.current = null;
+
+      state.members = [];
+      state.membersError = null;
     },
   },
   extraReducers: (builder) => {
@@ -163,6 +188,20 @@ const projectSlice = createSlice({
       .addCase(deleteProject.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+         // --- 프로젝트 멤버 조회 처리 ---
+      .addCase(fetchProjectMembers.pending, (state) => {
+        state.membersLoading = true;
+        state.membersError = null;
+      })
+      .addCase(fetchProjectMembers.fulfilled, (state, action) => {
+        state.membersLoading = false;
+        state.members = action.payload;
+      })
+      .addCase(fetchProjectMembers.rejected, (state, action) => {
+        state.membersLoading = false;
+        state.membersError = action.payload;
       });
   },
 });

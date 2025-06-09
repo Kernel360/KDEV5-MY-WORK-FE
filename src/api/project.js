@@ -47,3 +47,13 @@ export const updateProject = (id, data) =>
  */
 export const deleteProject = (data) =>
   api.delete("/api/projects", { data });
+
+/**
+ * 프로젝트 멤버 목록 조회
+ * - companyId, projectId를 query params로 전달합니다.
+ * @param {{ companyId: string; projectId: string }} params
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<ProjectMemberListWebResponse>
+ */
+export function getProjectMembers(params) {
+  return api.get("/api/projects/members", { params });
+}

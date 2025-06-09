@@ -32,6 +32,7 @@ export const fetchPosts = createAsyncThunk(
         projectStepId,
         deleted
       );
+      console.log('111', response)
       return {
         posts: response.data.data.posts,
         totalCount: response.data.data.totalCount,
@@ -144,9 +145,12 @@ const postSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchPosts.fulfilled, (state, action) => {
+
         state.loading = false;
         state.list = action.payload.posts;
         state.totalCount = action.payload.totalCount;
+                console.log('state', state)
+        console.log('action', action)
       })
       .addCase(fetchPosts.rejected, (state, action) => {
         state.loading = false;
