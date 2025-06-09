@@ -31,10 +31,7 @@ export default function MainRoutes() {
         }
       />
 
-      {/* 로그인 페이지 */}
       <Route path="/login" element={<LoginPage />} />
-
-      {/* 인증이 필요한 경로들 */}
       <Route
         element={
           isAuthenticated ? <MainLayout /> : <Navigate to="/login" replace />
@@ -42,9 +39,7 @@ export default function MainRoutes() {
       >
         <Route path="/projects" element={<ProjectPage />} />
 
-        {/* 프로젝트 상세 하위 라우트 */}
         <Route path="/projects/:id">
-          {/* 기본 인덱스는 tasks 탭으로 */}
           <Route index element={<Navigate to="tasks" replace />} />
           <Route path="management" element={<ProjectDetailPage />} />
           <Route path="tasks" element={<ProjectDetailPage />} />
@@ -62,7 +57,6 @@ export default function MainRoutes() {
         <Route path="/dev-companies/new" element={<DevCompanyFormPage />} />
       </Route>
 
-      {/* 그 외 모든 경로: 로그인 여부에 따라 리다이렉트 */}
       <Route
         path="*"
         element={
