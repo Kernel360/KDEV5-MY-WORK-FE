@@ -35,7 +35,7 @@ export default function ProjectPage() {
             </CustomButton>
           }
         />
-        <Box sx={{ flex: 1, overflow: "hidden", mb: 3 }}>
+        <Box sx={{ flex: 1, overflow: "hidden", mb: 0.3 }}>
           <ProjectTable />
         </Box>
       </Box>
