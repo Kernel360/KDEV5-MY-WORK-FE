@@ -3,8 +3,16 @@ module.exports = {
     browser: true,
     es2021: true,
   },
-  extends: ["eslint:recommended", "plugin:react/recommended", "prettier"],
-  plugins: ["react"],
+  extends: [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:import/recommended",
+    "prettier"
+  ],
+  plugins: [
+    "react",
+        "import"    
+  ],
   parserOptions: {
     ecmaVersion: "latest",
     sourceType: "module",
@@ -16,5 +24,6 @@ module.exports = {
   },
   rules: {
     "react/prop-types": "off",
+     "import/no-unresolved": "error", 
   },
 };
