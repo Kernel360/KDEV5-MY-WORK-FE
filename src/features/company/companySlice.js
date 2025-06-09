@@ -152,6 +152,19 @@ const companySlice = createSlice({
       .addCase(createCompanyId.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      // ===== 회사 상세 조회 =====
+      .addCase(fetchCompanyById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchCompanyById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.current = action.payload.data;
+      })
+      .addCase(fetchCompanyById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
