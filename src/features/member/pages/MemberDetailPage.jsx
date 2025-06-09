@@ -1,11 +1,9 @@
 import React, { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { Box, Stack, CircularProgress, Typography, Paper, Grid, Divider } from "@mui/material";
+import { Box, Stack, CircularProgress, Typography, Paper, Grid, Divider, Chip } from "@mui/material";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
 import CustomButton from "@/components/common/customButton/CustomButton";
-import SummaryCard from "@/components/common/summaryCard/SummaryCard";
 import CreateRoundedIcon from "@mui/icons-material/CreateRounded";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import { getMemberById, deleteMember } from "@/api/member";
@@ -96,7 +94,6 @@ export default function MemberDetailPage() {
         <Box sx={{ flexShrink: 0, width: "100%" }}>
           <PageHeader
             title={member.name}
-           
             action={
               <Stack direction="row" spacing={1}>
                 <CustomButton
@@ -118,6 +115,44 @@ export default function MemberDetailPage() {
           />
         </Box>
 
+        {/* Status and Role Info Section */}
+        <Box sx={{ px: 3, mt: 3, mb: 1 }}>
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 2,
+              borderRadius: 2,
+              bgcolor: 'background.paper',
+              borderColor: 'divider',
+            }}
+          >
+            <Stack direction="row" spacing={3} alignItems="center">
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Typography variant="body1" color="text.secondary" fontWeight={600}>
+                  상태:
+                </Typography>
+                <Chip
+                  label={member.deleted ? "비활성" : "활성"}
+                  color={member.deleted ? "error" : "success"}
+                  size="medium"
+                  variant="outlined"
+                />
+              </Stack>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Typography variant="body1" color="text.secondary" fontWeight={600}>
+                  권한:
+                </Typography>
+                <Chip
+                  label={getRoleLabel(member.role)}
+                  color="default"
+                  size="medium"
+                  variant="outlined"
+                />
+              </Stack>
+            </Stack>
+          </Paper>
+        </Box>
+
         <ConfirmDialog
           open={confirmOpen}
           title="멤버를 삭제하시겠습니까?"
@@ -129,95 +164,148 @@ export default function MemberDetailPage() {
           onConfirm={handleDelete}
         />
 
-        {/* 2. 상세 정보 */}
-        <Box sx={{ p: 3 }}>
+        {/* 2. Main Content - Single Paper */}
+        <Box sx={{ px: 3, pt: 0, pb: 3 }}>
           <Paper sx={{ p: 3, borderRadius: 2 }}>
-            <Stack spacing={3}>
-              <Typography variant="h6" fontWeight={600}>
-                멤버 상세 정보
-              </Typography>
-              <Divider />
-
-              {/* 기본 정보 */}
-              <Box mb={3}>
-                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                  기본 정보
+            <Grid container spacing={3}>
+              {/* 멤버 정보 섹션 */}
+              <Grid item xs={12} md={12}>
+                <Typography variant="h6" fontWeight={600} gutterBottom>
+                  멤버 정보
                 </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} md={6}>
-                    <Typography variant="body2" color="text.secondary">
-                      이름
-                    </Typography>
-                    <Typography variant="body1">{member.name}</Typography>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <Typography variant="body2" color="text.secondary">
-                      이메일
-                    </Typography>
-                    <Typography variant="body1">{member.email}</Typography>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <Typography variant="body2" color="text.secondary">
-                      연락처
-                    </Typography>
-                    <Typography variant="body1">{member.phoneNumber}</Typography>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <Typography variant="body2" color="text.secondary">
-                      상태
-                    </Typography>
-                    <Typography 
-                      variant="body1" 
-                      color={member.deleted ? "error" : "success"}
-                    >
-                      {member.deleted ? "비활성" : "활성"}
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </Box>
+                <Divider sx={{ mb: 3 }} />
 
-              {/* 직무 정보 */}
-              <Box mb={3}>
-                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                  직무 정보
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Typography variant="body2" color="text.secondary">
-                      부서
-                    </Typography>
-                    <Typography variant="body1">{member.department}</Typography>
+                {/* 기본 정보 */}
+                <Box mb={3}>
+                  <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                    기본 정보
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sx={{ mb: 1.5 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        이름
+                      </Typography>
+                      <Typography variant="body1">{member.name}</Typography>
+                    </Grid>
+                    <Grid item xs={12} sx={{ mb: 1.5 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        이메일
+                      </Typography>
+                      <Typography variant="body1">{member.email}</Typography>
+                    </Grid>
+                    <Grid item xs={12} sx={{ mb: 1.5 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        연락처
+                      </Typography>
+                      <Typography variant="body1">{member.phoneNumber}</Typography>
+                    </Grid>
                   </Grid>
-                  <Grid item xs={12}>
-                    <Typography variant="body2" color="text.secondary">
-                      직책
-                    </Typography>
-                    <Typography variant="body1">{member.position}</Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography variant="body2" color="text.secondary">
-                      권한
-                    </Typography>
-                    <Typography variant="body1">{getRoleLabel(member.role)}</Typography>
-                  </Grid>
-                </Grid>
-              </Box>
+                </Box>
 
-              {/* 회사 정보 */}
-              <Box>
-                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                {/* 직무 정보 */}
+                <Box>
+                  <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                    직무 정보
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sx={{ mb: 1.5 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        부서
+                      </Typography>
+                      <Typography variant="body1">{member.department}</Typography>
+                    </Grid>
+                    <Grid item xs={12} sx={{ mb: 1.5 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        직책
+                      </Typography>
+                      <Typography variant="body1">{member.position}</Typography>
+                    </Grid>
+                  </Grid>
+                </Box>
+              </Grid>
+
+              {/* 회사 정보 섹션 */}
+              <Grid item xs={12} md={12}>
+                <Typography variant="h6" fontWeight={600} gutterBottom>
                   회사 정보
                 </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Typography variant="body2" color="text.secondary">
-                      회사명
-                    </Typography>
-                    <Typography variant="body1">{member.companyName}</Typography>
+                <Divider sx={{ mb: 3 }} />
+
+                {/* 회사 기본 정보 */}
+                <Box mb={3}>
+                  <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                    기본 정보
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sx={{ mb: 1.5 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        회사명
+                      </Typography>
+                      <Typography variant="body1">{member.companyName}</Typography>
+                    </Grid>
+                    <Grid item xs={12} sx={{ mb: 1.5 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        회사 연락처
+                      </Typography>
+                      <Typography variant="body1">{member.contactPhoneNumber}</Typography>
+                    </Grid>
                   </Grid>
+                </Box>
+              </Grid>
+
+              {/* 참여 프로젝트 섹션 */}
+              {member.projects && member.projects.length > 0 && (
+                <Grid item xs={12} md={12}>
+                  <Typography variant="h6" fontWeight={600} gutterBottom>
+                    참여 프로젝트
+                  </Typography>
+                  <Divider sx={{ mb: 3 }} />
+                  <Paper 
+                    sx={{ 
+                      maxHeight: 200,
+                      overflow: 'auto',
+                      '&::-webkit-scrollbar': {
+                        width: '8px',
+                      },
+                      '&::-webkit-scrollbar-track': {
+                        background: '#f1f1f1',
+                        borderRadius: '4px',
+                      },
+                      '&::-webkit-scrollbar-thumb': {
+                        background: '#888',
+                        borderRadius: '4px',
+                        '&:hover': {
+                          background: '#555',
+                        },
+                      },
+                    }}
+                  >
+                    <Box sx={{ p: 2 }}>
+                      {member.projects.map((project, index) => (
+                        <Box 
+                          key={project.projectId}
+                          sx={{
+                            py: 1.5,
+                            px: 2,
+                            '&:not(:last-child)': {
+                              borderBottom: '1px solid',
+                              borderColor: 'divider',
+                            },
+                            '&:hover': {
+                              bgcolor: 'action.hover',
+                            },
+                          }}
+                        >
+                          <Typography variant="body1" fontWeight={500}>
+                            {project.projectName}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                  </Paper>
                 </Grid>
-              </Box>
-            </Stack>
+              )}
+            </Grid>
           </Paper>
         </Box>
       </Box>
