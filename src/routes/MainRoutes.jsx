@@ -8,11 +8,8 @@ import DevCompanyPage from "@/features/company/pages/DevCompanyPage";
 import DevCompanyFormPage from "@/features/company/pages/DevCompanyFormPage";
 import MainLayout from "@/layouts/MainLayout";
 import LoginPage from "@/features/auth/pages/LoginPage";
-import { useSelector } from "react-redux";
 import MemberPage from "@/features/member/pages/MemberPage";
 import MemberFormPage from "@/features/member/pages/MemberFormPage";
-import LoginPage from "@/features/auth/pages/LoginPage";
-import MainLayout from "@/layouts/MainLayout";
 import MemberDetailPage from "@/features/member/pages/MemberDetailPage";
 
 export default function MainRoutes() {
