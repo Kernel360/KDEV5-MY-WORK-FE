@@ -13,8 +13,7 @@ import MemberFormPage from "@/features/member/pages/MemberFormPage";
 import MemberDetailPage from "@/features/member/pages/MemberDetailPage";
 
 export default function MainRoutes() {
-  // const isAuthenticated = useSelector((state) => state.auth.isAuthenticated) || false;
-  const isAuthenticated = null;
+  const isAuthenticated = !!localStorage.getItem("accessToken");
 
   return (
     <Routes>
@@ -31,28 +30,43 @@ export default function MainRoutes() {
 
       <Route path="/login" element={<LoginPage />} />
 
-      <Route element={<MainLayout />}>
+      <Route
+        element={
+          isAuthenticated ? <MainLayout /> : <Navigate to="/login" replace />
+        }
+      >
         <Route path="/projects" element={<ProjectPage />} />
 
         {/* 프로젝트 상세 하위 라우트 */}
         <Route path="/projects/:id">
-          {/* 기본 진입시 management로 리다이렉트 */}
+          {/* 기본 진입시 tasks로 리다이렉트 */}
           <Route index element={<Navigate to="tasks" replace />} />
           <Route path="management" element={<ProjectDetailPage />} />
-          <Route path="tasks"      element={<ProjectDetailPage />} />
-          <Route path="progress"   element={<ProjectDetailPage />} />
+          <Route path="tasks" element={<ProjectDetailPage />} />
+          <Route path="progress" element={<ProjectDetailPage />} />
         </Route>
 
-        <Route path="/projects/new"         element={<ProjectFormPage />} />
-        <Route path="/projects/:id/edit"    element={<ProjectFormPage />} />
+        <Route path="/projects/new" element={<ProjectFormPage />} />
+        <Route path="/projects/:id/edit" element={<ProjectFormPage />} />
+
+        <Route path="/members" element={<MemberPage />} />
+        <Route path="/members/new" element={<MemberFormPage />} />
         <Route path="/members/:id" element={<MemberDetailPage />} />
-        <Route path="/members/new" element={<MemberFormPage />} />
-        <Route path="/members"      element={<MemberPage />} />
-        <Route path="/members/new" element={<MemberFormPage />} />
 
         <Route path="/dev-companies" element={<DevCompanyPage />} />
         <Route path="/dev-companies/new" element={<DevCompanyFormPage />} />
       </Route>
+
+      <Route
+        path="*"
+        element={
+          isAuthenticated ? (
+            <Navigate to="/projects" replace />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
     </Routes>
   );
 }
