@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 const SEARCH_TYPES = [
   { value: "name", label: "이름" },
   { value: "email", label: "이메일" },
+  { value: "company", label: "회사" },
   { value: "position", label: "직책" },
   { value: "department", label: "부서" },
   { value: "phoneNumber", label: "연락처" },
@@ -15,19 +16,10 @@ const SEARCH_TYPES = [
 const columns = [
   { key: "name", label: "이름", type: "avatar", searchable: true },
   { key: "email", label: "이메일", type: "text", searchable: true },
+  { key: "companyName", label: "회사", type: "text", searchable: true },
   { key: "position", label: "직책", type: "text", searchable: true },
   { key: "department", label: "부서", type: "text", searchable: true },
   { key: "phoneNumber", label: "연락처", type: "text", searchable: true },
-  {
-    key: "deleted",
-    label: "상태",
-    type: "status",
-    filter: true,
-    statusMap: {
-      true: { color: "error", label: "비활성" },
-      false: { color: "success", label: "활성" },
-    },
-  },
   { key: "createdAt", label: "등록일", type: "date" },
 ];
 

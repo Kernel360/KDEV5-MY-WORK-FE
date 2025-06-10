@@ -68,14 +68,32 @@ export default function PostTable() {
       .catch((e) => console.error(e));
   };
 
-  // 테이블 컬럼
-  const columns = [
-    { key: "title", label: "글제목", width: "35%", sortable: true },
-    { key: "stepName", label: "단계", width: "15%", sortable: true },
-    { key: "status", label: "상태", width: "15%", sortable: true },
-    { key: "authorName", label: "작성자", width: "20%", sortable: true },
-    { key: "createdAt", label: "작성일", width: "15%", sortable: true },
-  ];
+const columns = [
+  { key: "title", label: "글제목", width: "35%", sortable: true },
+  { key: "stepName", label: "단계", width: "15%", sortable: true },
+  {
+    key: "status",
+    label: "상태",
+    width: "15%",
+    sortable: true,
+    type: "status",
+    statusMap: {
+      New:   { label: "신규",   color: "primary" },
+      Done:  { label: "완료",   color: "success" },
+      Pause: { label: "보류",   color: "warning" },
+      Fail:  { label: "실패",   color: "error" },
+    },
+  },
+  { key: "authorName", label: "작성자", width: "20%", sortable: true },
+  {
+    key: "createdAt",
+    label: "작성일",
+    width: "15%",
+    sortable: true,
+    type: "date",
+  },
+];
+
 
   return (
     <Box sx={{ width: "100%", mt: 2 }}>
