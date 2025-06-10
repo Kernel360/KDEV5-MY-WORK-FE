@@ -2,7 +2,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { Box } from "@mui/material";
 import CustomTable from "@/components/common/customTable/CustomTable";
 import { fetchProjects } from "@/features/project/projectSlice";
 
@@ -13,16 +12,17 @@ const columns = [
     key: "step",
     label: "상태",
     type: "status",
-    statusMap: {
-      deleted: { color: "warning", label: "비활성됨" },
-      디자인: { color: "success", label: "디자인" },
-      개발: { color: "error", label: "개발" },
+   statusMap: {
+      NOT_STARTED: { color: "default",    label: "계획" },
+      IN_PROGRESS: { color: "info", label: "진행" },
+      PAUSED:      { color: "warning", label: "중단" },
+      COMPLETED:   { color: "success", label: "완료" },
     },
   },
-  { key: "progress", label: "진행도", type: "progress" },
-  { key: "endAt", label: "마감일", type: "date" },
-  { key: "manager", label: "담당자", type: "avatar", searchable: true },
-  { key: "deleted", label: "활성화 여부", type: "boolean" },
+  { key: "startAt", label: "시작일", type: "date" },
+  { key: "endAt", label: "종료일", type: "date" },
+   { field: 'clientCompanyName', headerName: '고객사' },
+  { field: 'devCompanyName', headerName: '개발사' },
 ];
 
 export default function ProjectTable() {
