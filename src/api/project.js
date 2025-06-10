@@ -36,8 +36,8 @@ export const createProject = (data) =>
  * @param {{ name?: string; description?: string;  }} data
  * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<ProjectUpdateWebResponse>
  */
-export const updateProject = (id, data) =>
-  api.put(`/api/projects/${id}`, data);
+export const updateProject = (projectId, webRequest) =>
+  api.put(`/api/projects/${projectId}`, webRequest);
 
 /**
  * 프로젝트 삭제
