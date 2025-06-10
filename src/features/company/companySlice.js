@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import * as companyAPI from "@/api/company";
-import { getCompanyListOnlyIdName } from "@/api/company";
 
 export const fetchCompanies = createAsyncThunk(
   "company/fetchCompanies",
@@ -83,13 +82,12 @@ export const deleteCompany = createAsyncThunk(
   }
 );
 
-// 회사 ID/이름만 가져오는 thunk
-export const fetchCompanyListOnlyIdName = createAsyncThunk(
-  "company/fetchCompanyListOnlyIdName",
-  async (_, thunkAPI) => {
+export const fetchCompanyNamesByType = createAsyncThunk(
+  "company/fetchCompanyNamesByType",
+  async (companyType, thunkAPI) => {
     try {
-      const response = await getCompanyListOnlyIdName();
-      return response.data.data; // { companies: [...] }
+      const response = await companyAPI.getCompanyNamesByType(companyType);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data || "Error");
     }
@@ -103,6 +101,7 @@ const companySlice = createSlice({
     current: null,
     error: null,
     companyListOnlyIdName: [], // 새로 추가
+      loading: false,
   },
   reducers: {
     clearCurrentCompany(state) {
@@ -125,31 +124,29 @@ const companySlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // 회사 ID/이름만 가져오는 thunk
-      .addCase(fetchCompanyListOnlyIdName.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchCompanyListOnlyIdName.fulfilled, (state, action) => {
-        state.companyListOnlyIdName = action.payload.companies;
-        state.loading = false;
-      })
-      .addCase(fetchCompanyListOnlyIdName.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
       // ===== 회사 ID 생성 =====
       .addCase(createCompanyId.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(createCompanyId.fulfilled, (state, action) => {
-        console.log("state: ", state);
-        console.log("action: ", action);
         state.loading = false;
         state.current = action.payload;
       })
       .addCase(createCompanyId.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+       .addCase(fetchCompanyNamesByType.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchCompanyNamesByType.fulfilled, (state, action) => {
+        state.loading = false;
+        // 백엔드 응답 구조에 맞춰 data.companyNames 또는 data.companyNameWebResponses 사용
+        state.companyListOnlyIdName = action.payload.data.companyNames;
+      })
+      .addCase(fetchCompanyNamesByType.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
