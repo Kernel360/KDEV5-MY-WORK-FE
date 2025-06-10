@@ -178,7 +178,7 @@ const companySlice = createSlice({
       })
       .addCase(fetchCompanyNamesByType.fulfilled, (state, action) => {
         state.loading = false;
-        const companyType = action.meta.arg; // "DEV" or "CLIENT"
+        const companyType = action.meta.arg;
         state.companyByType[companyType] = action.payload.data.companies.map(c => ({
           id: c.companyId,
           name: c.companyName,
