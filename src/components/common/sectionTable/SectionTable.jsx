@@ -1,4 +1,3 @@
-// src/components/common/sectionTable/SectionTable.jsx
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   Table,
@@ -12,7 +11,15 @@ import {
   TableSortLabel,
   Pagination,
   useTheme,
+  Checkbox,
+  Avatar,
+  Typography,
+  Stack,
+  Link,
+  Button,
+  LinearProgress, Chip
 } from "@mui/material";
+import dayjs from "dayjs";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CustomButton from "@/components/common/customButton/CustomButton";
@@ -34,7 +41,6 @@ export default function SectionTable({
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
 
-  // 스크롤 가능 여부 업데이트
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -60,7 +66,6 @@ export default function SectionTable({
     if (el) el.scrollBy({ left: el.clientWidth * 0.8, behavior: "smooth" });
   };
 
-  // 정렬
   const handleSort = (key) => {
     setSortConfig((prev) => ({
       key,
@@ -68,7 +73,6 @@ export default function SectionTable({
     }));
   };
 
-  // 정렬 적용
   const sortedRows = useMemo(() => {
     if (!sortConfig.key) return rows;
     return [...rows].sort((a, b) => {
@@ -86,26 +90,19 @@ export default function SectionTable({
     });
   }, [rows, sortConfig]);
 
-  // 필터 적용
   const filteredRows = useMemo(() => {
     if (!selectedStep || selectedStep === "전체") return sortedRows;
     return sortedRows.filter((row) => row.stepName === selectedStep);
   }, [sortedRows, selectedStep]);
 
-  // 페이징 설정
   const pageSize = pagination?.pageSize || 10;
   const pageCount = pagination ? Math.ceil(pagination.total / pageSize) : 0;
 
   return (
     <Box sx={sx}>
-      {/* 단계 탭 */}
       {steps.length > 0 && onStepChange && (
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-          <IconButton
-            size="small"
-            onClick={handlePrev}
-            disabled={!canScrollPrev}
-          >
+          <IconButton size="small" onClick={handlePrev} disabled={!canScrollPrev}>
             <ChevronLeftIcon fontSize="small" />
           </IconButton>
           <Box
@@ -122,9 +119,7 @@ export default function SectionTable({
           >
             <CustomButton
               key="전체"
-              kind={
-                !selectedStep || selectedStep === "전체" ? "primary" : "ghost"
-              }
+              kind={!selectedStep || selectedStep === "전체" ? "primary" : "ghost"}
               size="small"
               onClick={() => onStepChange("전체")}
             >
@@ -141,34 +136,21 @@ export default function SectionTable({
               </CustomButton>
             ))}
           </Box>
-          <IconButton
-            size="small"
-            onClick={handleNext}
-            disabled={!canScrollNext}
-          >
+          <IconButton size="small" onClick={handleNext} disabled={!canScrollNext}>
             <ChevronRightIcon fontSize="small" />
           </IconButton>
         </Box>
       )}
 
-      {/* 테이블 */}
-      <TableContainer
-        sx={{ border: 1, borderColor: "grey.300", borderRadius: 2 }}
-      >
+      <TableContainer sx={{ border: 1, borderColor: "grey.300", borderRadius: 2 }}>
         <Table size="small">
           <TableHead>
             <TableRow sx={{ backgroundColor: "grey.100" }}>
               {columns.map((col) => (
                 <TableCell
                   key={col.key}
-                  sx={{
-                    fontWeight: 600,
-                    width: col.width,
-                    whiteSpace: "nowrap",
-                  }}
-                  sortDirection={
-                    sortConfig.key === col.key ? sortConfig.direction : false
-                  }
+                  sx={{ fontWeight: 600, width: col.width, whiteSpace: "nowrap" }}
+                  sortDirection={sortConfig.key === col.key ? sortConfig.direction : false}
                 >
                   {col.sortable ? (
                     <TableSortLabel
@@ -194,13 +176,10 @@ export default function SectionTable({
                 sx={{ cursor: onRowClick ? "pointer" : "default" }}
               >
                 {columns.map((col) => (
-                  <TableCell
-                    key={`${row[rowKey] ?? idx}-${col.key}`}
-                    sx={{ whiteSpace: "nowrap" }}
-                  >
+                  <TableCell key={`${row[rowKey] ?? idx}-${col.key}`} sx={{ whiteSpace: "nowrap" }}>
                     {col.renderCell
                       ? col.renderCell(row)
-                      : String(row[col.key] ?? "")}
+                      : renderCell(col, row[col.key], row, theme)}
                   </TableCell>
                 ))}
               </TableRow>
@@ -209,7 +188,6 @@ export default function SectionTable({
         </Table>
       </TableContainer>
 
-      {/* 페이지네이션 */}
       {pagination && (
         <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
           <Pagination
@@ -222,4 +200,63 @@ export default function SectionTable({
       )}
     </Box>
   );
+}
+
+// Helper to render cell based on type
+function renderCell(col, value, row, theme) {
+  switch (col.type) {
+    case "checkbox":
+      return <Checkbox checked={!!value} disabled size="small" />;
+    case "avatar":
+      return value?.src && value?.name ? (
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Avatar src={value.src} sx={{ width: 28, height: 28 }} />
+          <Typography variant="body2" noWrap>
+            {value.name}
+          </Typography>
+        </Stack>
+      ) : (
+        <Typography variant="body2" color="text.disabled">-</Typography>
+      );
+    case "tag":
+      return <Chip label={value} size="small" variant="outlined" />;
+    case "status": {
+      const info = col.statusMap?.[value] || { label: value, color: "neutral" };
+      const pal = theme.palette.status?.[info.color] || theme.palette.status.neutral;
+      return (
+        <Chip label={info.label} size="small" sx={{ bgcolor: pal.bg, color: pal.main, fontSize: 13, fontWeight: 500 }} />
+      );
+    }
+    case "link":
+      return (
+        <Link href={value} target="_blank" underline="hover" onClick={(e) => e.stopPropagation()} sx={{ fontSize: 13 }}>
+          {value}
+        </Link>
+      );
+    case "date":
+      return dayjs(value).isValid() ? dayjs(value).format("YYYY.MM.DD") : "-";
+    case "number":
+      return <Typography variant="body2">{value}</Typography>;
+    case "boolean":
+      return value ? "Yes" : "No";
+    case "action":
+      return col.actions?.map((act, i) => (
+        <Button key={i} size="small" variant={act.variant || "outlined"} onClick={(e) => { e.stopPropagation(); act.onClick(row); }}>
+          {act.label}
+        </Button>
+      ));
+    case "progress":
+      return (
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Box flexGrow={1}>
+            <LinearProgress variant="determinate" value={value ?? 0} sx={{ height: 8, borderRadius: 1, "& .MuiLinearProgress-bar": { bgcolor: theme.palette.primary.main } }} />
+          </Box>
+          <Typography variant="caption">{value ?? 0}%</Typography>
+        </Stack>
+      );
+    case "custom":
+      return col.render ? col.render(value, row) : value;
+    default:
+      return String(value ?? "");
+  }
 }
