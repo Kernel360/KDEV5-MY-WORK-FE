@@ -21,6 +21,7 @@ import TaskIcon from "@mui/icons-material/AssignmentTurnedIn";
 import DownloadIcon from "@mui/icons-material/Download";
 import ProjectManagement from "../management/pages/ProjectManagement";
 import dayjs from "dayjs";
+import ProgressOverview from "../checklist/pages/ProgressOverview"
 
 export default function ProjectDetailPage() {
    const { id } = useParams();
@@ -160,7 +161,7 @@ export default function ProjectDetailPage() {
             ) : tab === 1 ? (
               <PostTable />
             ) : (
-              <Typography>진척도 관리 콘텐츠</Typography>
+             <ProgressOverview />
             )
           }
         />
