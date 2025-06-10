@@ -7,12 +7,14 @@ import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
 import MemberForm from '@/features/member/components/MemberForm';
 import { createMember } from "@/api/member";
-import { fetchCompanyListOnlyIdName } from "@/features/company/companySlice";
+import { fetchCompanyNamesByType } from "@/features/company/companySlice";
 
 const MemberFormPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { companyListOnlyIdName: companyList, loading } = useSelector((state) => state.company);
+
+  const { companyByType = {}, loading } = useSelector(state => state.company);
+
 
   const [form, setForm] = useState({
     name: "",
@@ -25,10 +27,16 @@ const MemberFormPage = () => {
     companyId: "",
   });
 
-  // 회사 목록 로드
+ // DEV / CLIENT 둘 다 불러오기
   useEffect(() => {
-    dispatch(fetchCompanyListOnlyIdName());
+    dispatch(fetchCompanyNamesByType("DEV"));
+    dispatch(fetchCompanyNamesByType("CLIENT"));
   }, [dispatch]);
+
+  // 두 배열 합치기
+ const devList    = companyByType.DEV    || [];
+ const clientList = companyByType.CLIENT || [];
+  const combinedCompanies = [...devList, ...clientList];
 
   // 각 필드 변경 핸들러
   const handleChange = (key) => (e) => {
@@ -91,7 +99,7 @@ const MemberFormPage = () => {
       <MemberForm
         form={form}
         handleChange={handleChange}
-        companies={companyList || []}
+        companies={combinedCompanies || []}
         loading={loading}
       />
     </PageWrapper>

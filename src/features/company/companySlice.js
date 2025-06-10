@@ -100,7 +100,7 @@ const companySlice = createSlice({
     list: [],
     current: null,
     error: null,
-    companyListOnlyIdName: [], // 새로 추가
+   companyByType: {},    
       loading: false,
   },
   reducers: {
@@ -137,19 +137,25 @@ const companySlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-       .addCase(fetchCompanyNamesByType.pending, (state) => {
+            .addCase(fetchCompanyNamesByType.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchCompanyNamesByType.fulfilled, (state, action) => {
         state.loading = false;
-        // 백엔드 응답 구조에 맞춰 data.companyNames 또는 data.companyNameWebResponses 사용
-        state.companyListOnlyIdName = action.payload.data.companyNames;
+        const companyType = action.meta.arg; // "DEV" 또는 "CLIENT"
+        const raw = action.payload.data.companies; 
+        // id/name 형태로 매핑하고, 해당 타입 키에 저장
+        state.companyByType[companyType] = raw.map(c => ({
+          id: c.companyId,
+          name: c.companyName,
+        }))
       })
       .addCase(fetchCompanyNamesByType.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
+
       // ===== 회사 상세 조회 =====
       .addCase(fetchCompanyById.pending, (state) => {
         state.loading = true;

@@ -90,11 +90,8 @@ export default function MemberForm({
                   sx={{ height: 56 }}
                 >
                   {companies.map((company) => (
-                    <MenuItem
-                      key={company.companyId}
-                      value={company.companyId}
-                    >
-                      {company.companyName}
+                    <MenuItem key={company.id} value={company.id}>
+                      {company.name}
                     </MenuItem>
                   ))}
                 </Select>
@@ -201,4 +198,4 @@ export default function MemberForm({
       </Paper>
     </Box>
   );
-} 
+}
