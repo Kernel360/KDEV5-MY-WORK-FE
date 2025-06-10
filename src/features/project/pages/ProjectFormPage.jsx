@@ -7,9 +7,10 @@ import {
   createProject,
   updateProject,
 } from "@/features/project/projectSlice";
-import { fetchCompanies } from "@/features/company/companySlice";
-import { fetchMembers } from "@/features/member/memberSlice";
-import { Box, Button, Stack } from "@mui/material";
+import {
+  fetchCompanyNamesByType,
+} from "@/features/company/companySlice";
+import { Box, Button, Stack, CircularProgress } from "@mui/material";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
 import ProjectForm from "../components/ProjectForm";
@@ -24,17 +25,23 @@ export default function ProjectFormPage() {
   const { current, loading: projectLoading } = useSelector(
     (state) => state.project
   );
-  const companies = useSelector((state) => state.company.data);
-  const users = useSelector((state) => state.member.data);
+  const { companyByType = {}, loading: companyLoading } = useSelector(
+    (state) => state.company
+  );
 
-  // 로컬 폼 상태
+  // DEV/CLIENT 타입별 리스트 분리
+  const devList = companyByType.DEV || [];
+  const clientList = companyByType.CLIENT || [];
+
+  // 로컬 폼 상태 (status로 통일)
   const [form, setForm] = useState({
-    title: "",
-    status: "기획",
-    startDate: "",
-    endDate: "",
-    assigneeId: "",
-    developerId: "",
+    name: "",
+    detail: "",
+    status: "NOT_STARTED",
+    startAt: "",
+    endAt: "",
+    devCompanyId: "",
+    clientCompanyId: "",
   });
 
   // 편집 모드일 때 기존 프로젝트 데이터 로드
@@ -48,49 +55,68 @@ export default function ProjectFormPage() {
   useEffect(() => {
     if (isEdit && current) {
       setForm({
-        title: current.title || "",
-        status: current.status || "기획",
-        startDate: current.startDate?.split("T")[0] || "",
-        endDate: current.endDate?.split("T")[0] || "",
-        assigneeId: current.assigneeId || "",
-        developerId: current.developerId || "",
+        name: current.name || "",
+        detail: current.detail || "",
+        status: current.step || "NOT_STARTED",
+        startAt: current.startAt || "",
+        endAt: current.endAt || "",
+        devCompanyId: current.devCompanyId || "",
+        clientCompanyId: current.clientCompanyId || "",
       });
     }
   }, [isEdit, current]);
 
-  // 처음 마운트 시 담당자·개발사 목록 로드
+  // 처음 마운트 시 개발사/고객사 목록 로드
   useEffect(() => {
-    dispatch(fetchMembers());
-    dispatch(fetchCompanies());
+    dispatch(fetchCompanyNamesByType("DEV"));
+    dispatch(fetchCompanyNamesByType("CLIENT"));
   }, [dispatch]);
 
   // 각 필드 변경 핸들러
   const handleChange = (key) => (e) => {
-    setForm((prev) => ({ ...prev, [key]: e.target.value }));
+    const value = e.target.value;
+    setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  // 제출 처리
-  const handleSubmit = async () => {
-    try {
-      if (isEdit) {
-        await dispatch(updateProject({ id, ...form })).unwrap();
-        navigate(`/projects/${id}`);
-      } else {
-        await dispatch(createProject(form)).unwrap();
-        navigate("/projects");
-      }
-    } catch (err) {
-      console.error(err);
-      // TODO: 에러 발생 시 스낵바/토스트 표시
+  // 제출 처리 (프론트에서는 status, 백엔드에 step으로 매핑)
+const handleSubmit = async () => {
+  try {
+    // 1) status → step, id·deleted 포함
+    const payload = {
+      id,                              // URL이 아니라 body에도 id 필요할 때
+      name: form.name,
+      detail: form.detail,
+      step: form.status,
+      deleted: false,                  // 수정 시 false로 고정
+      devCompanyId: form.devCompanyId,
+      clientCompanyId: form.clientCompanyId,
+      // 2) 날짜에 고정 시간 붙이기
+      ...(form.startAt && { startAt: `${form.startAt}T09:00:00` }),
+      ...(form.endAt   && {   endAt: `${form.endAt}T18:00:00` }),
+    };
+
+    if (isEdit) {
+      // PUT /api/projects/:id
+      await dispatch(updateProject(payload)).unwrap();
+      navigate(`/projects/${id}`);
+    } else {
+      // POST /api/projects
+      await dispatch(createProject(payload)).unwrap();
+      navigate("/projects");
     }
-  };
+  } catch (err) {
+    console.error(err);
+    // TODO: 에러 시 UI 처리
+  }
+};
+
 
   // 취소 시 뒤로 이동
   const handleCancel = () => {
     navigate(-1);
   };
 
-  // 헤더 우측에 들어갈 버튼들
+  // 헤더 우측 버튼
   const headerAction = (
     <Stack direction="row" spacing={2}>
       <Button variant="outlined" onClick={handleCancel}>
@@ -100,15 +126,15 @@ export default function ProjectFormPage() {
         variant="contained"
         color="primary"
         onClick={handleSubmit}
-        disabled={projectLoading || !form.title}
+        disabled={projectLoading || companyLoading || !form.name}
       >
-        {projectLoading
-          ? isEdit
-            ? "로딩 중..."
-            : "로딩 중..."
-          : isEdit
-            ? "수정 저장"
-            : "생성"}
+        {projectLoading ? (
+          isEdit ? "로딩 중..." : "로딩 중..."
+        ) : isEdit ? (
+          "수정 저장"
+        ) : (
+          "생성"
+        )}
       </Button>
     </Stack>
   );
@@ -127,8 +153,8 @@ export default function ProjectFormPage() {
         handleSubmit={handleSubmit}
         onCancel={handleCancel}
         loading={projectLoading}
-        companies={companies}
-        users={users}
+        developerCompanies={devList}
+        clientCompanies={clientList}
         isEdit={isEdit}
       />
     </PageWrapper>

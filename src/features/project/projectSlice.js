@@ -52,7 +52,7 @@ export const createProject = createAsyncThunk(
 // 수정
 export const updateProject = createAsyncThunk(
   "project/updateProject",
-  async ({ id, data }, thunkAPI) => {
+  async ({ id, ...data }, thunkAPI) => {
     try {
       const response = await projectAPI.updateProject(id, data);
       return response.data.data;
