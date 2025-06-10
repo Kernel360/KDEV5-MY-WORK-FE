@@ -49,7 +49,7 @@ export default function ProjectTable() {
   const loadCompany = useCallback(() => {
     const params = { page };
     if (searchText.trim()) params.keyword = searchText.trim();
-    params.companyType = "DEV";
+    params.companyType = "CLIENT";
     if (searchKey) params.keywordType = searchKey;
     if (filterValue) params[filterKey] = filterValue;
 
@@ -71,10 +71,7 @@ export default function ProjectTable() {
           total: totalCount,
           onPageChange: setPage,
         }}
-        onRowClick={(row) => {
-          console.log("선택된 row:", row);
-          navigate(`/dev-companies/${row.companyId}`);
-        }}
+        onRowClick={(row) => navigate(`/projects/${row.id}`)}
         search={{
           key: searchKey,
           placeholder: "검색어를 입력하세요",
