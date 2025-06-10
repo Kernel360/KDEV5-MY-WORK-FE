@@ -82,6 +82,21 @@ export const deleteCompany = createAsyncThunk(
   }
 );
 
+// 1) 타입 지정 없이 전체 목록 조회
+export const fetchAllCompanyNames = createAsyncThunk(
+  "company/fetchAllCompanyNames",
+  async (_, thunkAPI) => {
+    try {
+      // companyType 파라미터 없이 호출 → 전체
+      const response = await companyAPI.getCompanyNamesByType(null);
+      return response.data; 
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data || "Error");
+    }
+  }
+);
+
+// 2) 특정 타입별 목록 조회 (DEV, CLIENT 등)
 export const fetchCompanyNamesByType = createAsyncThunk(
   "company/fetchCompanyNamesByType",
   async (companyType, thunkAPI) => {
@@ -94,12 +109,14 @@ export const fetchCompanyNamesByType = createAsyncThunk(
   }
 );
 
+
 const companySlice = createSlice({
   name: "company",
   initialState: {
     list: [],
     current: null,
     error: null,
+    companyListOnlyIdName: [],
    companyByType: {},    
       loading: false,
   },
@@ -137,16 +154,32 @@ const companySlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-            .addCase(fetchCompanyNamesByType.pending, (state) => {
+    .addCase(fetchAllCompanyNames.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAllCompanyNames.fulfilled, (state, action) => {
+        state.loading = false;
+        // 전체 companies → {id,name} 매핑
+        state.companyListOnlyIdName = action.payload.data.companies.map(c => ({
+          id: c.companyId,
+          name: c.companyName,
+        }));
+      })
+      .addCase(fetchAllCompanyNames.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // -- 타입별 목록 --
+      .addCase(fetchCompanyNamesByType.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchCompanyNamesByType.fulfilled, (state, action) => {
         state.loading = false;
-        const companyType = action.meta.arg; // "DEV" 또는 "CLIENT"
-        const raw = action.payload.data.companies; 
-        // id/name 형태로 매핑하고, 해당 타입 키에 저장
-        state.companyByType[companyType] = raw.map(c => ({
+        const companyType = action.meta.arg; // "DEV" or "CLIENT"
+        state.companyByType[companyType] = action.payload.data.companies.map(c => ({
           id: c.companyId,
           name: c.companyName,
         }))
