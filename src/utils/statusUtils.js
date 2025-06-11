@@ -10,6 +10,3 @@ const getStatusLabel = (value) => {
   return option ? option.label : value;
 };
 
-// 사용 예
-console.log(getStatusLabel('IN_PROGRESS')); // "진행"
-console.log(getStatusLabel('UNKNOWN'));     // "UNKNOWN"
