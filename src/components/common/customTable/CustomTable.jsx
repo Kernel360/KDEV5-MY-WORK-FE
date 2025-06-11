@@ -25,6 +25,7 @@ import {
   LinearProgress,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import { useSelector } from "react-redux";
 import dayjs from "dayjs";
 
 export default function CustomTable({
@@ -35,6 +36,10 @@ export default function CustomTable({
   search = null,
   filter = null,
 }) {
+  // 대신 컴포넌트 최상단에
+ const { companyListOnlyIdName: companies = [] } = useSelector(
+   (state) => state.company
+ );
   const theme = useTheme();
 
   // 정렬 설정
@@ -128,24 +133,25 @@ export default function CustomTable({
         {/* 검색 & 필터 */}
         <Box p={2} bgcolor={theme.palette.background.default}>
           <Stack direction="row" spacing={2} alignItems="center">
-            {filter && filter.key && (
-              <FormControl size="small" sx={{ minWidth: 120 }}>
-                <InputLabel>
-                  {columns.find((c) => c.key === filter.key)?.label}
-                </InputLabel>
-                <Select
-                  value={filter.value}
-                  onChange={(e) => filter.onChange?.(e.target.value)}
-                  label={columns.find((c) => c.key === filter.key)?.label}
-                >
-                  {filter.options.map((opt) => (
-                    <MenuItem key={String(opt.value)} value={opt.value}>
-                      {opt.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
+          {filter && filter.key && (
+  <FormControl size="small" sx={{ minWidth: 120 }}>
+    <InputLabel>
+      {filter.label ?? columns.find((c) => c.key === filter.key)?.label}
+    </InputLabel>
+    <Select
+      value={filter.value}
+      onChange={(e) => filter.onChange?.(e.target.value)}
+      label={filter.label ?? columns.find((c) => c.key === filter.key)?.label}
+    >
+      {filter.options.map((opt) => (
+        <MenuItem key={String(opt.value)} value={opt.value}>
+          {opt.label}
+        </MenuItem>
+      ))}
+    </Select>
+  </FormControl>
+)}
+
 
             {search && (
               <>
@@ -250,7 +256,7 @@ export default function CustomTable({
                         textOverflow: "ellipsis",
                       }}
                     >
-                      {renderCell(col, row[col.key], row, theme)}
+                      {renderCell(col, row[col.key], row, theme, companies)}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -276,7 +282,7 @@ export default function CustomTable({
   );
 }
 
-function renderCell(col, value, row, theme) {
+function renderCell(col, value, row, theme, companies) {
   switch (col.type) {
     case "checkbox":
       return <Checkbox checked={!!value} disabled size="small" />;
@@ -360,6 +366,10 @@ function renderCell(col, value, row, theme) {
           <Typography variant="caption">{value ?? 0}%</Typography>
         </Stack>
       );
+ case "company": {
+      const comp = companies.find((c) => c.id === value);
+      return comp?.name ?? "-";
+    }
     case "custom":
       return col.render ? col.render(value, row) : value;
     default:

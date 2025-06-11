@@ -15,8 +15,13 @@ const columns = [
     type: "text",
     searchable: true,
   },
+   { key: "contactPhoneNumber", label: "연락처", type: "text" },
   { key: "address", label: "주소", type: "text", searchable: true },
   { key: "createdAt", label: "등록일자", type: "date" },
+  { key: "deleted", label: "활성화 여부", type: "status", statusMap: {
+      false: { color: "success",    label: "활성" },
+      true: { color: "error", label: "비활성" },
+    }, },
 ];
 
 export default function ProjectTable() {
@@ -42,7 +47,7 @@ export default function ProjectTable() {
   const filterOptions = [
     { label: "전체", value: "" },
     { label: "활성", value: "false" },
-    { label: "삭제됨", value: "true" },
+    { label: "비활성", value: "true" },
   ];
 
   // 데이터 로드 함수
@@ -87,6 +92,7 @@ export default function ProjectTable() {
         }}
         filter={{
           key: filterKey,
+          label:'활성화 여부',
           value: filterValue,
           options: filterOptions,
           onChange: (val) => {

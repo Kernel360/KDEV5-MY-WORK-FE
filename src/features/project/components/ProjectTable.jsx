@@ -13,16 +13,16 @@ const columns = [
     label: "상태",
     type: "status",
    statusMap: {
-      NOT_STARTED: { color: "default",    label: "계획" },
+      NOT_STARTED: { color: "neutral",    label: "계획" },
       IN_PROGRESS: { color: "info", label: "진행" },
       PAUSED:      { color: "warning", label: "중단" },
       COMPLETED:   { color: "success", label: "완료" },
     },
   },
-  { key: "startAt", label: "시작일", type: "date" },
-  { key: "endAt", label: "종료일", type: "date" },
-   { field: 'clientCompanyName', headerName: '고객사' },
-  { field: 'devCompanyName', headerName: '개발사' },
+    { key: "startAt", label: "시작일", type: "date" },
+    { key: "endAt", label: "종료일", type: "date" },
+   { key: 'clientCompanyId', label: "고객사",type: "company", },
+  { key: 'devCompanyId', label: '개발사' , type: "company"},
 ];
 
 export default function ProjectTable() {
@@ -39,13 +39,15 @@ export default function ProjectTable() {
   const [filterValue, setFilterValue] = useState("");
 
   // 고정 필터 키
-  const filterKey = "deleted";
+  const filterKey = "step";
 
   // 필터 옵션: boolean 전용
   const filterOptions = [
     { label: "전체", value: "" },
-    { label: "활성", value: "false" },
-    { label: "삭제됨", value: "true" },
+    { label: "계획", value: "NOT_STARTED" },
+    { label: "진행", value: "IN_PROGRESS" },
+    { label: "중단", value: "PAUSED" },
+    { label: "완료", value: "COMPLETED" },
   ];
 
   // 데이터 로드 함수
@@ -53,7 +55,9 @@ export default function ProjectTable() {
     const params = { page };
     if (searchText.trim()) params.keyword = searchText.trim();
     if (searchKey) params.keywordType = searchKey;
-    if (filterValue !== "") params[filterKey] = filterValue === "true";
+   if (filterValue) {
+  params[filterKey] = filterValue;
+}
     dispatch(fetchProjects(params));
   }, [dispatch, page, searchKey, searchText, filterValue]);
 
@@ -96,6 +100,7 @@ export default function ProjectTable() {
         }}
         filter={{
           key: filterKey,
+          label: '상태',        
           value: filterValue,
           options: filterOptions,
           onChange: (val) => {
