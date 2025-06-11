@@ -9,4 +9,3 @@ const getStatusLabel = (value) => {
   const option = STATUS_OPTIONS.find(opt => opt.value === value);
   return option ? option.label : value;
 };
-
