@@ -39,7 +39,7 @@ export default function ClientMemberList({ selectedEmployees = [], onRemove }) {
           }}
         >
           {/* 직원 이름과 이메일 */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, maxWidth: 'calc(100% - 40px)' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
             <Typography variant="body2" fontWeight={600} noWrap>
               {emp.name}
             </Typography>

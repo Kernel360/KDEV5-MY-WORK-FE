@@ -35,16 +35,17 @@ export default function DevMemberList({ selectedEmployees, onRemove }) {
             boxSizing: 'border-box',
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="body2" fontWeight={500}>
-              {emp.name}
-            </Typography>
-             {emp.email && (
-                          <Typography variant="caption" color="text.secondary" noWrap>
-                            {emp.email}
-                          </Typography>
-                        )}
-          </Box>
+             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                      <Typography variant="body2" fontWeight={600} noWrap>
+                        {emp.name}
+                      </Typography>
+                      {/* email이 없을 수도 있으니 안전 호출 */}
+                      {emp.email && (
+                        <Typography variant="caption" color="text.secondary" noWrap>
+                          {emp.email}
+                        </Typography>
+                      )}
+                    </Box>
           <IconButton
             size="small"
             onClick={() => onRemove(emp.id)}           
