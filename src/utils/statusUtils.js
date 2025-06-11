@@ -9,7 +9,3 @@ const getStatusLabel = (value) => {
   const option = STATUS_OPTIONS.find(opt => opt.value === value);
   return option ? option.label : value;
 };
-
-// 사용 예
-console.log(getStatusLabel('IN_PROGRESS')); // "진행"
-console.log(getStatusLabel('UNKNOWN'));     // "UNKNOWN"

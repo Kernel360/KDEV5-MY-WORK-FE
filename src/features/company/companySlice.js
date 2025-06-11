@@ -23,12 +23,9 @@ export const createCompanyId = createAsyncThunk(
   "company/generateCompanyId",
   async (_, thunkAPI) => {
     try {
-      console.log("회사 ID 생성 API 호출 시작");
       const response = await companyAPI.generateCompanyId();
-      console.log("회사 ID 생성 API 응답:", response);
       return response.data;
     } catch (error) {
-      console.error("회사 ID 생성 API 에러:", error);
       return thunkAPI.rejectWithValue(error.response?.data || "Error");
     }
   }

@@ -91,7 +91,6 @@ const projectStepSlice = createSlice({
         state.error = null;
       })
       .addCase(createProjectStages.fulfilled, (state, action) => {
-        console.log('action', action)
         state.loading = false;
         state.items = action.payload.steps;
       })

@@ -31,7 +31,6 @@ export default function ProjectDetailPage() {
   const projectState = useSelector((state) => state.project) || {};
   const { current: project } = projectState;
   const [confirmOpen, setConfirmOpen] = useState(false);
-  console.log('project', project)
 
   // URL 에서 탭 결정: /projects/:id/management  → 0, /tasks → 1, /progress → 2
   const tabMap = {

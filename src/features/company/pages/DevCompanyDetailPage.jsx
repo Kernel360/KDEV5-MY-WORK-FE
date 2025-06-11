@@ -32,11 +32,9 @@ export default function DevCompanyDetailPage() {
   const { current: company, loading } = useSelector((state) => state.company);
 
   useEffect(() => {
-    console.log("fetchCompanyById 호출, id:", id);
     dispatch(fetchCompanyById(id));
   }, [dispatch, id]);
 
-  console.log("현재 상태:", { company, loading, id });
 
   const handleDelete = async () => {
     try {
@@ -66,7 +64,6 @@ export default function DevCompanyDetailPage() {
   }
 
   if (!company) {
-    console.log("company: ", company);
     return (
       <PageWrapper>
         <Box
