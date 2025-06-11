@@ -5,21 +5,21 @@ import memberReducer from "@/features/member/memberSlice";
 import companyReducer from "@/features/company/companySlice";
 import authReducer from "@/features/auth/authSlice";
 import projectStepReducer from "@/features/project/projectStepSlice";
-import postReducer from "@/features/project/post/postSlice"
-import projectMemberReducer from "@/features/project/projectMemberSlice"
+import postReducer from "@/features/project/post/postSlice";
+import projectMemberReducer from "@/features/project/projectMemberSlice";
 
 const preloadedAuth = (() => {
   try {
-    const token = localStorage.getItem("accessToken");
-    const expiresAt = localStorage.getItem("expiresAt");
-    const userJson = localStorage.getItem("user");
-    if (token && userJson) {
+    const token       = localStorage.getItem("accessToken");
+    const userJson    = localStorage.getItem("user");
+    const companyJson = localStorage.getItem("company");
+    if (token && userJson && companyJson) {
       return {
         accessToken: token,
-        expiresAt,
-        user: JSON.parse(userJson),
-        status: "succeeded",
-        error: null,
+        user:        JSON.parse(userJson),
+        company:     JSON.parse(companyJson),
+        status:      "succeeded",
+        error:       null,
       };
     }
   } catch {
@@ -27,25 +27,24 @@ const preloadedAuth = (() => {
   }
   return {
     accessToken: null,
-    expiresAt: null,
-    user: null,
-    status: "idle",
-    error: null,
+    user:        null,
+    company:     null,
+    status:      "idle",
+    error:       null,
   };
 })();
 
 export const store = configureStore({
   reducer: {
-    project: projectReducer,
-    member: memberReducer,
-    company: companyReducer,
-    auth: authReducer,
-    projectStep: projectStepReducer,
-    post: postReducer,
-    projectMember: projectMemberReducer,
+    project:        projectReducer,
+    member:         memberReducer,
+    company:        companyReducer,
+    auth:           authReducer,
+    projectStep:    projectStepReducer,
+    post:           postReducer,
+    projectMember:  projectMemberReducer,
   },
   preloadedState: {
     auth: preloadedAuth,
   },
 });
-

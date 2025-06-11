@@ -1,3 +1,4 @@
+// src/features/auth/authSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import * as authAPI from "@/api/auth";
 
@@ -37,30 +38,31 @@ export const logout = createAsyncThunk(
   }
 );
 
-const storedToken = localStorage.getItem("accessToken");
-const storedExpiresAt = localStorage.getItem("expiresAt");
+const storedToken   = localStorage.getItem("accessToken");
 const storedUserJson = localStorage.getItem("user");
-const initialUser = storedUserJson ? JSON.parse(storedUserJson) : null;
+const storedCompanyJson = localStorage.getItem("company");
+const initialUser    = storedUserJson    ? JSON.parse(storedUserJson)    : null;
+const initialCompany = storedCompanyJson ? JSON.parse(storedCompanyJson) : null;
 
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    user: initialUser,                
-    accessToken: storedToken || null, 
-    expiresAt: storedExpiresAt || null,
+    user: initialUser,
+    company: initialCompany,
+    accessToken: storedToken || null,
     status: "idle",
     error: null,
   },
   reducers: {
     clearAuthState(state) {
       state.user = null;
+      state.company = null;
       state.accessToken = null;
-      state.expiresAt = null;
       state.status = "idle";
       state.error = null;
       localStorage.removeItem("accessToken");
-      localStorage.removeItem("expiresAt");
       localStorage.removeItem("user");
+      localStorage.removeItem("company");
     },
   },
   extraReducers: (builder) => {
@@ -68,81 +70,108 @@ const authSlice = createSlice({
       // === LOGIN ===
       .addCase(login.pending, (state) => {
         state.status = "loading";
-        state.error  = null;
+        state.error = null;
       })
-      .addCase(login.fulfilled, (state, action) => {
-        state.status      = "succeeded";
-        state.accessToken = action.payload.accessToken;
-        state.expiresAt   = action.payload.expiresAt;
+      .addCase(login.fulfilled, (state, { payload }) => {
+        state.status = "succeeded";
+        state.accessToken = payload.accessToken;
         state.user = {
-          id:   action.payload.memberId,
-          name: action.payload.memberName,
-          role: action.payload.memberRole,
+          id: payload.memberId,
+          name: payload.memberName,
+          role: payload.memberRole,
         };
-        localStorage.setItem("accessToken", action.payload.accessToken);
-        localStorage.setItem("expiresAt",   action.payload.expiresAt);
+        state.company = {
+          id: payload.companyId,
+          name: payload.companyName,
+          logoImagePath: payload.logoImagePath,
+          type: payload.companyType,
+        };
+
+        localStorage.setItem("accessToken", payload.accessToken);
         localStorage.setItem(
           "user",
           JSON.stringify({
-            id:   action.payload.memberId,
-            name: action.payload.memberName,
-            role: action.payload.memberRole,
+            id: payload.memberId,
+            name: payload.memberName,
+            role: payload.memberRole,
+          })
+        );
+        localStorage.setItem(
+          "company",
+          JSON.stringify({
+            id: payload.companyId,
+            name: payload.companyName,
+            logoImagePath: payload.logoImagePath,
+            type: payload.companyType,
           })
         );
       })
       .addCase(login.rejected, (state, action) => {
         state.status = "failed";
-        state.error  = action.payload;
+        state.error = action.payload;
       })
 
       // === REISSUE TOKEN ===
       .addCase(reissueToken.pending, (state) => {
         state.status = "loading";
-        state.error  = null;
+        state.error = null;
       })
-      .addCase(reissueToken.fulfilled, (state, action) => {
-        state.status      = "succeeded";
-        state.accessToken = action.payload.accessToken;
-        state.expiresAt   = action.payload.expiresAt;
+      .addCase(reissueToken.fulfilled, (state, { payload }) => {
+        state.status = "succeeded";
+        state.accessToken = payload.accessToken;
         state.user = {
-          id:   action.payload.memberId,
-          name: action.payload.memberName,
-          role: action.payload.memberRole,
+          id: payload.memberId,
+          name: payload.memberName,
+          role: payload.memberRole,
         };
-        localStorage.setItem("accessToken", action.payload.accessToken);
-        localStorage.setItem("expiresAt",   action.payload.expiresAt);
+        state.company = {
+          id: payload.companyId,
+          name: payload.companyName,
+          logoImagePath: payload.logoImagePath,
+          type: payload.companyType,
+        };
+
+        localStorage.setItem("accessToken", payload.accessToken);
         localStorage.setItem(
           "user",
           JSON.stringify({
-            id:   action.payload.memberId,
-            name: action.payload.memberName,
-            role: action.payload.memberRole,
+            id: payload.memberId,
+            name: payload.memberName,
+            role: payload.memberRole,
           })
         );
-        
+        localStorage.setItem(
+          "company",
+          JSON.stringify({
+            id: payload.companyId,
+            name: payload.companyName,
+            logoImagePath: payload.logoImagePath,
+            type: payload.companyType,
+          })
+        );
       })
       .addCase(reissueToken.rejected, (state, action) => {
         state.status = "failed";
-        state.error  = action.payload;
+        state.error = action.payload;
       })
 
       // === LOGOUT ===
       .addCase(logout.pending, (state) => {
         state.status = "loading";
-        state.error  = null;
+        state.error = null;
       })
       .addCase(logout.fulfilled, (state) => {
-        state.status      = "idle";
-        state.user        = null;
+        state.status = "idle";
+        state.user = null;
+        state.company = null;
         state.accessToken = null;
-        state.expiresAt   = null;
         localStorage.removeItem("accessToken");
-        localStorage.removeItem("expiresAt");
         localStorage.removeItem("user");
+        localStorage.removeItem("company");
       })
       .addCase(logout.rejected, (state, action) => {
         state.status = "failed";
-        state.error  = action.payload;
+        state.error = action.payload;
       });
   },
 });
