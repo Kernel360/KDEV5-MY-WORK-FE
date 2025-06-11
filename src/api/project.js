@@ -45,8 +45,10 @@ export const updateProject = (projectId, webRequest) =>
  * @param {{ id: string }} data - 삭제할 프로젝트의 UUID를 포함한 객체
  * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<ProjectDeleteWebResponse>
  */
-export const deleteProject = (data) =>
-  api.delete("/api/projects", { data });
+export function deleteProject({ id }) {
+  // DELETE 요청에 body를 붙이려면 config.data에 넣어야 합니다.
+  return api.delete("/api/projects", { data: { id } });
+}
 
 /**
  * 프로젝트 멤버 목록 조회
