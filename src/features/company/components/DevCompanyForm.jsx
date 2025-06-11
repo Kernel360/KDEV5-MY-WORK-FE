@@ -1,3 +1,4 @@
+// src/components/DevCompanyForm.jsx
 import React from "react";
 import {
   TextField,
@@ -11,13 +12,18 @@ import {
 } from "@mui/material";
 import { InfoOutlined } from "@mui/icons-material";
 
+/**
+ * DevCompanyForm
+ * - 회사 등록/수정 폼을 ProjectForm과 동일한 디자인 패턴으로 구성합니다.
+ * - 기능은 변경하지 않고, 레이아웃·간격·툴팁만 ProjectForm과 일치시켰습니다.
+ */
 export default function DevCompanyForm({
   form,
   handleChange,
   isSubmitted = false,
 }) {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", flex: 1 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
       <Paper
         sx={{
           p: 4,
@@ -30,56 +36,51 @@ export default function DevCompanyForm({
           flexDirection: "column",
           height: "100%",
           boxSizing: "border-box",
+          overflowY: "auto",
         }}
       >
-        <Stack spacing={4} sx={{ flex: 1 }}>
-          {/* 1) 기본 정보 섹션 */}
+        <Stack spacing={4} sx={{ flex: 1, minHeight: 0 }}>
+          {/* 1) 기본 정보 */}
           <Box>
             <Stack direction="row" alignItems="center" spacing={1}>
               <Typography variant="subtitle1" fontWeight={600}>
                 1. 기본 정보
               </Typography>
-              <Tooltip title="회사 이름은 필수 입력 항목입니다.">
+              <Tooltip title="회사 이름과 상세 설명을 입력하세요.">
                 <InfoOutlined fontSize="small" color="action" />
               </Tooltip>
             </Stack>
             <Divider sx={{ mt: 1, mb: 2 }} />
 
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  label="회사 이름"
-                  placeholder="예) MyWork"
-                  helperText={
-                    isSubmitted && !form.name ? "회사 이름을 입력해주세요." : ""
-                  }
-                  error={isSubmitted && !form.name}
-                  value={form.name || ""}
-                  onChange={handleChange("name")}
-                  fullWidth
-                />
-                <TextField
-                  label="상세 설명"
-                  placeholder="회사에 대한 상세 설명을 입력해주세요."
-                  multiline
-                  rows={4}
-                  value={form.detail || ""}
-                  onChange={handleChange("detail")}
-                  fullWidth
-                  sx={{ mt: 2 }}
-                />
-              </Grid>
-            </Grid>
+            <TextField
+              required
+              label="회사 이름"
+              placeholder="예) MyWork"
+              value={form.name || ""}
+              onChange={handleChange("name")}
+              fullWidth
+              error={isSubmitted && !form.name}
+              helperText={isSubmitted && !form.name ? "회사 이름을 입력해주세요." : ""}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              label="상세 설명"
+              placeholder="회사에 대한 상세 설명을 입력해주세요."
+              multiline
+              rows={4}
+              value={form.detail || ""}
+              onChange={handleChange("detail")}
+              fullWidth
+            />
           </Box>
 
-          {/* 2) 사업자 정보 섹션 */}
+          {/* 2) 사업자 정보 */}
           <Box>
             <Stack direction="row" alignItems="center" spacing={1}>
               <Typography variant="subtitle1" fontWeight={600}>
                 2. 사업자 정보
               </Typography>
-              <Tooltip title="사업자 정보를 입력하세요.">
+              <Tooltip title="사업자 번호를 입력하세요.">
                 <InfoOutlined fontSize="small" color="action" />
               </Tooltip>
             </Stack>
@@ -98,13 +99,13 @@ export default function DevCompanyForm({
             </Grid>
           </Box>
 
-          {/* 3) 연락처 정보 섹션 */}
+          {/* 3) 연락처 정보 */}
           <Box>
             <Stack direction="row" alignItems="center" spacing={1}>
               <Typography variant="subtitle1" fontWeight={600}>
                 3. 연락처 정보
               </Typography>
-              <Tooltip title="연락처 정보를 입력하세요.">
+              <Tooltip title="회사 주소, 전화번호, 이메일을 입력하세요.">
                 <InfoOutlined fontSize="small" color="action" />
               </Tooltip>
             </Stack>
@@ -142,8 +143,8 @@ export default function DevCompanyForm({
             </Grid>
           </Box>
 
-          {/* 4) 로고 이미지 섹션 */}
-          <Box>
+          {/* 4) 로고 이미지 */}
+          {/* <Box>
             <Stack direction="row" alignItems="center" spacing={1}>
               <Typography variant="subtitle1" fontWeight={600}>
                 4. 로고 이미지
@@ -161,7 +162,7 @@ export default function DevCompanyForm({
               onChange={handleChange("logoImagePath")}
               fullWidth
             />
-          </Box>
+          </Box> */}
         </Stack>
       </Paper>
     </Box>
