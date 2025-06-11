@@ -22,7 +22,7 @@ export default function TabsWithContent({
         border: "1px solid",
         borderColor: "divider",
         overflow: "hidden",
-        px:3,
+        px: 3,
         mb: 3,
         ...containerSx,
       }}
@@ -31,12 +31,20 @@ export default function TabsWithContent({
       <Tabs
         value={value}
         onChange={onChange}
+        TabIndicatorProps={{ style: { height: 2 } }}
         sx={{
+          minHeight: 58,  // 탭바 전체 최소 높이 조정
           borderBottom: "1px solid",
           borderColor: "divider",
           "& .MuiTabs-indicator": {
             backgroundColor: "primary.main",
-            height: 3,
+            height: 2,  // 인디케이터 높이 조정
+          },
+          // 개별 탭 높이 및 패딩 축소
+          "& .MuiTab-root": {
+            minHeight: 58,
+            paddingTop: 0,
+            paddingBottom: 0,
           },
           ...tabSx,
         }}
@@ -52,6 +60,8 @@ export default function TabsWithContent({
               fontWeight: "500",
               px: 2,
               color: "text.primary",
+              lineHeight: 1.2,  // 텍스트 줄높이 조정
+              fontSize: '0.875rem', // 폰트 크기 약간 축소
               "&.Mui-selected": {
                 color: "primary.main",
                 fontWeight: "600",
@@ -71,7 +81,6 @@ export default function TabsWithContent({
           ...contentSx,
         }}
       >
-      
         <Box
           sx={{
             width: "100%",   // 자식 콘텐츠가 부모 가로 폭을 완전히 채움
