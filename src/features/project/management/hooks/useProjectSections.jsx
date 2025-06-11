@@ -5,6 +5,7 @@ import ProjectStepManager from "../components/ProjectStepManager/ProjectStepMana
 import { IconButton, Tooltip } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded"
 import DevMemberSelector from "../components/DevMemberManager/DevMemberSelector";
+import ClientMemberSelector from "../components/ClientMemberManager/ClientMemberSelector";
 
 const ROLE_SYSTEM_ADMIN = "ROLE_SYSTEM_ADMIN";
 const ROLE_DEV_ADMIN    = "ROLE_DEV_ADMIN";
@@ -58,19 +59,14 @@ export default function useProjectSections({
         <DevMemberSelector/>
       ),
     },
-    // {
-    //   key: "clientMembers",
-    //   roles: [ROLE_SYSTEM_ADMIN, ROLE_CLIENT_ADMIN],
-    //   title: "고객사 직원 관리",
-    //   tooltip: "고객사 직원 목록에서 프로젝트 참여 직원을 선택·제외할 수 있습니다.",
-    //   content: (
-    //     <ProjectMemberSelector
-    //       allEmployees={clientEmployees}
-    //       selectedEmployees={selectedClientMembers}
-    //       onChange={handleChangeClientMembers}
-    //       onRemove={handleRemoveClientMember}
-    //     />
-    //   ),
-    // },
+    {
+      key: "clientMembers",
+      roles: [ROLE_SYSTEM_ADMIN, ROLE_CLIENT_ADMIN],
+      title: "고객사 직원 관리",
+      tooltip: "고객사 직원 목록에서 프로젝트 참여 직원을 선택·제외할 수 있습니다.",
+      content: (
+        <ClientMemberSelector/>
+      ),
+    },
   ];
 }

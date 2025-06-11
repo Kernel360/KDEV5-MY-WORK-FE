@@ -1,4 +1,4 @@
-// src/components/DevMemberSelector.jsx
+// src/components/ClientMemberSelector.jsx
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -17,29 +17,32 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
-import DevMemberList from "../DevMemberManager/DevMemberList";
+import ClientMemberList from "../ClientMemberManager/ClientMemberList";
 
 /**
- * DevMemberSelector
+ * ClientMemberSelector
  * - projectId와 companyId를 이용해
- *   1) 셀렉트 박스 열릴 때마다 전체 회사 직원 목록(options) 조회
- *   2) 페이지 로드 시 참여중인 직원 목록(assigned) 조회
+ *   1) 셀렉트 박스 열릴 때마다 전체 고객사 직원 목록(options) 조회
+ *   2) 페이지 로드 시 참여중인 고객사 직원 목록(assigned) 조회
  * - 선택/삭제 시 API 호출하여 DB 저장
  */
-export default function DevMemberSelector() {
+export default function ClientMemberSelector() {
   const theme = useMuiTheme();
   const dispatch = useDispatch();
   const { id: projectId } = useParams();
 
-  // Redux의 devCompanyId
-  const companyId = useSelector((state) => state.project.current.devCompanyId);
 
-  // 전체 회사 직원(options) 상태
+  // Redux의 clientCompanyId
+  const companyId = useSelector((state) => state.project.current.clientCompanyId);
+
+  // 전체 고객사 직원(options) 상태
   const options = useSelector((state) => state.projectMember.list ?? []);
   const loadingOptions = useSelector((state) => state.projectMember.loading);
 
   // 프로젝트에 할당된 직원(assigned) 상태
   const [assigned, setAssigned] = useState([]);
+  console.log('assigned', assigned)
+
 
   // 페이지 로드 시: 이미 참여중인 직원 목록 조회
   useEffect(() => {
@@ -158,12 +161,11 @@ export default function DevMemberSelector() {
 
       {/* Assigned 직원 리스트 */}
       <Box sx={{ mt: 2 }}>
-        <DevMemberList
+        <ClientMemberList
           selectedEmployees={assigned.map((emp) => ({
             id: emp.memberId,
             name: emp.memberName,
             email: emp.email
-            
           }))}
           onRemove={handleRemove}
         />
