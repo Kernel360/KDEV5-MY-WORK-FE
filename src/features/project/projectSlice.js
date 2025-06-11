@@ -65,12 +65,14 @@ export const updateProject = createAsyncThunk(
 // 삭제
 export const deleteProject = createAsyncThunk(
   "project/deleteProject",
-  async (id, thunkAPI) => {
+  async ({ id }, thunkAPI) => {
     try {
-      await projectAPI.deleteProject(id);
-      return id;
+      const response = await projectAPI.deleteProject({ id });
+      return response.data.data;
     } catch (err) {
-      return thunkAPI.rejectWithValue(err.response?.data || "프로젝트 삭제 실패");
+      return thunkAPI.rejectWithValue(
+        err.response?.data || "프로젝트 삭제 실패"
+      );
     }
   }
 );

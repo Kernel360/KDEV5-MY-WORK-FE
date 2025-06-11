@@ -55,9 +55,17 @@ export default function ProjectDetailPage() {
   }, [dispatch, id]);
 
   const handleDelete = () => {
-  dispatch(deleteProject(project.id)).then(() => navigate("/projects"));
-  setConfirmOpen(false);
-};
+    // deleteProject에 { id } 형태로 넘깁니다
+    dispatch(deleteProject({ id }))
+      .unwrap()
+      .then(() => {
+        navigate("/projects");
+      })
+      .catch(() => {
+        // 에러 처리 로직 (예: 알림)
+      });
+    setConfirmOpen(false);
+  };
 
   if (!project) {
     return (
