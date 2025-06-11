@@ -142,7 +142,7 @@ export default function SectionTable({
         </Box>
       )}
 
-      <TableContainer sx={{ border: 1, borderColor: "grey.300", borderRadius: 2 }}>
+      <TableContainer sx={{ border: 0.5, borderColor: "grey.100", borderRadius: 2 }}>
         <Table size="small">
           <TableHead>
             <TableRow sx={{ backgroundColor: "grey.100" }}>
@@ -189,7 +189,7 @@ export default function SectionTable({
       </TableContainer>
 
       {pagination && (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+        <Box sx={{ display: "flex", justifyContent: "end", mt: 2 }}>
           <Pagination
             count={pageCount}
             page={pagination.page}

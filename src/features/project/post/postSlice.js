@@ -8,8 +8,7 @@ export const createPostId = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const response = await postAPI.createPostId();
-      // 생성된 ID를 response.data.data 에서 꺼낸다고 가정
-      return response.data.data;
+      return response.data.data; // PostIdCreateWebResponse.data (UUID)
     } catch (err) {
       return thunkAPI.rejectWithValue(
         err.response?.data || "게시글 ID 생성 실패"
@@ -22,16 +21,17 @@ export const createPostId = createAsyncThunk(
 export const fetchPosts = createAsyncThunk(
   "post/fetchPosts",
   async (
-    { page, keyword = null, projectStepId = null, deleted = null },
+    { projectId, page, keyword = null, keywordType = null, projectStepId = null, deleted = null, approval = null },
     thunkAPI
   ) => {
     try {
-      const response = await postAPI.findPosts(
-        page,
+      const response = await postAPI.findPosts(projectId, page, {
         keyword,
+        keywordType,
         projectStepId,
-        deleted
-      );
+        deleted,
+        approval,
+      });
       return {
         posts: response.data.data.posts,
         totalCount: response.data.data.totalCount,
@@ -47,7 +47,7 @@ export const fetchPosts = createAsyncThunk(
 // 3) 게시글 단건 조회
 export const fetchPostById = createAsyncThunk(
   "post/fetchPostById",
-  async (postId, thunkAPI) => {
+  async ({ postId }, thunkAPI) => {
     try {
       const response = await postAPI.getPostDetail(postId);
       return response.data.data;
@@ -62,10 +62,10 @@ export const fetchPostById = createAsyncThunk(
 // 4) 게시글 생성
 export const createPost = createAsyncThunk(
   "post/createPost",
-  async (data, thunkAPI) => {
+  async ({ projectId, data }, thunkAPI) => {
     try {
-      const response = await postAPI.createPost(data);
-      return response.data.data;
+      const response = await postAPI.createPost(projectId, data);
+      return response.data.data; // PostCreateWebResponse.data (UUID)
     } catch (err) {
       return thunkAPI.rejectWithValue(
         err.response?.data || "게시글 생성 실패"
@@ -80,7 +80,7 @@ export const updatePost = createAsyncThunk(
   async ({ postId, data }, thunkAPI) => {
     try {
       const response = await postAPI.updatePost(postId, data);
-      return response.data.data;
+      return response.data.data; // PostUpdateWebResponse.data
     } catch (err) {
       return thunkAPI.rejectWithValue(
         err.response?.data || "게시글 수정 실패"
@@ -92,7 +92,7 @@ export const updatePost = createAsyncThunk(
 // 6) 게시글 삭제
 export const deletePost = createAsyncThunk(
   "post/deletePost",
-  async (postId, thunkAPI) => {
+  async ({ postId }, thunkAPI) => {
     try {
       await postAPI.deletePost(postId);
       return postId;
@@ -144,7 +144,6 @@ const postSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchPosts.fulfilled, (state, action) => {
-
         state.loading = false;
         state.list = action.payload.posts;
         state.totalCount = action.payload.totalCount;

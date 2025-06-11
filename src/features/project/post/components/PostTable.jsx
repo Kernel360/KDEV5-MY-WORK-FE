@@ -13,6 +13,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import SectionTable from "@/components/common/sectionTable/SectionTable";
 import PostDetailDrawer from "../components/PostDetailDrawer";
+import CreatePostDrawer from "../components/CreatePostDrawer"; // 신규 작성 드로어
+import CustomButton from "@/components/common/CustomButton/CustomButton"; // 커스텀 버튼
 import { fetchPosts, fetchPostById } from "../postSlice";
 import { fetchProjectStages } from "../../projectStepSlice";
 
@@ -20,6 +22,9 @@ export default function PostTable() {
   const theme = useTheme();
   const dispatch = useDispatch();
   const { id: projectId } = useParams();
+
+  // 신규 작성 드로어 오픈 상태
+  const [isCreateOpen, setCreateOpen] = useState(false);
 
   // Redux에서 게시글과 페이징
   const posts = useSelector((state) => state.post.list || []);
@@ -68,36 +73,42 @@ export default function PostTable() {
       .catch((e) => console.error(e));
   };
 
-const columns = [
-  { key: "title", label: "글제목", width: "35%", sortable: true },
-  { key: "stepName", label: "단계", width: "15%", sortable: true },
-  {
-    key: "status",
-    label: "상태",
-    width: "15%",
-    sortable: true,
-    type: "status",
-    statusMap: {
-      New:   { label: "신규",   color: "primary" },
-      Done:  { label: "완료",   color: "success" },
-      Pause: { label: "보류",   color: "warning" },
-      Fail:  { label: "실패",   color: "error" },
+  const columns = [
+    { key: "title", label: "글제목", width: "35%", sortable: true },
+    { key: "stepName", label: "단계", width: "15%", sortable: true },
+    {
+      key: "status",
+      label: "상태",
+      width: "15%",
+      sortable: true,
+      type: "status",
+      statusMap: {
+        New: { label: "신규", color: "primary" },
+        Done: { label: "완료", color: "success" },
+        Pause: { label: "보류", color: "warning" },
+        Fail: { label: "실패", color: "error" },
+      },
     },
-  },
-  { key: "authorName", label: "작성자", width: "20%", sortable: true },
-  {
-    key: "createdAt",
-    label: "작성일",
-    width: "15%",
-    sortable: true,
-    type: "date",
-  },
-];
-
+    { key: "authorName", label: "작성자", width: "20%", sortable: true },
+    {
+      key: "createdAt",
+      label: "작성일",
+      width: "15%",
+      sortable: true,
+      type: "date",
+    },
+  ];
 
   return (
     <Box sx={{ width: "100%", mt: 2 }}>
-    <SectionTable
+      {/* ── 툴바: 제목 + 작성 버튼 ── */}
+      <Box sx={{ display: "flex", justifyContent: "end", mb: 1 }}>
+        <CustomButton variant="contained" onClick={() => setCreateOpen(true)}>
+          새 글 작성
+        </CustomButton>
+      </Box>
+
+      <SectionTable
         columns={columns}
         rows={rows}
         rowKey="id"
@@ -113,6 +124,15 @@ const columns = [
         open={!!selectedPost}
         post={selectedPost || {}}
         onClose={() => setSelectedPost(null)}
+      />
+
+       <CreatePostDrawer
+        open={isCreateOpen}
+        onClose={() => setCreateOpen(false)}
+        onSubmit={() => {
+          setCreateOpen(false);
+          dispatch(fetchPosts({ page, projectStepId: selectedStep || null }));
+        }}
       />
     </Box>
   );
