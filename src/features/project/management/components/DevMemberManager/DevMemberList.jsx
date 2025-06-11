@@ -12,48 +12,43 @@ export default function DevMemberList({ selectedEmployees, onRemove }) {
       sx={{
         display: 'flex',
         flexWrap: 'wrap',
-        gap: 2,
+        gap: 1,
+        mb: 1.5,
       }}
     >
       {selectedEmployees.map((emp, idx) => (
         <Box
           key={emp.id}
           sx={{
+               minWidth: 300,
+               maxWidth: 300,
+   minHeight: 80,
+               maxHeight: 80,
             flex: '1 0 120px',
             border: `1px solid ${theme.palette.divider}`,
             borderRadius: 2,
-            p: 1.5,
+            p: 2,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             backgroundColor: theme.palette.background.paper,
+            boxSizing: 'border-box',
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Box
-              sx={{
-                width: 24,
-                height: 24,
-                borderRadius: '50%',
-                backgroundColor: theme.palette.primary.main,
-                color: theme.palette.primary.contrastText,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 12,
-                fontWeight: 500,
-              }}
-            >
-              {idx + 1}
-            </Box>
             <Typography variant="body2" fontWeight={500}>
               {emp.name}
             </Typography>
+             {emp.email && (
+                          <Typography variant="caption" color="text.secondary" noWrap>
+                            {emp.email}
+                          </Typography>
+                        )}
           </Box>
           <IconButton
             size="small"
-            onClick={() => onRemove(emp.id)}           // 변경: onRemove 호출
-            sx={{ color: theme.palette.error.main }}  // 삭제니 에러 컬러
+            onClick={() => onRemove(emp.id)}           
+            sx={{ color: theme.palette.error.main }}  
           >
             <DeleteIcon fontSize="small" />
           </IconButton>
