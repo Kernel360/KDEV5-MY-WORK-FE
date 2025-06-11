@@ -109,7 +109,18 @@ export default function ProjectForm({
           </Box>
 
           {/* 2) 기간 설정 */}
+          <Box>
+           <Stack direction="row" alignItems="center" spacing={1}>
+              <Typography variant="subtitle1" fontWeight={600}>
+                2. 기간 설정
+              </Typography>
+              <Tooltip title="시작일과 종료일을 선택하세요.">
+                <InfoOutlined fontSize="small" color="action" />
+              </Tooltip>
+            </Stack>
+            <Divider sx={{ mt: 1, mb: 2 }} />
           <LocalizationProvider dateAdapter={AdapterDayjs}>
+               <Grid container spacing={2} justifyContent="flex-start">
   <Grid item xs={12} sm={6} md={4}>
     <DatePicker
       label="시작일"
@@ -157,7 +168,9 @@ export default function ProjectForm({
       )}
     />
   </Grid>
+  </Grid>
 </LocalizationProvider>
+</Box>
 
           {/* 4) 고객사/개발사 선택 */}
           <Box>
@@ -192,7 +205,7 @@ export default function ProjectForm({
                   )}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={6} sx={{pb:2}}>
                 <Autocomplete
                   options={developerCompanies}
                   getOptionLabel={(option) => option.name}
