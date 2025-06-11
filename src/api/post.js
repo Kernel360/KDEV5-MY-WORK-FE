@@ -13,13 +13,14 @@ export function createPostId() {
 
 /**
  * 게시글 생성
- * POST /api/posts
+ * POST /api/projects/{projectId}/posts
  *
- * @param {{ id: string; title: string; content: string; projectStepId?: string;}} data
+ * @param {string} projectId - 프로젝트 UUID
+ * @param {{ id: string; title: string; content: string; projectStepId?: string; }} data
  * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<PostCreateWebResponse>
  */
-export function createPost(data) {
-  return api.post("/api/posts", data);
+export function createPost(projectId, data) {
+  return api.post(`/api/projects/${projectId}/posts`, data);
 }
 
 /**
@@ -27,7 +28,8 @@ export function createPost(data) {
  * PUT /api/posts/{postId}
  *
  * @param {string} postId - 수정할 게시글의 UUID
- * @param {{ title?: string; content?: string;}}
+ * @param {{ title?: string; content?: string; }} data
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<PostUpdateWebResponse>
  */
 export function updatePost(postId, data) {
   return api.put(`/api/posts/${postId}`, data);
@@ -46,17 +48,21 @@ export function getPostDetail(postId) {
 
 /**
  * 게시글 목록 조회
- * GET /api/posts?page={page}&keyword={keyword}&projectStepId={projectStepId}&deleted={deleted}
+ * GET /api/projects/{projectId}/posts
  *
- * @param {number} page - 페이지 번호
- * @param {string} [keyword] - 검색 키워드
- * @param {string} [projectStepId] - 단계 UUID
- * @param {boolean} [deleted] - 삭제 여부 필터
+ * @param {string} projectId - 프로젝트 UUID
+ * @param {object} params
+ * @param {number} params.page - 페이지 번호 (>=1)
+ * @param {string} [params.keyword] - 검색 키워드
+ * @param {'AUTHORNAME'|'TITLE'} [params.keywordType] - 검색 대상 타입
+ * @param {string} [params.projectStepId] - 단계 UUID
+ * @param {boolean} [params.deleted] - 삭제 여부 필터
+ * @param {'APPROVED'|'PENDING'} [params.approval] - 승인 상태 필터
  * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<PostListSelectWebResponse>
  */
-export function findPosts(page, keyword, projectStepId, deleted) {
-  return api.get("/api/posts", {
-    params: { page, keyword, projectStepId, deleted },
+export function findPosts(projectId, { page, keyword, keywordType, projectStepId, deleted, approval }) {
+  return api.get(`/api/projects/${projectId}/posts`, {
+    params: { page, keyword, keywordType, projectStepId, deleted, approval },
   });
 }
 
