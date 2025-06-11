@@ -131,7 +131,7 @@ const handleSubmit = async () => {
         {projectLoading ? (
           isEdit ? "로딩 중..." : "로딩 중..."
         ) : isEdit ? (
-          "수정 저장"
+          "저장"
         ) : (
           "생성"
         )}
