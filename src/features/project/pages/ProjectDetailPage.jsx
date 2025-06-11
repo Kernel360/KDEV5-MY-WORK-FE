@@ -32,6 +32,13 @@ export default function ProjectDetailPage() {
   const { current: project } = projectState;
   const [confirmOpen, setConfirmOpen] = useState(false);
 
+  const statusMap = {
+  NOT_STARTED: { color: 'neutral', label: '계획' },
+  IN_PROGRESS: { color: 'info',    label: '진행' },
+  PAUSED:      { color: 'warning', label: '중단' },
+  COMPLETED:   { color: 'success', label: '완료' },
+}
+
   // URL 에서 탭 결정: /projects/:id/management  → 0, /tasks → 1, /progress → 2
   const tabMap = {
     management: 0,
@@ -130,22 +137,60 @@ export default function ProjectDetailPage() {
         {/* 2. SummaryCard */}
         <Box sx={{ flexShrink: 0, width: "100%" }}>
           <SummaryCard
-          schema={[
+  schema={[
     {
-      key: "step",
-      label: "상태",
-      type: "status",
-      colorMap: { INIT: "warning", IN_PROGRESS: "info", DONE: "success" }
+      key: 'step',
+      label: '상태',
+      type: 'status',
+      colorMap: {
+        NOT_STARTED: statusMap.NOT_STARTED.color,
+        IN_PROGRESS: statusMap.IN_PROGRESS.color,
+        PAUSED:      statusMap.PAUSED.color,
+        COMPLETED:   statusMap.COMPLETED.color,
+      },
+      labelMap: {
+        NOT_STARTED: statusMap.NOT_STARTED.label,
+        IN_PROGRESS: statusMap.IN_PROGRESS.label,
+        PAUSED:      statusMap.PAUSED.label,
+        COMPLETED:   statusMap.COMPLETED.label,
+      },
     },
-    { key: "period", label: "기간", type: "text" },
+    {
+      key: 'period',
+      label: '기간',
+      type: 'text',
+    },
+    {
+      key: 'clientCompanyName',
+      label: '고객사',
+      type: 'text',
+    },
+    {
+      key: 'clientContactPhoneNum',
+      label: '고객사 연락처',
+      type: 'text',
+    },
+    {
+      key: 'devCompanyName',
+      label: '개발사',
+      type: 'text',
+    },
+    {
+      key: 'devContactPhoneNum',
+      label: '개발사 연락처',
+      type: 'text',
+    },
   ]}
-             data={{
-    // API로 받은 step 그대로
+  data={{
     step: project.step,
-    period: `${dayjs(project.startAt).format("YYYY.MM.DD")} ~ ${dayjs(project.endAt).format("YYYY.MM.DD")}`,
+    period: `${dayjs(project.startAt).format('YYYY.MM.DD')} ~ ${dayjs(project.endAt).format('YYYY.MM.DD')}`,
+    clientCompanyName: project.clientCompanyName,
+    clientContactPhoneNum: project.clientContactPhoneNum,
+    devCompanyName: project.devCompanyName,
+    devContactPhoneNum: project.devContactPhoneNum,
   }}
-            noMarginBottom
-          />
+  noMarginBottom
+/>
         </Box>
 
         {/* 3. TabsWithContent 래핑 박스 */}
