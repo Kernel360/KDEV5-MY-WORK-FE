@@ -1,5 +1,6 @@
 // src/features/project/pages/ProjectPage.jsx
-import { useSelector } from "react-redux";
+import  { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
 import ProjectTable from "@/features/project/components/ProjectTable";
@@ -7,11 +8,18 @@ import CustomButton from "@/components/common/customButton/CustomButton";
 import { useNavigate } from "react-router-dom";
 import { Add } from "@mui/icons-material";
 import { Box } from "@mui/material";
+import { fetchAllCompanyNames } from "@/features/company/companySlice";
 
 export default function ProjectPage() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const { totalCount } = useSelector((state) => state.project);
+
+    useEffect(() => {
+    // 페이지 로드 시 한 번만 회사 목록을 가져오도록 dispatch
+    dispatch(fetchAllCompanyNames());
+  }, [dispatch]);
 
   return (
     <PageWrapper>
