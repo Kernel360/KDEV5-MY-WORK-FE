@@ -15,36 +15,25 @@ import {
   Typography,
   TextField,
   CircularProgress,
+  IconButton,        // ← 추가
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";  // ← 추가
 import { useTheme as useMuiTheme } from "@mui/material/styles";
 import ClientMemberList from "../ClientMemberManager/ClientMemberList";
 
-/**
- * ClientMemberSelector
- * - projectId와 companyId를 이용해
- *   1) 셀렉트 박스 열릴 때마다 전체 고객사 직원 목록(options) 조회
- *   2) 페이지 로드 시 참여중인 고객사 직원 목록(assigned) 조회
- * - 선택/삭제 시 API 호출하여 DB 저장
- */
 export default function ClientMemberSelector() {
   const theme = useMuiTheme();
   const dispatch = useDispatch();
   const { id: projectId } = useParams();
-
-
-  // Redux의 clientCompanyId
   const companyId = useSelector((state) => state.project.current.clientCompanyId);
 
-  // 전체 고객사 직원(options) 상태
   const options = useSelector((state) => state.projectMember.list ?? []);
   const loadingOptions = useSelector((state) => state.projectMember.loading);
 
-  // 프로젝트에 할당된 직원(assigned) 상태
   const [assigned, setAssigned] = useState([]);
-  console.log('assigned', assigned)
+  // ★ 입력창에 쓰여진 텍스트만 관리할 state
+  const [inputValue, setInputValue] = useState("");
 
-
-  // 페이지 로드 시: 이미 참여중인 직원 목록 조회
   useEffect(() => {
     if (companyId && projectId) {
       dispatch(fetchCompanyMembersInProject({ projectId, companyId }))
@@ -56,7 +45,6 @@ export default function ClientMemberSelector() {
     }
   }, [companyId, projectId, dispatch]);
 
-  // 셀렉트 박스 열림 제어
   const [open, setOpen] = useState(false);
   const handleOpen = () => {
     setOpen(true);
@@ -68,7 +56,6 @@ export default function ClientMemberSelector() {
     setOpen(false);
   };
 
-  // 할당 목록 변경 핸들러(Autocomplete 선택)
   const handleChange = (_e, newValue) => {
     const additions = newValue.filter(
       (nv) => !assigned.some((a) => a.memberId === nv.memberId)
@@ -80,7 +67,6 @@ export default function ClientMemberSelector() {
     setOpen(false);
   };
 
-  // 할당 취소 핸들러
   const handleRemove = (memberId) => {
     dispatch(removeMemberFromProject({ projectId, memberId }));
     setAssigned((prev) =>
@@ -88,38 +74,38 @@ export default function ClientMemberSelector() {
     );
   };
 
-  // 이름 이니셜
   const getInitial = (name) => (name && name.length ? name[0] : "?");
 
   return (
     <Box>
-      {/* Autocomplete for options */}
       <Autocomplete
         multiple
         open={open}
         onOpen={handleOpen}
         onClose={handleClose}
+
+        // 기본 clear 아이콘 제거
+        disableClearable
+        clearIcon={null}
+
         options={options}
         loading={loadingOptions}
         getOptionLabel={(opt) => opt.memberName}
-        isOptionEqualToValue={(opt, val) =>
-          opt.memberId === val.memberId
-        }
+        isOptionEqualToValue={(opt, val) => opt.memberId === val.memberId}
         value={assigned}
         onChange={handleChange}
+
+        // ★ 입력창값 제어
+        inputValue={inputValue}
+        onInputChange={(_e, newInput) => setInputValue(newInput)}
+
         renderOption={(props, option, { selected }) => (
           <Box
             component="li"
             {...props}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              py: 0.5,
-            }}
+            sx={{ display: "flex", alignItems: "center", py: 0.5 }}
           >
-            <Avatar
-              sx={{ width: 30, height: 30, mr: 1 }}
-            >
+            <Avatar sx={{ width: 30, height: 30, mr: 1 }}>
               {getInitial(option.memberName)}
             </Avatar>
             <Typography sx={{ flexGrow: 1 }}>
@@ -133,6 +119,7 @@ export default function ClientMemberSelector() {
           </Box>
         )}
         renderTags={() => null}
+
         renderInput={(params) => (
           <TextField
             {...params}
@@ -142,8 +129,15 @@ export default function ClientMemberSelector() {
               ...params.InputProps,
               endAdornment: (
                 <>
-                  {loadingOptions && (
-                    <CircularProgress size={20} />
+                  {loadingOptions && <CircularProgress size={20} />}
+                  {/* ★ 직접 넣은 X 버튼 */}
+                  {inputValue && (
+                    <IconButton
+                      size="small"
+                      onClick={() => setInputValue("")}
+                    >
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
                   )}
                   {params.InputProps.endAdornment}
                 </>
@@ -159,13 +153,12 @@ export default function ClientMemberSelector() {
         }}
       />
 
-      {/* Assigned 직원 리스트 */}
       <Box sx={{ mt: 2 }}>
         <ClientMemberList
           selectedEmployees={assigned.map((emp) => ({
             id: emp.memberId,
             name: emp.memberName,
-            email: emp.email
+            email: emp.email,
           }))}
           onRemove={handleRemove}
         />
