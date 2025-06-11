@@ -1,3 +1,4 @@
+// src/components/MemberForm.jsx
 import React from "react";
 import {
   TextField,
@@ -11,189 +12,232 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Tooltip,
 } from "@mui/material";
+import { InfoOutlined } from "@mui/icons-material";
 
-const ROLES = [
-  { value: "DEV_ADMIN", label: "개발사 관리자" },
-  { value: "CLIENT_ADMIN", label: "고객사 관리자" },
-  { value: "SYSTEM_ADMIN", label: "관리자" },
-  { value: "USER", label: "일반 사용자" },
-];
-
+/**
+ * MemberForm
+ * - 멤버 등록 폼을 ProjectForm과 동일한 디자인 패턴으로 구성합니다.
+ * - 연락처와 생년월일을 기본 정보로 옮기고,
+ *   3번 섹션 제목을 "3. 권한 선택"으로 변경했습니다.
+ */
 export default function MemberForm({
   form,
   handleChange,
   companies = [],
   loading = false,
 }) {
+  const ROLES = [
+    { value: "DEV_ADMIN", label: "개발사 관리자" },
+    { value: "CLIENT_ADMIN", label: "고객사 관리자" },
+    { value: "SYSTEM_ADMIN", label: "관리자" },
+    { value: "USER", label: "일반 사용자" },
+  ];
+
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", flex: 1 }}>
-      <Paper sx={{ p: 4, mb: 3, mx: 3, borderRadius: 2, boxShadow: 2 }}>
-        <Stack spacing={4}>
-          <Typography variant="h6" fontWeight={600}>
-            멤버 등록
-          </Typography>
-          <Divider />
-
-          {/* 1행: 이름 */}
-          <Grid container columns={12} spacing={3}>
-            <Grid gridColumn="span 12">
-              <TextField
-                fullWidth
-                label="이름"
-                value={form.name}
-                onChange={handleChange("name")}
-                required
-                disabled={loading}
-                error={!form.name}
-                helperText={!form.name ? "이름을 입력해주세요." : " "}
-              />
+    <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+      <Paper
+        sx={{
+          p: 4,
+          mb: 3,
+          mx: 3,
+          borderRadius: 2,
+          boxShadow: 2,
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          boxSizing: "border-box",
+          overflowY: "auto",
+        }}
+      >
+        <Stack spacing={4} sx={{ flex: 1, minHeight: 0 }}>
+          {/* 1) 기본 정보 */}
+          <Box>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Typography variant="subtitle1" fontWeight={600}>
+                1. 기본 정보
+              </Typography>
+              <Tooltip title="이름, 이메일, 연락처, 생년월일을 입력하세요.">
+                <InfoOutlined fontSize="small" color="action" />
+              </Tooltip>
+            </Stack>
+            <Divider sx={{ mt: 1, mb: 2 }} />
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="이름"
+                  value={form.name}
+                  onChange={handleChange("name")}
+                  required
+                  disabled={loading}
+                  error={!form.name}
+                  helperText={!form.name ? "이름을 입력해주세요." : " "}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="이메일"
+                  type="email"
+                  value={form.email}
+                  onChange={handleChange("email")}
+                  required
+                  disabled={loading}
+                  error={!form.email}
+                  helperText={!form.email ? "이메일을 입력해주세요." : " "}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="연락처"
+                  value={form.phoneNumber}
+                  onChange={handleChange("phoneNumber")}
+                  required
+                  disabled={loading}
+                  error={!form.phoneNumber}
+                  helperText={!form.phoneNumber ? "연락처를 입력해주세요." : " "}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="생년월일"
+                  type="date"
+                  value={form.birthDate}
+                  onChange={handleChange("birthDate")}
+                  required
+                  disabled={loading}
+                  error={!form.birthDate}
+                  helperText={!form.birthDate ? "생년월일을 입력해주세요." : " "}
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
             </Grid>
-          </Grid>
+          </Box>
 
-          {/* 2행: 이메일 */}
-          <Grid container columns={12} spacing={3}>
-            <Grid gridColumn="span 12">
-              <TextField
-                fullWidth
-                label="이메일"
-                type="email"
-                value={form.email}
-                onChange={handleChange("email")}
-                required
-                disabled={loading}
-                error={!form.email}
-                helperText={!form.email ? "이메일을 입력해주세요." : " "}
-              />
-            </Grid>
-          </Grid>
-
-          {/* 3행: 회사 / 부서 / 직책 */}
-          <Grid container columns={12} spacing={3}>
-            <Grid gridColumn="span 4">
-              <FormControl
-                fullWidth
-                required
-                disabled={loading}
-                error={!form.companyId}
-                sx={{ minWidth: 200 }}
-              >
-                <InputLabel id="company-select-label">회사</InputLabel>
-                <Select
-                  labelId="company-select-label"
-                  value={form.companyId}
-                  onChange={handleChange("companyId")}
-                  label="회사"
-                  MenuProps={{
-                    PaperProps: { style: { maxHeight: 300 } },
-                  }}
-                  sx={{ height: 56 }}
+          {/* 2) 소속 정보 */}
+          <Box>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Typography variant="subtitle1" fontWeight={600}>
+                2. 소속 정보
+              </Typography>
+              <Tooltip title="회사를 선택하고, 부서와 직책을 입력하세요.">
+                <InfoOutlined fontSize="small" color="action" />
+              </Tooltip>
+            </Stack>
+            <Divider sx={{ mt: 1, mb: 2 }} />
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={4}>
+                <FormControl
+                  fullWidth
+                  required
+                  disabled={loading}
+                  error={!form.companyId}
                 >
-                  {companies.map((company) => (
-                    <MenuItem key={company.id} value={company.id}>
-                      {company.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {!form.companyId && (
-                  <Typography
-                    variant="caption"
-                    color="error"
-                    sx={{ ml: 2, mt: 0.5 }}
+                  <InputLabel id="company-select-label">회사</InputLabel>
+                  <Select
+                    labelId="company-select-label"
+                    value={form.companyId}
+                    onChange={handleChange("companyId")}
+                    label="회사"
+                    MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}
+                    sx={{ height: 56 }}
                   >
-                    회사를 선택해주세요.
-                  </Typography>
-                )}
-              </FormControl>
+                    {companies.map((c) => (
+                      <MenuItem key={c.id} value={c.id}>
+                        {c.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {!form.companyId && (
+                    <Typography
+                      variant="caption"
+                      color="error"
+                      sx={{ ml: 2, mt: 0.5 }}
+                    >
+                      회사를 선택해주세요.
+                    </Typography>
+                  )}
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  label="부서"
+                  value={form.department}
+                  onChange={handleChange("department")}
+                  required
+                  disabled={loading}
+                  error={!form.department}
+                  helperText={!form.department ? "부서를 입력해주세요." : " "}
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  label="직책"
+                  value={form.position}
+                  onChange={handleChange("position")}
+                  required
+                  disabled={loading}
+                  error={!form.position}
+                  helperText={!form.position ? "직책을 입력해주세요." : " "}
+                />
+              </Grid>
             </Grid>
-            <Grid gridColumn="span 4">
-              <TextField
-                fullWidth
-                label="부서"
-                value={form.department}
-                onChange={handleChange("department")}
-                required
-                disabled={loading}
-                error={!form.department}
-                helperText={!form.department ? "부서를 입력해주세요." : " "}
-              />
-            </Grid>
-            <Grid gridColumn="span 4">
-              <TextField
-                fullWidth
-                label="직책"
-                value={form.position}
-                onChange={handleChange("position")}
-                required
-                disabled={loading}
-                error={!form.position}
-                helperText={!form.position ? "직책을 입력해주세요." : " "}
-              />
-            </Grid>
-          </Grid>
+          </Box>
 
-          {/* 4행: 권한 / 연락처 / 생년월일 */}
-          <Grid container columns={12} spacing={3}>
-            <Grid gridColumn="span 4">
-              <FormControl
-                fullWidth
-                required
-                disabled={loading}
-                error={!form.role}
-                sx={{ minWidth: 200 }}
-              >
-                <InputLabel id="role-select-label">권한</InputLabel>
-                <Select
-                  labelId="role-select-label"
-                  value={form.role}
-                  onChange={handleChange("role")}
-                  label="권한"
-                  sx={{ height: 56 }}
+          {/* 3) 권한 선택 */}
+          <Box>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Typography variant="subtitle1" fontWeight={600}>
+                3. 권한 선택
+              </Typography>
+              <Tooltip title="멤버의 권한을 선택하세요.">
+                <InfoOutlined fontSize="small" color="action" />
+              </Tooltip>
+            </Stack>
+            <Divider sx={{ mt: 1, mb: 2 }} />
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={4}>
+                <FormControl
+                  fullWidth
+                  required
+                  disabled={loading}
+                  error={!form.role}
+                  sx={{ minWidth: 200 }}
                 >
-                  {ROLES.map((role) => (
-                    <MenuItem key={role.value} value={role.value}>
-                      {role.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {!form.role && (
-                  <Typography
-                    variant="caption"
-                    color="error"
-                    sx={{ ml: 2, mt: 0.5 }}
+                  <InputLabel id="role-select-label">권한</InputLabel>
+                  <Select
+                    labelId="role-select-label"
+                    value={form.role}
+                    onChange={handleChange("role")}
+                    label="권한"
+                    sx={{ height: 56 }}
                   >
-                    권한을 선택해주세요.
-                  </Typography>
-                )}
-              </FormControl>
+                    {ROLES.map((role) => (
+                      <MenuItem key={role.value} value={role.value}>
+                        {role.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {!form.role && (
+                    <Typography
+                      variant="caption"
+                      color="error"
+                      sx={{ ml: 2, mt: 0.5 }}
+                    >
+                      권한을 선택해주세요.
+                    </Typography>
+                  )}
+                </FormControl>
+              </Grid>
             </Grid>
-            <Grid gridColumn="span 4">
-              <TextField
-                fullWidth
-                label="연락처"
-                value={form.phoneNumber}
-                onChange={handleChange("phoneNumber")}
-                required
-                disabled={loading}
-                error={!form.phoneNumber}
-                helperText={!form.phoneNumber ? "연락처를 입력해주세요." : " "}
-              />
-            </Grid>
-            <Grid gridColumn="span 4">
-              <TextField
-                fullWidth
-                label="생년월일"
-                type="date"
-                value={form.birthDate}
-                onChange={handleChange("birthDate")}
-                required
-                disabled={loading}
-                error={!form.birthDate}
-                helperText={!form.birthDate ? "생년월일을 입력해주세요." : " "}
-                InputLabelProps={{ shrink: true }}
-              />
-            </Grid>
-          </Grid>
+          </Box>
         </Stack>
       </Paper>
     </Box>
