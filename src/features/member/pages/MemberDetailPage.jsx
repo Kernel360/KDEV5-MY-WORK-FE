@@ -66,21 +66,6 @@ export default function MemberDetailPage() {
     );
   }
 
-  if (!member) {
-    return (
-      <PageWrapper>
-        <Box
-          display="flex"
-          flex={1}
-          alignItems="center"
-          justifyContent="center"
-        >
-          멤버를 찾을 수 없습니다.
-        </Box>
-      </PageWrapper>
-    );
-  }
-
   // 활성/비활성 칩 정보 구성
   const statusInfo = member.deleted
     ? { label: "비활성", colorKey: "error" }
