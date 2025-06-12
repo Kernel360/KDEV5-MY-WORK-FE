@@ -3,15 +3,21 @@ import api from "./api";
 
 /**
  * 회사 소속 멤버 목록 조회
- * GET /api/member/company/{companyId}?page={page}
+ * GET /api/member?page={page}&companyId={companyId}&keyword={keyword}&keywordType=NAME
  *
  * @param {string} companyId - 조회할 회사 UUID
  * @param {number} [page=1] - 페이지 번호 (1 이상)
- * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<CompanyMemberWebResponse>
+ * @param {string} [keyword=""] - 검색어 (이름 기준)
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<MemberListWebResponse>
  */
-export function getCompanyMembers(companyId, page = 1) {
-  return api.get(`/api/member/company/${companyId}`, {
-    params: { page },
+export function getCompanyMembers(companyId, page = 1, keyword = "") {
+  return api.get(`/api/member`, {
+    params: { 
+      page,
+      companyId,
+      keyword: keyword || null,
+      keywordType: keyword ? "NAME" : null
+    },
   });
 }
 
