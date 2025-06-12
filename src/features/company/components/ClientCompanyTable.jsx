@@ -76,7 +76,7 @@ export default function ProjectTable() {
           total: totalCount,
           onPageChange: setPage,
         }}
-        onRowClick={(row) => navigate(`/projects/${row.id}`)}
+        onRowClick={(row) => navigate(`/client-companies/${row.companyId}`)}
         search={{
           key: searchKey,
           placeholder: "검색어를 입력하세요",
