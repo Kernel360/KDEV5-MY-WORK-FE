@@ -12,11 +12,11 @@ import api from "./api";
  */
 export function getCompanyMembers(companyId, page = 1, keyword = "") {
   return api.get(`/api/member`, {
-    params: { 
+    params: {
       page,
       companyId,
       keyword: keyword || null,
-      keywordType: keyword ? "NAME" : null
+      keywordType: keyword ? "NAME" : null,
     },
   });
 }
@@ -28,8 +28,7 @@ export function getCompanyMembers(companyId, page = 1, keyword = "") {
  * @param {string} memberId - 조회할 멤버 UUID
  * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<MemberSelectWebResponse>
  */
-export const getMemberById = (memberId) =>
-  api.get(`/api/member/${memberId}`);
+export const getMemberById = (memberId) => api.get(`/api/member/${memberId}`);
 
 /**
  * 멤버 생성
@@ -38,8 +37,7 @@ export const getMemberById = (memberId) =>
  * @param {{ name: string; email: string; position: string; department: string; phoneNumber?: string; companyId: string }} data
  * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<MemberCreateWebResponse>
  */
-export const createMember = (data) =>
-  api.post(`/api/member`, data);
+export const createMember = (data) => api.post(`/api/member`, data);
 
 /**
  * 멤버 수정
@@ -48,8 +46,7 @@ export const createMember = (data) =>
  * @param {{ id: string; name?: string; email?: string; position?: string; department?: string; phoneNumber?: string }} data
  * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<MemberUpdateWebResponse>
  */
-export const updateMember = (data) =>
-  api.put(`/api/member`, data);
+export const updateMember = (data) => api.put("/api/member", data);
 
 /**
  * 멤버 삭제
@@ -58,8 +55,7 @@ export const updateMember = (data) =>
  * @param {{ memberId: string }} data
  * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<MemberDeleteWebResponse>
  */
-export const deleteMember = (data) =>
-  api.delete(`/api/member`, { data });
+export const deleteMember = (data) => api.delete(`/api/member`, { data });
 
 /**
  * 멤버 검색 조회

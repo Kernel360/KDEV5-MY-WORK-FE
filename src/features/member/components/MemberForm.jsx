@@ -36,7 +36,9 @@ export default function MemberForm({
   ];
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+    <Box
+      sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}
+    >
       <Paper
         sx={{
           px: 4,
@@ -99,7 +101,9 @@ export default function MemberForm({
                   required
                   disabled={loading}
                   error={!form.phoneNumber}
-                  helperText={!form.phoneNumber ? "연락처를 입력해주세요." : " "}
+                  helperText={
+                    !form.phoneNumber ? "연락처를 입력해주세요." : " "
+                  }
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -108,12 +112,17 @@ export default function MemberForm({
                   label="생년월일"
                   type="date"
                   value={form.birthDate}
-                  onChange={handleChange("birthDate")}
+                  onChange={handleChange("")}
                   required
                   disabled={loading}
                   error={!form.birthDate}
-                  helperText={!form.birthDate ? "생년월일을 입력해주세요." : " "}
+                  helperText={
+                    !form.birthDate ? "생년월일을 입력해주세요." : " "
+                  }
                   InputLabelProps={{ shrink: true }}
+                  InputProps={{
+                    readOnly: true,
+                  }}
                 />
               </Grid>
             </Grid>
