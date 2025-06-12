@@ -9,7 +9,7 @@ import {
 
 // 게시글별 리뷰 조회
 export const fetchReviews = createAsyncThunk(
-  'reviews/fetchByPost',
+  'review/fetchByPost',
   async ({ postId, page }, thunkAPI) => {
     try {
       const response = await fetchReviewsByPost(postId, page);
@@ -22,7 +22,7 @@ export const fetchReviews = createAsyncThunk(
 
 // 리뷰 생성
 export const addReview = createAsyncThunk(
-  'reviews/create',
+  'review/create',
   async (payload, thunkAPI) => {
     try {
       const response = await createReview(payload);
@@ -35,7 +35,7 @@ export const addReview = createAsyncThunk(
 
 // 리뷰 수정
 export const updateReview = createAsyncThunk(
-  'reviews/update',
+  'review/update',
   async ({ reviewId, comment }, thunkAPI) => {
     try {
       const response = await modifyReview(reviewId, { comment });
@@ -48,7 +48,7 @@ export const updateReview = createAsyncThunk(
 
 // 리뷰 삭제
 export const removeReview = createAsyncThunk(
-  'reviews/delete',
+  'review/delete',
   async (reviewId, thunkAPI) => {
     try {
       const response = await deleteReview(reviewId);
@@ -67,7 +67,7 @@ const initialState = {
 };
 
 const reviewSlice = createSlice({
-  name: 'reviews',
+  name: 'review',
   initialState,
   reducers: {
     // 필요 시 동기 액션 추가

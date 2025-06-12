@@ -7,6 +7,8 @@ import authReducer from "@/features/auth/authSlice";
 import projectStepReducer from "@/features/project/projectStepSlice";
 import postReducer from "@/features/project/post/postSlice";
 import projectMemberReducer from "@/features/project/projectMemberSlice";
+import reviewReducer from "@/features/project/post/reviewSlice";
+
 
 const preloadedAuth = (() => {
   try {
@@ -43,6 +45,7 @@ export const store = configureStore({
     projectStep:    projectStepReducer,
     post:           postReducer,
     projectMember:  projectMemberReducer,
+    review: reviewReducer
   },
   preloadedState: {
     auth: preloadedAuth,

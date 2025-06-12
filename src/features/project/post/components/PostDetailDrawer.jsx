@@ -1,5 +1,5 @@
 // src/components/common/postTable/PostDetailDrawer.jsx
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Drawer,
   Box,
@@ -8,17 +8,30 @@ import {
   Stack,
   Paper,
   Chip,
-  Divider,
   Avatar,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@mui/material/styles";
+import { useDispatch, useSelector } from "react-redux";
 import CommentSection from "./CommentSection";
+import { fetchReviews } from "../reviewSlice"; // 경로는 실제 위치에 맞춰 조정
 
 export default function PostDetailDrawer({ open, post, onClose }) {
   const theme = useTheme();
+  const dispatch = useDispatch();
+  const reviews = useSelector(
+    state => state.review.items || []
+  );
 
-  // post가 아직 로드되지 않았다면 렌더링하지 않음
+  console.log('reviews', reviews)
+
+  // drawer가 열릴 때 postId가 있으면 댓글 조회
+  useEffect(() => {
+    if (open && post?.postId) {
+      dispatch(fetchReviews({ postId: post.postId, page: 1 }));
+    }
+  }, [open, post, dispatch]);
+
   if (!post) return null;
 
   const statusMap = {
@@ -47,13 +60,21 @@ export default function PostDetailDrawer({ open, post, onClose }) {
         {/* 헤더 */}
         <Box sx={{ p: 3, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Stack direction="row" spacing={2} alignItems="center">
-            <Avatar sx={{ width: 40, height: 40 }}>{post.companyName?.[0] || "?"}</Avatar>
+            <Avatar sx={{ width: 40, height: 40 }}>
+              {post.companyName?.[0] || "?"}
+            </Avatar>
             <Box>
               <Stack direction="row" spacing={1} alignItems="baseline">
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{post.authorName}</Typography>
-                <Typography variant="body2" color="text.secondary">{post.companyName}</Typography>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                  {post.authorName}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {post.companyName}
+                </Typography>
               </Stack>
-              <Typography variant="caption" color="text.secondary">{post.createdAt}</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {post.createdAt}
+              </Typography>
             </Box>
           </Stack>
           <IconButton onClick={onClose}>
@@ -63,7 +84,9 @@ export default function PostDetailDrawer({ open, post, onClose }) {
 
         {/* 제목 + 상태 칩 */}
         <Box sx={{ px: 3, pb: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>{post.title}</Typography>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>
+            {post.title}
+          </Typography>
           <Chip
             label={stat.label}
             size="medium"
@@ -77,14 +100,12 @@ export default function PostDetailDrawer({ open, post, onClose }) {
           />
         </Box>
 
-        {/* 본문 */}
+        {/* 본문 + 댓글 */}
         <Box sx={{ px: 3, pb: 3 }}>
           <Typography variant="body1" sx={{ whiteSpace: "pre-wrap", lineHeight: 1.6 }}>
             {post.content}
           </Typography>
-
-          {/* 댓글 섹션 */}
-          <CommentSection postId={post.postId} comments={post.reviews ?? []} />
+          <CommentSection postId={post.postId} comments={reviews} />
         </Box>
       </Paper>
     </Drawer>
