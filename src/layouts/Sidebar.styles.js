@@ -8,6 +8,7 @@ import Stack from "@mui/material/Stack";
 
 export const SidebarRoot = styled(Box)(({ theme }) => ({
   width: 200,
+  minWidth: 200,
   height: "100vh",
   backgroundColor: theme.palette.text.primary,
   color: theme.palette.background.default,

@@ -1,8 +1,8 @@
 // src/components/ClientMemberList.jsx
-import React from 'react';
-import { Box, Typography, IconButton } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { useTheme } from '@mui/material/styles';
+import React from "react";
+import { Box, Typography, IconButton } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { useTheme } from "@mui/material/styles";
 
 export default function ClientMemberList({ selectedEmployees = [], onRemove }) {
   const theme = useTheme();
@@ -15,8 +15,8 @@ export default function ClientMemberList({ selectedEmployees = [], onRemove }) {
   return (
     <Box
       sx={{
-        display: 'flex',
-        flexWrap: 'wrap',
+        display: "flex",
+        flexWrap: "wrap",
         gap: 1,
         mb: 1.5,
       }}
@@ -25,21 +25,24 @@ export default function ClientMemberList({ selectedEmployees = [], onRemove }) {
         <Box
           key={emp.id}
           sx={{
-               maxWidth: 300,
-               maxHeight: 80,
-            flex: '1 0 140px',
+            maxWidth: 300,
+            maxHeight: 80,
+            minHeight: 80,
+            minWidth: 300,
+
+            flex: "1 0 140px",
             border: `1px solid ${theme.palette.divider}`,
             borderRadius: 2,
             p: 2,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
             backgroundColor: theme.palette.background.paper,
-            boxSizing: 'border-box'
+            boxSizing: "border-box",
           }}
         >
           {/* 직원 이름과 이메일 */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
             <Typography variant="body2" fontWeight={600} noWrap>
               {emp.name}
             </Typography>
