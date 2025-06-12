@@ -15,6 +15,7 @@ import LoginPage from "@/features/auth/pages/LoginPage";
 import MemberPage from "@/features/member/pages/MemberPage";
 import MemberFormPage from "@/features/member/pages/MemberFormPage";
 import MemberDetailPage from "@/features/member/pages/MemberDetailPage";
+import ClientCompanyDetailPage from "@/features/company/pages/ClientCompanyDetailPage"
 
 export default function MainRoutes() {
   const isAuthenticated = useSelector(
@@ -62,6 +63,7 @@ export default function MainRoutes() {
 
         <Route path="/client-companies" element={<ClientCompanyPage />} />
         <Route path="/client-companies/new" element={<ClientCompanyFormPage />} />
+        <Route path="/client-companies/:id" element={<ClientCompanyDetailPage />} />
       </Route>
 
       <Route
