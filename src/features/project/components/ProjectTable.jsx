@@ -13,16 +13,16 @@ const columns = [
     key: "step",
     label: "상태",
     type: "status",
-   statusMap: {
+    statusMap: {
       NOT_STARTED: { color: "neutral",    label: "계획" },
       IN_PROGRESS: { color: "info", label: "진행" },
       PAUSED:      { color: "warning", label: "중단" },
       COMPLETED:   { color: "success", label: "완료" },
     },
   },
-    { key: "startAt", label: "시작일", type: "date" },
-    { key: "endAt", label: "종료일", type: "date" },
-   { key: 'clientCompanyId', label: "고객사",type: "company", },
+  { key: "startAt", label: "시작일", type: "date" },
+  { key: "endAt", label: "종료일", type: "date" },
+  { key: 'clientCompanyId', label: "고객사",type: "company", },
   { key: 'devCompanyId', label: '개발사' , type: "company"},
 ];
 
@@ -143,6 +143,13 @@ export default function ProjectTable() {
         open={snackbarOpen}
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity="warning">
+          관리자에게 문의해주세요.
+        </Alert>
+      </Snackbar>
+    </Box>
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
         <Alert onClose={handleCloseSnackbar} severity="warning" sx={{ width: '100%' }}>
