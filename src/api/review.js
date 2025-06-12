@@ -38,3 +38,17 @@ export function modifyReview(reviewId, data) {
 export function deleteReview(reviewId) {
   return api.delete(`/api/reviews/${reviewId}`);
 }
+
+/**
+ * 리뷰 목록 조회 (페이징)
+ * GET /api/posts/{postId}/reviews?page={page}
+ *
+ * @param {string} postId - 조회할 게시글의 UUID
+ * @param {number} page - 페이지 번호 (1부터 시작)
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<ReviewsSelectWebResponse>
+ */
+export function fetchReviewsByPost(postId, page = 1) {
+  return api.get(`/api/posts/${postId}/reviews`, {
+    params: { page },
+  });
+}
