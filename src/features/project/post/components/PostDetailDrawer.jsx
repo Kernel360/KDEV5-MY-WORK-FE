@@ -21,14 +21,13 @@ export default function PostDetailDrawer({ open, post, onClose }) {
   const theme = useTheme();
   const [comment, setComment] = useState("");
 
-  const statusMap = {
-    승인대기: { color: "warning", label: "승인 대기" },
-    승인완료: { color: "success", label: "승인 완료" },
-  };
-  const stat = statusMap[post.approval] || {
-    color: "neutral",
-    label: post.approval || "-",
-  };
+const statusMap = {
+  PENDING: { label: "검토 요청", color: "neutral" },
+  APPROVED: { label: "검토 완료", color: "success" },
+};
+
+const stat = statusMap[post?.approval ?? "-"] 
+            || { label: post?.approval ?? "-", color: "neutral" };
 
   return (
     <Drawer
@@ -37,7 +36,6 @@ export default function PostDetailDrawer({ open, post, onClose }) {
       onClose={onClose}
       PaperProps={{
         sx: {
-          // 화면이 xs일 땐 100%, 그 이상일 땐 화면 너비의 50% 사용
           width: { xs: "100%", sm: "50vw" },
           bgcolor: "transparent",
         },
@@ -63,20 +61,21 @@ export default function PostDetailDrawer({ open, post, onClose }) {
           }}
         >
           <Stack direction="row" spacing={2} alignItems="center">
-            <Avatar src={post.companyLogoUrl} sx={{ width: 40, height: 40 }}>
-              {post.companyName?.[0] || post.authorName?.[0] || "?"}
+            {/* Avatar에도 Optional Chaining 적용 */}
+            <Avatar sx={{ width: 40, height: 40 }}>
+              {post?.companyName?.[0] ?? "?"}
             </Avatar>
             <Box>
               <Stack direction="row" spacing={1} alignItems="baseline">
                 <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                  {post.companyName || "-"}
+                {post?.authorName ?? "-"}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {post.authorName || "-"}
+                    {post?.companyName ?? "-"}
                 </Typography>
               </Stack>
               <Typography variant="caption" color="text.secondary">
-                {post.createdAt || "-"}
+                {post?.createdAt ?? "-"}
               </Typography>
             </Box>
           </Stack>
@@ -96,14 +95,14 @@ export default function PostDetailDrawer({ open, post, onClose }) {
           }}
         >
           <Typography variant="h5" sx={{ fontWeight: 700 }}>
-            {post.title || "-"}
+            {post?.title ?? "-"}
           </Typography>
           <Chip
-            label={stat.label}
+           label={stat?.label ?? "-"}
             size="medium"
             sx={{
-              bgcolor: theme.palette.status[stat.color]?.bg,
-              color: theme.palette.status[stat.color]?.main,
+              bgcolor: theme.palette.status?.[stat.color]?.bg,
+              color:  theme.palette.status?.[stat.color]?.main,
               fontWeight: 600,
               py: 0.5,
               px: 1.5,
@@ -117,7 +116,7 @@ export default function PostDetailDrawer({ open, post, onClose }) {
             variant="body1"
             sx={{ whiteSpace: "pre-wrap", lineHeight: 1.6 }}
           >
-            {post.content || "-"}
+            {post?.content ?? "-"}
           </Typography>
 
           {/* 댓글 입력 */}
