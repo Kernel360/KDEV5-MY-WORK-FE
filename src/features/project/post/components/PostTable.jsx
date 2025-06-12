@@ -2,18 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import { Box, Pagination } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import SectionTable from "@/components/common/sectionTable/SectionTable";
 import PostDetailDrawer from "../components/PostDetailDrawer";
-import CreatePostDrawer from "../components/CreatePostDrawer";
+import CreatePostDrawer from "./CreatePostDrawer";
 import CustomButton from "@/components/common/CustomButton/CustomButton";
 import { fetchPosts, fetchPostById, createPost } from "../postSlice";
 import { fetchProjectStages } from "../../projectStepSlice";
 
 export default function PostTable() {
-  const theme = useTheme();
   const dispatch = useDispatch();
   const { id: projectId } = useParams();
 
