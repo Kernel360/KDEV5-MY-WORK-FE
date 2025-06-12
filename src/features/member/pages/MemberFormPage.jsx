@@ -13,6 +13,7 @@ const MemberFormPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { id: memberId } = useParams(); // ← id 파라미터 받아오기
+  const isEdit = Boolean(memberId);
 
   const { companyListOnlyIdName: companies = [], loading } = useSelector(
     (state) => state.company
@@ -51,7 +52,7 @@ const MemberFormPage = () => {
             role: member.role,
             phoneNumber: member.phoneNumber,
             email: member.email,
-            birthDate: member.birthDate?.substring(0, 10) || "",
+            birthDate: member.birthday?.substring(0, 10) || "",
             companyId: member.companyId,
           });
         } catch (err) {
@@ -73,11 +74,22 @@ const MemberFormPage = () => {
     try {
       const payload = {
         ...form,
-        birthDate: form.birthDate ? form.birthDate + "T00:00:00" : "",
+        ...(isEdit
+          ? {
+              id: memberId,
+              birthday: form.birthDate ? form.birthDate + "T00:00:00" : "",
+            }
+          : {
+              birthDate: form.birthDate ? form.birthDate + "T00:00:00" : "",
+            }),
       };
 
+      if (isEdit) {
+        delete payload.birthDate;
+      }
+
       if (memberId) {
-        await updateMember(memberId, payload);
+        await updateMember(payload);
       } else {
         await createMember(payload);
       }

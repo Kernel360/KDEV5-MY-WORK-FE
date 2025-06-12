@@ -13,6 +13,70 @@ export const fetchMembers = createAsyncThunk(
   }
 );
 
+/**
+ * 회사 소속 멤버 목록 조회
+ */
+export const fetchCompanyMembers = createAsyncThunk(
+  "member/fetchCompanyMembers",
+  async ({ companyId, page = 1, keyword = "" }, thunkAPI) => {
+    try {
+      const response = await memberAPI.getCompanyMembers(
+        companyId,
+        page,
+        keyword
+      );
+      return response.data.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data || "Error");
+    }
+  }
+);
+
+/**
+ * 단일 멤버 조회
+ */
+export const fetchMemberById = createAsyncThunk(
+  "member/fetchMemberById",
+  async (memberId, thunkAPI) => {
+    try {
+      const response = await memberAPI.getMemberById(memberId);
+      return response.data.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data || "Error");
+    }
+  }
+);
+
+/**
+ * 멤버 생성
+ */
+export const createMember = createAsyncThunk(
+  "member/createMember",
+  async (data, thunkAPI) => {
+    try {
+      const response = await memberAPI.createMember(data);
+      return response.data.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data || "Error");
+    }
+  }
+);
+
+/**
+ * 멤버 수정
+ */
+export const updateMember = createAsyncThunk(
+  "member/updateMember",
+  async ({ id, ...data }, thunkAPI) => {
+    try {
+      const response = await memberAPI.updateMember({ id, ...data });
+      return response.data.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data || "Error");
+    }
+  }
+);
+
 const memberSlice = createSlice({
   name: "member",
   initialState: {
@@ -28,19 +92,77 @@ const memberSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(fetchMembers.pending, (state) => {
-      state.loading = true;
-      state.error = null;
-    })
-    .addCase(fetchMembers.fulfilled, (state, action) => {
-      state.list = action.payload.members;
-      state.totalCount = action.payload.totalCount;
-      state.loading = false;
-    })
-    .addCase(fetchMembers.rejected, (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    });
+    builder
+      // 페치 멤버들
+      .addCase(fetchCompanyMembers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchCompanyMembers.fulfilled, (state, action) => {
+        state.list = action.payload.members;
+        state.totalCount = action.payload.totalCount;
+        state.loading = false;
+      })
+      .addCase(fetchCompanyMembers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // 단일 멤버
+      .addCase(fetchMemberById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchMemberById.fulfilled, (state, action) => {
+        state.current = action.payload;
+        state.loading = false;
+      })
+      .addCase(fetchMemberById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // 생성
+      .addCase(createMember.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createMember.fulfilled, (state, action) => {
+        state.list.unshift(action.payload);
+        state.loading = false;
+      })
+      .addCase(createMember.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // 수정
+      .addCase(updateMember.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateMember.fulfilled, (state, action) => {
+        const idx = state.list.findIndex((m) => m.id === action.payload.id);
+        if (idx !== -1) state.list[idx] = action.payload;
+        if (state.current?.id === action.payload.id)
+          state.current = action.payload;
+        state.loading = false;
+      })
+      .addCase(updateMember.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // 삭제
+      .addCase(deleteMember.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteMember.fulfilled, (state, action) => {
+        state.list = state.list.filter((m) => m.id !== action.payload.id);
+        if (state.current?.id === action.payload.id) state.current = null;
+        state.loading = false;
+      })
+      .addCase(deleteMember.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
   },
 });
 
