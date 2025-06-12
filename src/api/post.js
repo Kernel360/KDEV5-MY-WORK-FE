@@ -46,23 +46,16 @@ export function getPostDetail(postId) {
   return api.get(`/api/posts/${postId}`);
 }
 
-/**
- * 게시글 목록 조회
- * GET /api/projects/{projectId}/posts
- *
- * @param {string} projectId - 프로젝트 UUID
- * @param {object} params
- * @param {number} params.page - 페이지 번호 (>=1)
- * @param {string} [params.keyword] - 검색 키워드
- * @param {'AUTHORNAME'|'TITLE'} [params.keywordType] - 검색 대상 타입
- * @param {string} [params.projectStepId] - 단계 UUID
- * @param {boolean} [params.deleted] - 삭제 여부 필터
- * @param {'APPROVED'|'PENDING'} [params.approval] - 승인 상태 필터
- * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<PostListSelectWebResponse>
- */
-export function findPosts(projectId, { page, keyword, keywordType, projectStepId, deleted, approval }) {
+export function findPosts(projectId, page, { keyword, keywordType, projectStepId, deleted, approval }) {
   return api.get(`/api/projects/${projectId}/posts`, {
-    params: { page, keyword, keywordType, projectStepId, deleted, approval },
+    params: {
+      page,
+      keyword,
+      keywordType,
+      projectStepId,
+      deleted,
+      approval,
+    },
   });
 }
 

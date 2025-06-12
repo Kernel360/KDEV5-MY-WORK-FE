@@ -1,3 +1,4 @@
+// src/components/common/sectionTable/SectionTable.jsx
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   Table,
@@ -11,18 +12,19 @@ import {
   TableSortLabel,
   Pagination,
   useTheme,
-  Checkbox,
-  Avatar,
-  Typography,
-  Stack,
-  Link,
-  Button,
-  LinearProgress, Chip
+  Chip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
 } from "@mui/material";
 import dayjs from "dayjs";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import CustomButton from "@/components/common/customButton/CustomButton";
+import LinearProgress from "@mui/material/LinearProgress";
+import { Stack, Typography } from "@mui/material";
+import CustomButton from "@/components/common/CustomButton/CustomButton";
 
 export default function SectionTable({
   columns,
@@ -33,14 +35,17 @@ export default function SectionTable({
   onStepChange,
   onRowClick,
   pagination = null,
+  search = null,
   sx,
 }) {
   const theme = useTheme();
   const scrollRef = useRef(null);
+
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
 
+  // 스크롤버튼 활성화 상태
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -73,6 +78,7 @@ export default function SectionTable({
     }));
   };
 
+  // 정렬된 행 목록
   const sortedRows = useMemo(() => {
     if (!sortConfig.key) return rows;
     return [...rows].sort((a, b) => {
@@ -90,16 +96,40 @@ export default function SectionTable({
     });
   }, [rows, sortConfig]);
 
+  // 단계 & 검색 필터 적용
   const filteredRows = useMemo(() => {
-    if (!selectedStep || selectedStep === "전체") return sortedRows;
-    return sortedRows.filter((row) => row.stepName === selectedStep);
-  }, [sortedRows, selectedStep]);
+    let result = sortedRows;
+
+     if (selectedStep && selectedStep !== "전체") {
+     // row.projectStepTitle 필드로 비교
+     result = result.filter((row) => row.projectStepTitle === selectedStep);
+   }
+
+    // 검색 필터
+    if (search?.key) {
+      const kw = search.value?.toLowerCase();
+      result = result.filter((row) => {
+        let cell = row[search.key];
+        if (cell && typeof cell === "object") {
+          if ("name" in cell) {
+            cell = cell.name;
+          } else {
+            cell = JSON.stringify(cell);
+          }
+        }
+        return cell?.toString().toLowerCase().includes(kw);
+      });
+    }
+
+    return result;
+  }, [sortedRows, selectedStep, search]);
 
   const pageSize = pagination?.pageSize || 10;
   const pageCount = pagination ? Math.ceil(pagination.total / pageSize) : 0;
 
   return (
     <Box sx={sx}>
+      {/* 단계 선택 스크롤 */}
       {steps.length > 0 && onStepChange && (
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
           <IconButton size="small" onClick={handlePrev} disabled={!canScrollPrev}>
@@ -121,16 +151,16 @@ export default function SectionTable({
               key="전체"
               kind={!selectedStep || selectedStep === "전체" ? "primary" : "ghost"}
               size="small"
-              onClick={() => onStepChange("전체")}
+              onClick={() => onStepChange(null, "전체")}
             >
               전체
             </CustomButton>
             {steps.map((step) => (
               <CustomButton
-                key={step.id}
+                key={step.projectStepId}
                 kind={selectedStep === step.title ? "primary" : "ghost"}
                 size="small"
-                onClick={() => onStepChange(step.title)}
+                onClick={() => onStepChange(step.projectStepId, step.title)}
               >
                 {step.title}
               </CustomButton>
@@ -142,6 +172,41 @@ export default function SectionTable({
         </Box>
       )}
 
+      {/* 검색 조건 UI */}
+      {search && (
+        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+          <FormControl size="small" sx={{ minWidth: 120, mr: 2 }}>
+            <InputLabel>검색 조건</InputLabel>
+            <Select
+              value={search.key}
+              onChange={(e) => {
+                search.onKeyChange?.(e.target.value);
+              }}
+              label="검색 조건"
+            >
+              <MenuItem value="">선택</MenuItem>
+              {columns
+                .filter((c) => c.searchable)
+                .map((c) => (
+                  <MenuItem key={c.key} value={c.key}>
+                    {c.label}
+                  </MenuItem>
+                ))}
+            </Select>
+          </FormControl>
+          {search.key && (
+            <TextField
+              size="small"
+              placeholder={search.placeholder || "검색어 입력"}
+              value={search.value}
+              onChange={(e) => search.onChange?.(e.target.value)}
+              sx={{ flex: 1 }}
+            />
+          )}
+        </Box>
+      )}
+
+      {/* 테이블 */}
       <TableContainer sx={{ border: 0.5, borderColor: "grey.100", borderRadius: 2 }}>
         <Table size="small">
           <TableHead>
@@ -188,6 +253,7 @@ export default function SectionTable({
         </Table>
       </TableContainer>
 
+      {/* 페이지네이션 */}
       {pagination && (
         <Box sx={{ display: "flex", justifyContent: "end", mt: 2 }}>
           <Pagination
@@ -216,7 +282,9 @@ function renderCell(col, value, row, theme) {
           </Typography>
         </Stack>
       ) : (
-        <Typography variant="body2" color="text.disabled">-</Typography>
+        <Typography variant="body2" color="text.disabled">
+          -
+        </Typography>
       );
     case "tag":
       return <Chip label={value} size="small" variant="outlined" />;
@@ -254,8 +322,6 @@ function renderCell(col, value, row, theme) {
           <Typography variant="caption">{value ?? 0}%</Typography>
         </Stack>
       );
-    case "custom":
-      return col.render ? col.render(value, row) : value;
     default:
       return String(value ?? "");
   }

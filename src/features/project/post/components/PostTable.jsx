@@ -1,21 +1,15 @@
 // src/components/common/postTable/PostTable.jsx
-import React, { useState, useEffect, useMemo } from "react";
-import {
-  LinearProgress,
-  Stack,
-  Typography,
-  Chip,
-  Box,
-  Pagination,
-} from "@mui/material";
+
+import React, { useState, useEffect } from "react";
+import { Box, Pagination } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import SectionTable from "@/components/common/sectionTable/SectionTable";
 import PostDetailDrawer from "../components/PostDetailDrawer";
-import CreatePostDrawer from "../components/CreatePostDrawer"; // 신규 작성 드로어
-import CustomButton from "@/components/common/CustomButton/CustomButton"; // 커스텀 버튼
-import { fetchPosts, fetchPostById } from "../postSlice";
+import CreatePostDrawer from "../components/CreatePostDrawer";
+import CustomButton from "@/components/common/CustomButton/CustomButton";
+import { fetchPosts, fetchPostById, createPost } from "../postSlice";
 import { fetchProjectStages } from "../../projectStepSlice";
 
 export default function PostTable() {
@@ -23,115 +17,128 @@ export default function PostTable() {
   const dispatch = useDispatch();
   const { id: projectId } = useParams();
 
-  // 신규 작성 드로어 오픈 상태
   const [isCreateOpen, setCreateOpen] = useState(false);
-
-  // Redux에서 게시글과 페이징
   const posts = useSelector((state) => state.post.list || []);
   const totalCount = useSelector((state) => state.post.totalCount || 0);
-
-  // 단계 목록
   const steps = useSelector((state) => state.projectStep.items) || [];
 
-  // 로컬 상태: 페이지, 단계 필터, 선택된 상세
   const [page, setPage] = useState(1);
-  const [selectedStep, setSelectedStep] = useState("");
+  const [selectedStepTitle, setSelectedStepTitle] = useState("전체");
+  const [selectedStepId, setSelectedStepId] = useState(null);
+  const [searchKey, setSearchKey] = useState("");
+  const [searchText, setSearchText] = useState("");
   const [selectedPost, setSelectedPost] = useState(null);
 
-  // 단계 조회
+  // 1) 스텝 목록 로드
   useEffect(() => {
     if (projectId) dispatch(fetchProjectStages(projectId));
   }, [dispatch, projectId]);
 
-  // 게시글 조회
+  // 2) 포스트 목록 로드 (필터/페이지 변경 시마다)
   useEffect(() => {
     dispatch(
       fetchPosts({
+        projectId,
         page,
-        projectStepId: selectedStep || null,
+        keyword: searchText || null,
+       keywordType: searchKey ? searchKey.toUpperCase() : null,
+        projectStepId: selectedStepId,
+        approval: null,
       })
     );
-  }, [dispatch, projectId, page, selectedStep]);
+  }, [dispatch, projectId, page, selectedStepId, searchKey, searchText]);
 
-  // 테이블용 rows
-  const rows = useMemo(
-    () =>
-      posts.map((p) => ({
-        ...p,
-        stepName: p.projectStep?.name,
-        authorName: p.author?.name,
-        createdAt: new Date(p.createdAt).toLocaleDateString(),
-      })),
-    [posts]
-  );
-
-  // 행 클릭: 상세 로드
+  // 행 클릭 → 상세 조회
   const handleRowClick = (row) => {
     dispatch(fetchPostById(row.postId))
       .unwrap()
       .then((detail) => setSelectedPost(detail))
-      .catch((e) => console.error(e));
+      .catch(console.error);
   };
 
+  // 컬럼 정의
   const columns = [
-    { key: "title", label: "글제목", width: "35%", sortable: true },
-    { key: "stepName", label: "단계", width: "15%", sortable: true },
+    { key: "title", label: "글제목", width: "35%", sortable: true, searchable: true },
+    { key: "projectStepTitle", label: "단계", width: "15%", sortable: true},
     {
-      key: "status",
+      key: "approval",
       label: "상태",
       width: "15%",
       sortable: true,
       type: "status",
       statusMap: {
-        New: { label: "신규", color: "primary" },
-        Done: { label: "완료", color: "success" },
-        Pause: { label: "보류", color: "warning" },
-        Fail: { label: "실패", color: "error" },
+        PENDING: { label: "검토 요청", color: "neutral" },
+        APPROVED: { label: "검토 완료", color: "success" },
       },
     },
-    { key: "authorName", label: "작성자", width: "20%", sortable: true },
-    {
-      key: "createdAt",
-      label: "작성일",
-      width: "15%",
-      sortable: true,
-      type: "date",
-    },
+    { key: "authorName", label: "작성자", width: "20%", sortable: true, searchable: true },
+    { key: "createdAt", label: "작성일", width: "15%", sortable: true, type: "date" },
   ];
 
   return (
     <Box sx={{ width: "100%", mt: 2 }}>
-      {/* ── 툴바: 제목 + 작성 버튼 ── */}
-      <Box sx={{ display: "flex", justifyContent: "end", mb: 1 }}>
+      {/* 새 글 작성 버튼 */}
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
         <CustomButton variant="contained" onClick={() => setCreateOpen(true)}>
           새 글 작성
         </CustomButton>
       </Box>
 
+      {/* 테이블 */}
       <SectionTable
         columns={columns}
-        rows={rows}
+        rows={posts}
         rowKey="id"
         steps={steps}
-        selectedStep={selectedStep}
-        onStepChange={setSelectedStep}
+        selectedStep={selectedStepTitle}
+        onStepChange={(stepId, stepTitle) => {
+          setPage(1);
+          setSelectedStepTitle(stepTitle);
+          setSelectedStepId(stepId);
+        }}
         onRowClick={handleRowClick}
         pagination={{ page, total: totalCount, onPageChange: setPage }}
         sx={{ width: "100%" }}
+        search={{
+          key: searchKey,
+          placeholder: "검색어를 입력하세요",
+          value: searchText,
+          onKeyChange: (newKey) => { setPage(1); setSearchKey(newKey); },
+          onChange: (newText) => { setPage(1); setSearchText(newText); },
+        }}
       />
 
+      {/* 상세 드로어 */}
       <PostDetailDrawer
-        open={!!selectedPost}
-        post={selectedPost || {}}
+        open={Boolean(selectedPost)}
+        post={selectedPost}
         onClose={() => setSelectedPost(null)}
       />
 
-       <CreatePostDrawer
+      {/* 생성 드로어 */}
+      <CreatePostDrawer
         open={isCreateOpen}
         onClose={() => setCreateOpen(false)}
-        onSubmit={() => {
-          setCreateOpen(false);
-          dispatch(fetchPosts({ page, projectStepId: selectedStep || null }));
+        onSubmit={(data) => {
+          dispatch(createPost({ projectId, data }))
+            .unwrap()
+            .then(() => {
+              setCreateOpen(false);
+              // 1) 페이지 1 고정
+              setPage(1);
+              // 2) 강제 새로고침: 새 글이 추가된 최신 목록 조회
+              dispatch(
+                fetchPosts({
+                  projectId,
+                  page: 1,
+                  keyword: searchText || null,
+                  keywordType: searchKey ? searchKey.toUpperCase() : null,
+                  projectStepId: selectedStepId,
+                  approval: null,
+                })
+              );
+            })
+            .catch(console.error);
         }}
       />
     </Box>
