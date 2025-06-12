@@ -31,15 +31,15 @@ export default function ProjectTable() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const {
-    // companySlice 와 값 맞춰야 함
-    list: companies, // list 에서 사용할 변수 명 : rawProjects
+    list: companies,
     totalCount,
     error,
-  } = useSelector((state) => state.company); // 도메인 이름으로 설정
+    loading
+  } = useSelector((state) => state.company);
 
   // 페이지 및 검색/필터 상태
   const [page, setPage] = useState(1);
-  const [searchKey, setSearchKey] = useState("");
+  const [searchKey, setSearchKey] = useState("companyName");
   const [searchText, setSearchText] = useState("");
   const [filterValue, setFilterValue] = useState("");
 
@@ -55,14 +55,48 @@ export default function ProjectTable() {
 
   // 데이터 로드 함수
   const loadCompany = useCallback(() => {
-    const params = { page };
-    if (searchText.trim()) params.keyword = searchText.trim();
-    params.companyType = "DEV";
-    if (searchKey) params.keywordType = searchKey;
-    if (filterValue) params[filterKey] = filterValue;
+    const params = { 
+      page,
+      companyType: "DEV"
+    };
+    
+    if (searchText.trim()) {
+      params.keyword = searchText.trim();
+      // 검색 필드에 따라 keywordType 설정
+      switch(searchKey) {
+        case "companyName":
+          params.keywordType = "NAME";
+          break;
+        case "businessNumber":
+          params.keywordType = "BUSINESS_NUMBER";
+          break;
+        case "address":
+          params.keywordType = "ADDRESS";
+          break;
+        default:
+          params.keywordType = "NAME";
+      }
+    }
+    
+    if (filterValue) {
+      params[filterKey] = filterValue;
+    }
 
     dispatch(fetchCompanies(params));
-  }, [dispatch, page, searchText, filterValue]);
+  }, [dispatch, page, searchKey, searchText, filterValue]);
+
+  // 검색 필드 변경 시 페이지 초기화
+  const handleSearchKeyChange = (newKey) => {
+    setPage(1);
+    setSearchKey(newKey);
+    setSearchText(""); // 검색어 초기화
+  };
+
+  // 검색어 변경 시 페이지 초기화
+  const handleSearchTextChange = (newText) => {
+    setPage(1);
+    setSearchText(newText);
+  };
 
   useEffect(() => {
     loadCompany();
@@ -80,21 +114,14 @@ export default function ProjectTable() {
           onPageChange: setPage,
         }}
         onRowClick={(row) => {
-          console.log("선택된 row:", row);
           navigate(`/dev-companies/${row.companyId}`);
         }}
         search={{
           key: searchKey,
           placeholder: "검색어를 입력하세요",
           value: searchText,
-          onKeyChange: (newKey) => {
-            setPage(1);
-            setSearchKey(newKey);
-          },
-          onChange: (newText) => {
-            setPage(1);
-            setSearchText(newText);
-          },
+          onKeyChange: handleSearchKeyChange,
+          onChange: handleSearchTextChange,
         }}
         filter={{
           key: filterKey,
@@ -106,7 +133,7 @@ export default function ProjectTable() {
             setFilterValue(val);
           },
         }}
-        loading={status === "loading"}
+        loading={loading}
         error={error}
       />
     </Box>
