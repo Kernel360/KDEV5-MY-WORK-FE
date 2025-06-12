@@ -10,6 +10,10 @@ import {
   Grid,
   Divider,
   Tooltip,
+  Avatar,
+  Autocomplete,
+  TextField,
+  IconButton,
 } from "@mui/material";
 import { InfoOutlined } from "@mui/icons-material";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
@@ -22,19 +26,54 @@ import {
   deleteCompany,
 } from "@/features/company/companySlice";
 import ConfirmDialog from "@/components/common/confirmDialog/ConfirmDialog";
+import { getCompanyMembers } from "@/api/member";
+import CustomTable from "@/components/common/customTable/CustomTable";
+import CompanyMemberList from "@/features/company/components/CompanyMemberList";
+import { useTheme } from "@mui/material/styles";
+import CloseIcon from "@mui/icons-material/Close";
 
 export default function DevCompanyDetailPage() {
+  const theme = useTheme();
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [members, setMembers] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [searchText, setSearchText] = useState("");
 
-  const { current: company, loading } = useSelector((state) => state.company);
+  const { current: company, loading: companyLoading } = useSelector((state) => state.company);
 
   useEffect(() => {
     dispatch(fetchCompanyById(id));
   }, [dispatch, id]);
 
+  useEffect(() => {
+    const loadMembers = async () => {
+      if (!company?.companyId) return;
+      
+      setLoading(true);
+      try {
+        const response = await getCompanyMembers(company.companyId, page, searchText);
+        setMembers(response.data.data.members);
+        setTotalCount(response.data.data.totalCount);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // 디바운스 처리
+    const timer = setTimeout(() => {
+      loadMembers();
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [company?.companyId, page, searchText]);
 
   const handleDelete = async () => {
     try {
@@ -46,7 +85,21 @@ export default function DevCompanyDetailPage() {
     setConfirmOpen(false);
   };
 
-  if (loading) {
+  const handleRemove = (memberId) => {
+    setMembers((prev) => prev.filter((m) => m.id !== memberId));
+  };
+
+  const getInitial = (name) => (name && name.length ? name[0] : "?");
+
+  const columns = [
+    { key: "name", label: "이름", type: "avatar", searchable: true },
+    { key: "email", label: "이메일", type: "text", searchable: true },
+    { key: "position", label: "직책", type: "text", searchable: true },
+    { key: "department", label: "부서", type: "text", searchable: true },
+    { key: "phoneNumber", label: "연락처", type: "text", searchable: true },
+  ];
+
+  if (companyLoading) {
     return (
       <PageWrapper>
         <Box
@@ -237,7 +290,39 @@ export default function DevCompanyDetailPage() {
             </Tooltip>
           </Stack>
           <Divider sx={{ mt: 1, mb: 2 }} />
-          {/* TODO: 사원 목록 컴포넌트 추가 */}
+          
+          <Box>
+            <TextField
+              fullWidth
+              placeholder="직원 이름을 검색하세요"
+              size="small"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              InputProps={{
+                endAdornment: loading && <CircularProgress size={20} />,
+              }}
+              sx={{
+                width: { xs: "100%", sm: 360 },
+                "& .MuiOutlinedInput-root": {
+                  bgcolor: theme.palette.background.paper,
+                },
+              }}
+            />
+
+            <Box sx={{ mt: 2 }}>
+              <CompanyMemberList
+                members={members.map((member) => ({
+                  id: member.id,
+                  name: member.name,
+                  email: member.email,
+                  position: member.position,
+                  department: member.department,
+                  phoneNumber: member.phoneNumber,
+                  createdAt: member.createdAt
+                }))}
+              />
+            </Box>
+          </Box>
         </Paper>
       </Box>
     </PageWrapper>
