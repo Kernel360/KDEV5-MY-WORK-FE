@@ -41,7 +41,7 @@ export default function PostTable() {
         projectId,
         page,
         keyword: searchText || null,
-       keywordType: searchKey ? searchKey.toUpperCase() : null,
+        keywordType: searchKey ? searchKey.toUpperCase() : null,
         projectStepId: selectedStepId,
         approval: null,
       })
@@ -58,8 +58,14 @@ export default function PostTable() {
 
   // 컬럼 정의
   const columns = [
-    { key: "title", label: "글제목", width: "35%", sortable: true, searchable: true },
-    { key: "projectStepTitle", label: "단계", width: "15%", sortable: true},
+    {
+      key: "title",
+      label: "글제목",
+      width: "35%",
+      sortable: true,
+      searchable: true,
+    },
+    { key: "projectStepTitle", label: "단계", width: "15%", sortable: true },
     {
       key: "approval",
       label: "상태",
@@ -71,8 +77,20 @@ export default function PostTable() {
         APPROVED: { label: "검토 완료", color: "success" },
       },
     },
-    { key: "authorName", label: "작성자", width: "20%", sortable: true, searchable: true },
-    { key: "createdAt", label: "작성일", width: "15%", sortable: true, type: "date" },
+    {
+      key: "authorName",
+      label: "작성자",
+      width: "20%",
+      sortable: true,
+      searchable: true,
+    },
+    {
+      key: "createdAt",
+      label: "작성일",
+      width: "15%",
+      sortable: true,
+      type: "date",
+    },
   ];
 
   return (
@@ -103,8 +121,14 @@ export default function PostTable() {
           key: searchKey,
           placeholder: "검색어를 입력하세요",
           value: searchText,
-          onKeyChange: (newKey) => { setPage(1); setSearchKey(newKey); },
-          onChange: (newText) => { setPage(1); setSearchText(newText); },
+          onKeyChange: (newKey) => {
+            setPage(1);
+            setSearchKey(newKey);
+          },
+          onChange: (newText) => {
+            setPage(1);
+            setSearchText(newText);
+          },
         }}
       />
 

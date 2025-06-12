@@ -1,22 +1,22 @@
-// src/features/project/pages/ProjectFormPage.jsx
+// src/features/project/pages/MemberFormPage.jsx
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Box, Button, Stack, CircularProgress } from "@mui/material";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
-import MemberForm from '@/features/member/components/MemberForm';
-import { createMember } from "@/api/member";
-import {
-  fetchAllCompanyNames,    // 추가
-} from "@/features/company/companySlice";
+import MemberForm from "@/features/member/components/MemberForm";
+import { createMember, updateMember, getMemberById } from "@/api/member";
+import { fetchAllCompanyNames } from "@/features/company/companySlice";
 
 const MemberFormPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { id: memberId } = useParams(); // ← id 파라미터 받아오기
 
-  const { companyListOnlyIdName: companies = [], loading } =
-    useSelector((state) => state.company);
+  const { companyListOnlyIdName: companies = [], loading } = useSelector(
+    (state) => state.company
+  );
 
   const [form, setForm] = useState({
     name: "",
@@ -29,36 +29,69 @@ const MemberFormPage = () => {
     companyId: "",
   });
 
- // DEV / CLIENT 둘 다 불러오기
+  const [fetching, setFetching] = useState(false); // 수정 시 데이터 로딩용
+
+  // 회사목록 불러오기
   useEffect(() => {
     dispatch(fetchAllCompanyNames());
   }, [dispatch]);
 
-  // 각 필드 변경 핸들러
+  // 수정인 경우 멤버 상세 조회
+  useEffect(() => {
+    if (memberId) {
+      const fetchMember = async () => {
+        setFetching(true);
+        try {
+          const res = await getMemberById(memberId);
+          const member = res.data.data;
+          setForm({
+            name: member.name,
+            department: member.department,
+            position: member.position,
+            role: member.role,
+            phoneNumber: member.phoneNumber,
+            email: member.email,
+            birthDate: member.birthDate?.substring(0, 10) || "",
+            companyId: member.companyId,
+          });
+        } catch (err) {
+          console.error(err);
+          // TODO: 에러 처리 (스낵바 등)
+        } finally {
+          setFetching(false);
+        }
+      };
+      fetchMember();
+    }
+  }, [memberId]);
+
   const handleChange = (key) => (e) => {
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
   };
 
-  // 제출 처리
   const handleSubmit = async () => {
     try {
-      await createMember({
+      const payload = {
         ...form,
-        birthDate: form.birthDate ? form.birthDate + 'T00:00:00' : ""
-      });
+        birthDate: form.birthDate ? form.birthDate + "T00:00:00" : "",
+      };
+
+      if (memberId) {
+        await updateMember(memberId, payload);
+      } else {
+        await createMember(payload);
+      }
       navigate("/members");
     } catch (err) {
       console.error(err);
-      // TODO: 에러 발생 시 스낵바/토스트 표시
+      // TODO: 에러 처리 (스낵바 등)
     }
   };
 
-  // 취소 시 뒤로 이동
   const handleCancel = () => {
     navigate(-1);
   };
 
-  // 헤더 우측에 들어갈 버튼들
   const headerAction = (
     <Stack direction="row" spacing={2}>
       <Button variant="outlined" onClick={handleCancel}>
@@ -70,6 +103,7 @@ const MemberFormPage = () => {
         onClick={handleSubmit}
         disabled={
           loading ||
+          fetching ||
           !form.name ||
           !form.email ||
           !form.position ||
@@ -80,7 +114,13 @@ const MemberFormPage = () => {
           !form.birthDate
         }
       >
-        {loading ? <CircularProgress size={24} /> : "등록"}
+        {loading || fetching ? (
+          <CircularProgress size={24} />
+        ) : memberId ? (
+          "수정"
+        ) : (
+          "등록"
+        )}
       </Button>
     </Stack>
   );
@@ -88,15 +128,19 @@ const MemberFormPage = () => {
   return (
     <PageWrapper>
       <PageHeader
-        title="멤버 등록"
-        subtitle="새로운 멤버를 등록하여 팀을 구성하세요."
+        title={memberId ? "멤버 수정" : "멤버 등록"}
+        subtitle={
+          memberId
+            ? "멤버 정보를 수정합니다."
+            : "새로운 멤버를 등록하여 팀을 구성하세요."
+        }
         action={headerAction}
       />
       <MemberForm
         form={form}
         handleChange={handleChange}
-          companies={companies}
-        loading={loading}
+        companies={companies}
+        loading={loading || fetching}
       />
     </PageWrapper>
   );

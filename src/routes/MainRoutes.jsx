@@ -15,11 +15,11 @@ import LoginPage from "@/features/auth/pages/LoginPage";
 import MemberPage from "@/features/member/pages/MemberPage";
 import MemberFormPage from "@/features/member/pages/MemberFormPage";
 import MemberDetailPage from "@/features/member/pages/MemberDetailPage";
-import ClientCompanyDetailPage from "@/features/company/pages/ClientCompanyDetailPage"
+import ClientCompanyDetailPage from "@/features/company/pages/ClientCompanyDetailPage";
 
 export default function MainRoutes() {
-  const isAuthenticated = useSelector(
-    (state) => Boolean(state.auth?.accessToken)
+  const isAuthenticated = useSelector((state) =>
+    Boolean(state.auth?.accessToken)
   );
 
   return (
@@ -54,16 +54,31 @@ export default function MainRoutes() {
         <Route path="/projects/:id/edit" element={<ProjectFormPage />} />
 
         <Route path="/members" element={<MemberPage />} />
-        <Route path="/members/new" element={<MemberFormPage />} />
         <Route path="/members/:id" element={<MemberDetailPage />} />
+        <Route path="/members/new" element={<MemberFormPage />} />
+        <Route path="/members/:id/edit" element={<MemberFormPage />} />
 
         <Route path="/dev-companies" element={<DevCompanyPage />} />
         <Route path="/dev-companies/new" element={<DevCompanyFormPage />} />
+        <Route
+          path="/dev-companies/:id/edit"
+          element={<DevCompanyFormPage />}
+        />
         <Route path="/dev-companies/:id" element={<DevCompanyDetailPage />} />
 
         <Route path="/client-companies" element={<ClientCompanyPage />} />
-        <Route path="/client-companies/new" element={<ClientCompanyFormPage />} />
-        <Route path="/client-companies/:id" element={<ClientCompanyDetailPage />} />
+        <Route
+          path="/client-companies/new"
+          element={<ClientCompanyFormPage />}
+        />
+        <Route
+          path="/client-companies/:id/edit"
+          element={<ClientCompanyFormPage />}
+        />
+        <Route
+          path="/client-companies/:id"
+          element={<ClientCompanyDetailPage />}
+        />
       </Route>
 
       <Route
