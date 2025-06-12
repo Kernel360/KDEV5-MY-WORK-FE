@@ -7,7 +7,7 @@ import { useParams } from "react-router-dom";
 import SectionTable from "@/components/common/sectionTable/SectionTable";
 import PostDetailDrawer from "../components/PostDetailDrawer";
 import CreatePostDrawer from "./CreatePostDrawer";
-import CustomButton from "@/components/common/CustomButton/CustomButton";
+import CustomButton from "@/components/common/customButton/CustomButton";
 import { fetchPosts, fetchPostById, createPost } from "../postSlice";
 import { fetchProjectStages } from "../../projectStepSlice";
 
