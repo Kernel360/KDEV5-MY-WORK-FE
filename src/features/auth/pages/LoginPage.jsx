@@ -39,17 +39,14 @@ export default function LoginPage() {
     setSnackbarMessage("");
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const result = await dispatch(login(form));
-    if (login.fulfilled.match(result)) {
-      const { memberRole, memberId } = result.payload;
-      if (memberRole !== "ROLE_USER") {
-        navigate("/projects");
-        return;
-      }
+  const result = await dispatch(login(form));
+  if (login.fulfilled.match(result)) {
+    const { memberRole, memberId } = result.payload;
 
+    if (memberRole === "ROLE_USER") {
       try {
         const response = await fetch(
           `/api/projects?memberId=${memberId}&page=1&pageSize=1`
@@ -60,24 +57,32 @@ export default function LoginPage() {
         if (projects.length > 0) {
           navigate(`/projects/${projects[0].id}`);
         } else {
-          dispatch(clearAuthState());
-          setSnackbarMessage(
-            "참여 중인 프로젝트가 없습니다. 시스템 관리자에게 문의하여 프로젝트에 참여해주세요."
-          );
-          setSnackbarOpen(true);
+          navigate("/projects", {
+            state: {
+              warningMessage:
+                "참여 중인 프로젝트가 없습니다. 시스템 관리자에게 문의하여 프로젝트에 참여해주세요.",
+            },
+          });
         }
       } catch (fetchError) {
         console.error("프로젝트 조회 실패:", fetchError);
-        dispatch(clearAuthState());
-        setSnackbarMessage(
-          "프로젝트 조회 중 오류가 발생했습니다. 다시 시도해주세요."
-        );
-        setSnackbarOpen(true);
++       // 조회 에러일 때도 이동하면서 메시지 전달
+        navigate("/projects", {
+          state: {
+            warningMessage:
+              "프로젝트 조회 중 오류가 발생했습니다. 다시 시도해주세요.",
+          },
+        });
       }
-    } else {
-      console.error("로그인 실패:", result.payload || result.error);
+      return;
     }
-  };
+
+    // ROLE_USER 외에는 그냥 리스트로
+    navigate("/projects");
+  } else {
+    console.error("로그인 실패:", result.payload || result.error);
+  }
+};
 
   return (
     <RootBox>
