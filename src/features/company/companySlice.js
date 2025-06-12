@@ -57,9 +57,9 @@ export const createCompany = createAsyncThunk(
 
 export const updateCompany = createAsyncThunk(
   "company/updateCompany",
-  async (id, data, thunkAPI) => {
+  async (companyData, thunkAPI) => {
     try {
-      const response = await companyAPI.updateCompany(id, data);
+      const response = await companyAPI.updateCompany(companyData);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data || "Error");
