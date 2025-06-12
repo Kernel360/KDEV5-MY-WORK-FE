@@ -15,13 +15,13 @@ import {
   Switch,
 } from "@mui/material";
 import { InfoOutlined, CalendarTodayRounded } from "@mui/icons-material";
-import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 
 /**
  * ProjectForm 컴포넌트
- * 
+ *
  * props:
  * - form: { name, detail, step, startAt, endAt, devCompanyId, clientCompanyId, deleted }
  * - handleChange: (key: string) => (e: React.ChangeEvent<HTMLInputElement> | any) => void
@@ -37,23 +37,41 @@ export default function ProjectForm({
   isEdit = false,
 }) {
   const STATUS_OPTIONS = [
-    { value: 'NOT_STARTED', label: '계획' },
-    { value: 'IN_PROGRESS', label: '진행' },
-    { value: 'PAUSED', label: '중단' },
-    { value: 'COMPLETED', label: '완료' },
+    { value: "NOT_STARTED", label: "계획" },
+    { value: "IN_PROGRESS", label: "진행" },
+    { value: "PAUSED", label: "중단" },
+    { value: "COMPLETED", label: "완료" },
   ];
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+    <Box
+      sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}
+    >
       <Paper
-        sx={{ p: 4, mb: 3, mx: 3, borderRadius: 2, boxShadow: 2, flex: 1, display: "flex", flexDirection: "column", height: "100%", boxSizing: "border-box", overflowY: "auto" }}
+        sx={{
+          p: 4,
+          mb: 3,
+          mx: 3,
+          borderRadius: 2,
+          boxShadow: 2,
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          boxSizing: "border-box",
+          overflowY: "auto",
+        }}
       >
         <Stack spacing={4} sx={{ flex: 1, minHeight: 0 }}>
           {/* 1) 기본 정보 */}
           <Box>
             <Stack direction="row" alignItems="center" spacing={1}>
-              <Typography variant="subtitle1" fontWeight={600}>1. 기본 정보</Typography>
-              <Tooltip title="프로젝트 이름과 상세 설명을 입력하세요."><InfoOutlined fontSize="small" color="action" /></Tooltip>
+              <Typography variant="subtitle1" fontWeight={600}>
+                1. 기본 정보
+              </Typography>
+              <Tooltip title="프로젝트 이름과 상세 설명을 입력하세요.">
+                <InfoOutlined fontSize="small" color="action" />
+              </Tooltip>
             </Stack>
             <Divider sx={{ mt: 1, mb: 2 }} />
 
@@ -88,7 +106,9 @@ export default function ProjectForm({
               fullWidth
             >
               {STATUS_OPTIONS.map((opt) => (
-                <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                <MenuItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </MenuItem>
               ))}
             </TextField>
           </Box>
@@ -96,8 +116,12 @@ export default function ProjectForm({
           {/* 2) 기간 설정 */}
           <Box>
             <Stack direction="row" alignItems="center" spacing={1}>
-              <Typography variant="subtitle1" fontWeight={600}>2. 기간 설정</Typography>
-              <Tooltip title="시작일과 종료일을 선택하세요."><InfoOutlined fontSize="small" color="action" /></Tooltip>
+              <Typography variant="subtitle1" fontWeight={600}>
+                2. 기간 설정
+              </Typography>
+              <Tooltip title="시작일과 종료일을 선택하세요.">
+                <InfoOutlined fontSize="small" color="action" />
+              </Tooltip>
             </Stack>
             <Divider sx={{ mt: 1, mb: 2 }} />
             <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -107,14 +131,19 @@ export default function ProjectForm({
                     label="시작일"
                     format="YYYY-MM-DD"
                     slots={{ openPickerIcon: CalendarTodayRounded }}
-                    slotProps={{ openPickerIcon: { fontSize: 'small' } }}
+                    slotProps={{ openPickerIcon: { fontSize: "small" } }}
                     value={form.startAt ? dayjs(form.startAt) : null}
                     onChange={(newDate) => {
-                      const val = newDate ? newDate.format('YYYY-MM-DD') : '';
-                      handleChange('startAt')({ target: { value: val } });
+                      const val = newDate ? newDate.format("YYYY-MM-DD") : "";
+                      handleChange("startAt")({ target: { value: val } });
                     }}
                     renderInput={(params) => (
-                      <TextField {...params} required fullWidth InputLabelProps={{ shrink: true }} />
+                      <TextField
+                        {...params}
+                        required
+                        fullWidth
+                        InputLabelProps={{ shrink: true }}
+                      />
                     )}
                   />
                 </Grid>
@@ -123,14 +152,19 @@ export default function ProjectForm({
                     label="종료일"
                     format="YYYY-MM-DD"
                     slots={{ openPickerIcon: CalendarTodayRounded }}
-                    slotProps={{ openPickerIcon: { fontSize: 'small' } }}
+                    slotProps={{ openPickerIcon: { fontSize: "small" } }}
                     value={form.endAt ? dayjs(form.endAt) : null}
                     onChange={(newDate) => {
-                      const val = newDate ? newDate.format('YYYY-MM-DD') : '';
-                      handleChange('endAt')({ target: { value: val } });
+                      const val = newDate ? newDate.format("YYYY-MM-DD") : "";
+                      handleChange("endAt")({ target: { value: val } });
                     }}
                     renderInput={(params) => (
-                      <TextField {...params} required fullWidth InputLabelProps={{ shrink: true }} />
+                      <TextField
+                        {...params}
+                        required
+                        fullWidth
+                        InputLabelProps={{ shrink: true }}
+                      />
                     )}
                   />
                 </Grid>
@@ -151,23 +185,55 @@ export default function ProjectForm({
             <Divider sx={{ mt: 1, mb: 2 }} />
             <Grid container spacing={3} justifyContent="flex-start">
               <Grid item xs={12} sm={6}>
-               <Autocomplete
-                disabled={isEdit}
+                <Autocomplete
+                  disabled={isEdit}
                   options={clientCompanies}
                   getOptionLabel={(opt) => opt.name}
-                  value={clientCompanies.find(c => c.id === form.clientCompanyId) || null}
-                  onChange={(_, val) => handleChange('clientCompanyId')({ target: { value: val?.id || '' } })}
-                  renderInput={(params) => <TextField {...params} required label="고객사" placeholder="검색..."   sx={{ width: { xs: "100%", sm: 400 } }}  />}
+                  value={
+                    clientCompanies.find(
+                      (c) => c.id === form.clientCompanyId
+                    ) || null
+                  }
+                  onChange={(_, val) =>
+                    handleChange("clientCompanyId")({
+                      target: { value: val?.id || "" },
+                    })
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      required
+                      label="고객사"
+                      placeholder="검색..."
+                      sx={{ width: { xs: "100%", sm: 400 } }}
+                    />
+                  )}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Autocomplete
-                 disabled={isEdit}
+                  disabled={isEdit}
                   options={developerCompanies}
                   getOptionLabel={(opt) => opt.name}
-                  value={developerCompanies.find(c => c.id === form.devCompanyId) || null}
-                  onChange={(_, val) => handleChange('devCompanyId')({ target: { value: val?.id || '' } })}
-                  renderInput={(params) => <TextField {...params} required label="개발사" placeholder="검색..." sx={{ width: { xs: "100%", sm: 400 } }}  />}
+                  value={
+                    developerCompanies.find(
+                      (c) => c.id === form.devCompanyId
+                    ) || null
+                  }
+                  onChange={(_, val) =>
+                    handleChange("devCompanyId")({
+                      target: { value: val?.id || "" },
+                    })
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      required
+                      label="개발사"
+                      placeholder="검색..."
+                      sx={{ width: { xs: "100%", sm: 400 } }}
+                    />
+                  )}
                 />
               </Grid>
             </Grid>

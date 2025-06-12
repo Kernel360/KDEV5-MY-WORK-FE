@@ -11,21 +11,18 @@ import {
   Avatar,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
 import CommentSection from "./CommentSection";
-import { fetchReviews } from "../reviewSlice"; // 경로는 실제 위치에 맞춰 조정
+import { fetchReviews } from "../reviewSlice";
+import { deletePost } from "../postSlice"; // postSlice 경로는 프로젝트에 맞게 조정
 
 export default function PostDetailDrawer({ open, post, onClose }) {
   const theme = useTheme();
   const dispatch = useDispatch();
-  const reviews = useSelector(
-    state => state.review.items || []
-  );
+  const reviews = useSelector((state) => state.review.items || []);
 
-  console.log('reviews', reviews)
-
-  // drawer가 열릴 때 postId가 있으면 댓글 조회
   useEffect(() => {
     if (open && post?.postId) {
       dispatch(fetchReviews({ postId: post.postId, page: 1 }));
@@ -34,18 +31,37 @@ export default function PostDetailDrawer({ open, post, onClose }) {
 
   if (!post) return null;
 
+  const handleDelete = async () => {
+    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+
+    try {
+      await dispatch(deletePost({ postId: post.postId })).unwrap();
+      alert("삭제되었습니다.");
+      onClose();
+    } catch (err) {
+      console.error(err);
+      alert("삭제 실패");
+    }
+  };
+
   const statusMap = {
     PENDING: { label: "검토 요청", color: "neutral" },
     APPROVED: { label: "검토 완료", color: "success" },
   };
-  const stat = statusMap[post.approval] || { label: post.approval ?? "-", color: "neutral" };
+  const stat = statusMap[post.approval] || {
+    label: post.approval ?? "-",
+    color: "neutral",
+  };
 
   return (
     <Drawer
       anchor="right"
       open={open}
       onClose={onClose}
-      PaperProps={{ sx: { width: { xs: "100%", sm: "50vw" }, bgcolor: "transparent" } }}
+      keepMounted={false}
+      PaperProps={{
+        sx: { width: { xs: "100%", sm: "50vw" }, bgcolor: "transparent" },
+      }}
     >
       <Paper
         elevation={6}
@@ -58,7 +74,14 @@ export default function PostDetailDrawer({ open, post, onClose }) {
         }}
       >
         {/* 헤더 */}
-        <Box sx={{ p: 3, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Box
+          sx={{
+            p: 3,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           <Stack direction="row" spacing={2} alignItems="center">
             <Avatar sx={{ width: 40, height: 40 }}>
               {post.companyName?.[0] || "?"}
@@ -77,13 +100,27 @@ export default function PostDetailDrawer({ open, post, onClose }) {
               </Typography>
             </Box>
           </Stack>
-          <IconButton onClick={onClose}>
-            <CloseIcon />
-          </IconButton>
+
+          <Stack direction="row" spacing={1}>
+            <IconButton onClick={handleDelete}>
+              <DeleteIcon />
+            </IconButton>
+            <IconButton onClick={onClose}>
+              <CloseIcon />
+            </IconButton>
+          </Stack>
         </Box>
 
         {/* 제목 + 상태 칩 */}
-        <Box sx={{ px: 3, pb: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Box
+          sx={{
+            px: 3,
+            pb: 2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           <Typography variant="h5" sx={{ fontWeight: 700 }}>
             {post.title}
           </Typography>
@@ -102,7 +139,10 @@ export default function PostDetailDrawer({ open, post, onClose }) {
 
         {/* 본문 + 댓글 */}
         <Box sx={{ px: 3, pb: 3 }}>
-          <Typography variant="body1" sx={{ whiteSpace: "pre-wrap", lineHeight: 1.6 }}>
+          <Typography
+            variant="body1"
+            sx={{ whiteSpace: "pre-wrap", lineHeight: 1.6 }}
+          >
             {post.content}
           </Typography>
           <CommentSection postId={post.postId} comments={reviews} />

@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Box, Stack, Avatar, Typography, Divider, IconButton } from "@mui/material";
+import {
+  Box,
+  Stack,
+  Avatar,
+  Typography,
+  Divider,
+  IconButton,
+} from "@mui/material";
 import ReplyIcon from "@mui/icons-material/Reply";
 import CustomButton from "@/components/common/customButton/CustomButton";
 import CommentInput from "./CommentInput";
@@ -11,35 +18,51 @@ function CommentItem({ review, level = 0, postId, onReply }) {
   return (
     <Box sx={{ mt: 2, ml: level * 4 }}>
       <Stack direction="row" spacing={1} alignItems="flex-start">
-        <Avatar sx={{ width: 32, height: 32, fontSize: 14 }}>
+        <Avatar sx={{ width: 34, height: 34, fontSize: 14 }}>
           {review.companyName?.[0] || "?"}
         </Avatar>
-        <Box sx={{ flex: 1 }}>
-          <Stack direction="row" spacing={1} alignItems="baseline">
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              {review.authorName}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
+        <Box sx={{ flex: 1, position: "relative" }}>
+          <Stack spacing={1}>
+            <Stack direction="row" spacing={1} alignItems="baseline">
+              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                {review.authorName}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {review.companyName}
+              </Typography>
+            </Stack>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ lineHeight: 0 }}
+            >
               {review.createdAt}
             </Typography>
           </Stack>
-          <Typography variant="body2" sx={{ mt: 0.5, whiteSpace: "pre-wrap" }}>
+          <Typography variant="body2" sx={{ mt: 2, whiteSpace: "pre-wrap" }}>
             {review.comment}
           </Typography>
-          {/* 답글 버튼 */}
-          <IconButton size="small" onClick={() => setReplying(prev => !prev)}>
-            <ReplyIcon fontSize="small" />
-          </IconButton>
+
+          {/* 답글 버튼을 오른쪽 끝으로 */}
+          {level === 0 && (
+            <IconButton
+              size="small"
+              onClick={() => setReplying((prev) => !prev)}
+              sx={{ position: "absolute", top: 0, right: 0 }}
+            >
+              <ReplyIcon fontSize="small" />
+            </IconButton>
+          )}
         </Box>
       </Stack>
 
       {/* 대댓글 입력창 */}
       {replying && (
-        <Box sx={{ mt: 1, ml: (level + 1) * 4 }}>
+        <Box sx={{ ml: (level + 1) * 4 }}>
           <CommentInput
             postId={postId}
             parentId={review.reviewId}
-            onSubmit={text => {
+            onSubmit={(text) => {
               onReply(review.reviewId, text);
               setReplying(false);
             }}
@@ -50,7 +73,7 @@ function CommentItem({ review, level = 0, postId, onReply }) {
       {/* 자식 리뷰 렌더링 */}
       {review.childReviews && review.childReviews.length > 0 && (
         <Box sx={{ mt: 1 }}>
-          {review.childReviews.map(child => (
+          {review.childReviews.map((child) => (
             <CommentItem
               key={child.reviewId}
               review={child}
@@ -69,11 +92,18 @@ function CommentItem({ review, level = 0, postId, onReply }) {
 }
 
 // CommentSection: 댓글 입력창을 최상단에, 그 아래 댓글 목록, 더보기 버튼 렌더링
-export default function CommentSection({ postId, comments = [], onSubmit, onReply, onLoadMore, currentPage = 1 }) {
+export default function CommentSection({
+  postId,
+  comments = [],
+  onSubmit,
+  onReply,
+  onLoadMore,
+  currentPage = 1,
+}) {
   return (
     <Box sx={{ mt: 3 }}>
       {/* 최상위 댓글 입력창 */}
-      <CommentInput postId={postId} onSubmit={text => onSubmit(text)} />
+      <CommentInput postId={postId} onSubmit={(text) => onSubmit(text)} />
 
       {/* 댓글 목록 */}
       {comments.length === 0 ? (
@@ -81,13 +111,18 @@ export default function CommentSection({ postId, comments = [], onSubmit, onRepl
           댓글이 없습니다.
         </Typography>
       ) : (
-        comments.map(review => (
-          <CommentItem key={review.reviewId} review={review} postId={postId} onReply={onReply} />
+        comments.map((review) => (
+          <CommentItem
+            key={review.reviewId}
+            review={review}
+            postId={postId}
+            onReply={onReply}
+          />
         ))
       )}
 
       {/* 더보기 버튼 */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+      {/* <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
         <CustomButton
           kind="ghost"
           size="small"
@@ -95,7 +130,7 @@ export default function CommentSection({ postId, comments = [], onSubmit, onRepl
         >
           더보기
         </CustomButton>
-      </Box>
+      </Box> */}
     </Box>
   );
 }
