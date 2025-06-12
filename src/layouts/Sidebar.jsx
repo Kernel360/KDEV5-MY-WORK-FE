@@ -30,13 +30,20 @@ export default function Sidebar({ onClose }) {
 
   const memberName = useSelector((state) => state.auth.user?.name);
   const memberRole = useSelector((state) => state.auth.user?.role);
+  const companyType = useSelector((state) => state.auth.company?.type);
 
   const projects = useSelector((state) => state.project.data);
 
   const currentPath = location.pathname;
 
   const filteredNavItems = navItems.filter(
-    (item) => item.roles && item.roles.includes(memberRole)
+    (item) => {
+      // 역할 체크
+      const hasRole = item.roles && item.roles.includes(memberRole);
+      // 회사 타입 체크
+      const hasCompanyType = !item.companyTypes || item.companyTypes.includes(companyType);
+      return hasRole && hasCompanyType;
+    }
   );
 
   useEffect(() => {
@@ -44,7 +51,6 @@ export default function Sidebar({ onClose }) {
       dispatch(fetchProjects({ page: 0, size: 100 })); 
     }
   }, [memberRole, dispatch]);
-
 
   const handleItemClick = (path) => {
     onClose();
