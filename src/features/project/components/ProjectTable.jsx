@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import CustomTable from "@/components/common/customTable/CustomTable";
 import { fetchProjects } from "@/features/project/projectSlice";
+import { Alert, Snackbar } from "@mui/material";
 
 // 테이블 컬럼 정의
 const columns = [
@@ -31,6 +32,8 @@ export default function ProjectTable() {
   const { list: rawProjects, totalCount, status, error } = useSelector(
     (state) => state.project
   );
+  const memberRole = useSelector((state) => state.auth.user?.role);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   // 페이지 및 검색/필터 상태
   const [page, setPage] = useState(1);
@@ -94,34 +97,58 @@ export default function ProjectTable() {
     },
   }));
 
+  const handleRowClick = (row) => {
+    if (memberRole === "ROLE_DEV_ADMIN") {
+      setSnackbarOpen(true);
+      return;
+    }
+    navigate(`/projects/${row.id}`);
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
+  };
+
   return (
-    <CustomTable
-      columns={columns}
-      rows={enrichedProjects}
-      pagination={{
-        page,
-        total: totalCount || 0, // totalCount가 없을 경우 0으로 처리
-        onPageChange: (newPage) => {
-          setPage(newPage);
-        },
-        pageSize: 10
-      }}
-      onRowClick={(row) => navigate(`/projects/${row.id}`)}
-      search={{
-        key: "name",
-        placeholder: "프로젝트 제목을 입력하세요",
-        value: searchText,
-        onChange: handleSearchTextChange,
-      }}
-      filter={{
-        key: filterKey,
-        label: '상태',        
-        value: filterValue,
-        options: filterOptions,
-        onChange: handleFilterChange,
-      }}
-      loading={status === "loading"}
-      error={error}
-    />
+    <>
+      <CustomTable
+        columns={columns}
+        rows={enrichedProjects}
+        pagination={{
+          page,
+          total: totalCount || 0,
+          onPageChange: (newPage) => {
+            setPage(newPage);
+          },
+          pageSize: 10
+        }}
+        onRowClick={handleRowClick}
+        search={{
+          key: "name",
+          placeholder: "프로젝트 제목을 입력하세요",
+          value: searchText,
+          onChange: handleSearchTextChange,
+        }}
+        filter={{
+          key: filterKey,
+          label: '상태',        
+          value: filterValue,
+          options: filterOptions,
+          onChange: handleFilterChange,
+        }}
+        loading={status === "loading"}
+        error={error}
+      />
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity="warning" sx={{ width: '100%' }}>
+          관리자에게 문의해주세요.
+        </Alert>
+      </Snackbar>
+    </>
   );
 }
