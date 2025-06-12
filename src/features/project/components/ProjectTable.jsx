@@ -34,7 +34,6 @@ export default function ProjectTable() {
 
   // 페이지 및 검색/필터 상태
   const [page, setPage] = useState(1);
-  const [searchKey, setSearchKey] = useState("");
   const [searchText, setSearchText] = useState("");
   const [filterValue, setFilterValue] = useState("");
 
@@ -52,14 +51,34 @@ export default function ProjectTable() {
 
   // 데이터 로드 함수
   const loadProjects = useCallback(() => {
-    const params = { page };
-    if (searchText.trim()) params.keyword = searchText.trim();
-    if (searchKey) params.keywordType = searchKey;
-   if (filterValue) {
-  params[filterKey] = filterValue;
-}
+    const params = { 
+      page,
+      size: 10
+    };
+    
+    if (searchText.trim()) {
+      params.keyword = searchText.trim();
+      params.keywordType = "PROJECT_NAME";
+    }
+    
+    if (filterValue) {
+      params[filterKey] = filterValue;
+    }
+
     dispatch(fetchProjects(params));
-  }, [dispatch, page, searchKey, searchText, filterValue]);
+  }, [dispatch, page, searchText, filterValue]);
+
+  // 검색어 변경 시 페이지 초기화
+  const handleSearchTextChange = (newText) => {
+    setPage(1);
+    setSearchText(newText);
+  };
+
+  // 필터 변경 시 페이지 초기화
+  const handleFilterChange = (val) => {
+    setPage(1);
+    setFilterValue(val);
+  };
 
   useEffect(() => {
     loadProjects();
@@ -76,40 +95,33 @@ export default function ProjectTable() {
   }));
 
   return (
-      <CustomTable
-        columns={columns}
-        rows={enrichedProjects}
-        pagination={{
-          page,
-          total: totalCount,
-          onPageChange: setPage,
-        }}
-        onRowClick={(row) => navigate(`/projects/${row.id}`)}
-        search={{
-          key: searchKey,
-          placeholder: "검색어를 입력하세요",
-          value: searchText,
-          onKeyChange: (newKey) => {
-            setPage(1);
-            setSearchKey(newKey);
-          },
-          onChange: (newText) => {
-            setPage(1);
-            setSearchText(newText);
-          },
-        }}
-        filter={{
-          key: filterKey,
-          label: '상태',        
-          value: filterValue,
-          options: filterOptions,
-          onChange: (val) => {
-            setPage(1);
-            setFilterValue(val);
-          },
-        }}
-        loading={status === "loading"}
-        error={error}
-      />
+    <CustomTable
+      columns={columns}
+      rows={enrichedProjects}
+      pagination={{
+        page,
+        total: totalCount || 0, // totalCount가 없을 경우 0으로 처리
+        onPageChange: (newPage) => {
+          setPage(newPage);
+        },
+        pageSize: 10
+      }}
+      onRowClick={(row) => navigate(`/projects/${row.id}`)}
+      search={{
+        key: "name",
+        placeholder: "프로젝트 제목을 입력하세요",
+        value: searchText,
+        onChange: handleSearchTextChange,
+      }}
+      filter={{
+        key: filterKey,
+        label: '상태',        
+        value: filterValue,
+        options: filterOptions,
+        onChange: handleFilterChange,
+      }}
+      loading={status === "loading"}
+      error={error}
+    />
   );
 }
