@@ -107,12 +107,12 @@ export default function MemberForm({
                   fullWidth
                   label="생년월일"
                   type="date"
-                  value={form.birthDate}
-                  onChange={handleChange("birthDate")}
+                  value={form.birthday}
+                  onChange={handleChange("birthday")}
                   required
                   disabled={loading}
-                  error={!form.birthDate}
-                  helperText={!form.birthDate ? "생년월일을 입력해주세요." : " "}
+                  error={!form.birthday}
+                  helperText={!form.birthday ? "생년월일을 입력해주세요." : " "}
                   InputLabelProps={{ shrink: true }}
                 />
               </Grid>

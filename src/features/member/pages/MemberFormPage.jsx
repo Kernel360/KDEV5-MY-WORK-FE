@@ -12,7 +12,7 @@ import { fetchAllCompanyNames } from "@/features/company/companySlice";
 const MemberFormPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { id: memberId } = useParams(); // ← id 파라미터 받아오기
+  const { id: memberId } = useParams();
 
   const { companyListOnlyIdName: companies = [], loading } = useSelector(
     (state) => state.company
@@ -25,35 +25,36 @@ const MemberFormPage = () => {
     role: "",
     phoneNumber: "",
     email: "",
-    birthDate: "",
+    birthday: "",
     companyId: "",
   });
 
-  const [fetching, setFetching] = useState(false); // 수정 시 데이터 로딩용
+  const [fetching, setFetching] = useState(false);
 
-  // 회사목록 불러오기
   useEffect(() => {
     dispatch(fetchAllCompanyNames());
   }, [dispatch]);
 
-  // 수정인 경우 멤버 상세 조회
   useEffect(() => {
     if (memberId) {
       const fetchMember = async () => {
         setFetching(true);
         try {
           const res = await getMemberById(memberId);
+          console.log('멤버 상세 데이터:', res.data.data); // 데이터 확인용 로그
           const member = res.data.data;
-          setForm({
+          const newForm = {
             name: member.name,
             department: member.department,
             position: member.position,
             role: member.role,
             phoneNumber: member.phoneNumber,
             email: member.email,
-            birthDate: member.birthDate?.substring(0, 10) || "",
+            birthday: member.birthday?.substring(0, 10) || "",
             companyId: member.companyId,
-          });
+          };
+          console.log('설정할 폼 데이터:', newForm); // 폼 데이터 확인용 로그
+          setForm(newForm);
         } catch (err) {
           console.error(err);
           // TODO: 에러 처리 (스낵바 등)
@@ -71,20 +72,31 @@ const MemberFormPage = () => {
 
   const handleSubmit = async () => {
     try {
-      const payload = {
-        ...form,
-        birthDate: form.birthDate ? form.birthDate + "T00:00:00" : "",
-      };
-
       if (memberId) {
-        await updateMember(memberId, payload);
+        await updateMember({
+          id: memberId,
+          companyId: form.companyId,
+          name: form.name,
+          department: form.department,
+          position: form.position,
+          role: form.role,
+          phoneNumber: form.phoneNumber,
+          email: form.email,
+          password: "", // 비밀번호는 변경하지 않음
+          deleted: false,
+          birthday: form.birthday ? form.birthday + "T00:00:00" : null,
+        });
       } else {
+        const payload = {
+          ...form,
+          birthDate: form.birthday ? form.birthday + "T00:00:00" : null,
+        };
+        delete payload.birthday;
         await createMember(payload);
       }
       navigate("/members");
     } catch (err) {
       console.error(err);
-      // TODO: 에러 처리 (스낵바 등)
     }
   };
 
@@ -111,7 +123,7 @@ const MemberFormPage = () => {
           !form.role ||
           !form.companyId ||
           !form.phoneNumber ||
-          !form.birthDate
+          !form.birthday
         }
       >
         {loading || fetching ? (
