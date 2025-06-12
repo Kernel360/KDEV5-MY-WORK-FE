@@ -178,15 +178,22 @@ export default function ClientCompanyDetailPage() {
                 sx={{ mb: 2, '& .MuiOutlinedInput-root': { bgcolor: theme.palette.background.paper } }}
               />
               <Stack spacing={2}>
-                {members.map(m => (
-                  <Stack key={m.id} direction="row" spacing={2} alignItems="center">
-                    <Avatar sx={{ width: 32, height: 32 }}>{m.name?.[0]}</Avatar>
-                    <Box>
-                      <Typography variant="subtitle2">{m.name}</Typography>
-                      <Typography variant="caption" color="text.secondary">{m.department} · {m.position}</Typography>
-                    </Box>
+             {members.map((m) => (
+              <Stack key={m.id} direction="row" spacing={2} alignItems="center">
+                <Avatar sx={{ width: 32, height: 32 }}>{m.name?.[0]}</Avatar>
+                <Box>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <Typography variant="subtitle2">{m.name}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {m.department} · {m.position}
+                    </Typography>
                   </Stack>
-                ))}
+                  <Typography variant="caption" color="text.secondary">
+                    {m.email}
+                  </Typography>
+                </Box>
+              </Stack>
+            ))}
               </Stack>
             </Box>
 
