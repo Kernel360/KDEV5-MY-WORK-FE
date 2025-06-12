@@ -123,11 +123,16 @@ const projectSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchProjects.fulfilled, (state, action) => {
-        state.loading = false;
-        state.list = action.payload.projects;
-        state.totalCount = action.payload.totalCount;
-      })
+     .addCase(fetchProjects.fulfilled, (state, action) => {
+  state.loading = false;
+  state.list = action.payload.projects.map((proj) => ({
+    ...proj,
+    // devCompanyName이 없으면 "미지정"으로 대체
+    devCompanyName: proj.devCompanyName ?? "미지정",
+  }));
+  state.totalCount = action.payload.totalCount;
+})
+
       .addCase(fetchProjects.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
