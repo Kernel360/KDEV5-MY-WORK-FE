@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import CustomTable from "@/components/common/customTable/CustomTable";
 import { fetchProjects } from "@/features/project/projectSlice";
-import { Box, Alert, Snackbar } from "@mui/material";
+import { Alert, Snackbar } from "@mui/material";
 
 // 테이블 컬럼 정의
 const columns = [
@@ -32,12 +32,11 @@ export default function ProjectTable() {
   const { list: rawProjects, totalCount, status, error } = useSelector(
     (state) => state.project
   );
-  const companyType = useSelector((state) => state.auth.company?.type);
+  const memberRole = useSelector((state) => state.auth.user?.role);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   // 페이지 및 검색/필터 상태
   const [page, setPage] = useState(1);
-  const [searchKey, setSearchKey] = useState("");
   const [searchText, setSearchText] = useState("");
   const [filterValue, setFilterValue] = useState("");
 
@@ -55,15 +54,34 @@ export default function ProjectTable() {
 
   // 데이터 로드 함수
   const loadProjects = useCallback(() => {
-    const params = { page };
-    if (searchText.trim()) params.keyword = searchText.trim();
-    if (searchKey) params.keywordType = searchKey;
+    const params = { 
+      page,
+      size: 10
+    };
+    
+    if (searchText.trim()) {
+      params.keyword = searchText.trim();
+      params.keywordType = "PROJECT_NAME";
+    }
+    
     if (filterValue) {
       params[filterKey] = filterValue;
     }
 
     dispatch(fetchProjects(params));
-  }, [dispatch, page, searchKey, searchText, filterValue]);
+  }, [dispatch, page, searchText, filterValue]);
+
+  // 검색어 변경 시 페이지 초기화
+  const handleSearchTextChange = (newText) => {
+    setPage(1);
+    setSearchText(newText);
+  };
+
+  // 필터 변경 시 페이지 초기화
+  const handleFilterChange = (val) => {
+    setPage(1);
+    setFilterValue(val);
+  };
 
   useEffect(() => {
     loadProjects();
@@ -80,7 +98,7 @@ export default function ProjectTable() {
   }));
 
   const handleRowClick = (row) => {
-    if (companyType === "DEV") {
+    if (memberRole === "ROLE_DEV_ADMIN") {
       setSnackbarOpen(true);
       return;
     }
@@ -92,43 +110,35 @@ export default function ProjectTable() {
   };
 
   return (
-    <Box>
+    <>
       <CustomTable
         columns={columns}
         rows={enrichedProjects}
         pagination={{
           page,
-          total: totalCount,
-          onPageChange: setPage,
+          total: totalCount || 0,
+          onPageChange: (newPage) => {
+            setPage(newPage);
+          },
+          pageSize: 10
         }}
         onRowClick={handleRowClick}
         search={{
-          key: searchKey,
-          placeholder: "검색어를 입력하세요",
+          key: "name",
+          placeholder: "프로젝트 제목을 입력하세요",
           value: searchText,
-          onKeyChange: (newKey) => {
-            setPage(1);
-            setSearchKey(newKey);
-          },
-          onChange: (newText) => {
-            setPage(1);
-            setSearchText(newText);
-          },
+          onChange: handleSearchTextChange,
         }}
         filter={{
           key: filterKey,
           label: '상태',        
           value: filterValue,
           options: filterOptions,
-          onChange: (val) => {
-            setPage(1);
-            setFilterValue(val);
-          },
+          onChange: handleFilterChange,
         }}
         loading={status === "loading"}
         error={error}
       />
-
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={6000}
@@ -140,5 +150,12 @@ export default function ProjectTable() {
         </Alert>
       </Snackbar>
     </Box>
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity="warning" sx={{ width: '100%' }}>
+          관리자에게 문의해주세요.
+        </Alert>
+      </Snackbar>
+    </>
   );
 }
