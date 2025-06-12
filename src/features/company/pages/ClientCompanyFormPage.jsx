@@ -20,6 +20,8 @@ export default function ClientCompanyFormPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  console.log('ClientCompanyFormPage - useParams id:', id);
+
   // Redux 상태 조회
   const { current, loading: companyLoading } = useSelector(
     (state) => state.company
@@ -77,6 +79,7 @@ export default function ClientCompanyFormPage() {
   // current 데이터가 바뀌면 form 상태에 반영
   useEffect(() => {
     if (isEdit && current) {
+      console.log('ClientCompanyFormPage - current data for form setting:', current);
       setForm({
         id: current.id || null,
         name: current.name || "",
@@ -102,8 +105,9 @@ export default function ClientCompanyFormPage() {
     if (!form.name) return;
 
     try {
+      const payload = { ...form, id: id };
       if (isEdit) {
-        await dispatch(updateCompany({ id, ...form })).unwrap();
+        await dispatch(updateCompany(payload)).unwrap();
         navigate(`/client-companies/${id}`);
       } else {
         await dispatch(createCompany(form)).unwrap();

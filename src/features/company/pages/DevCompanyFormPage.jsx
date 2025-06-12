@@ -44,16 +44,11 @@ export default function DevCompanyFormPage() {
   useEffect(() => {
     const generateNewCompanyId = async () => {
       if (!isEdit) {
-        console.log("회사 ID 생성 시작 - isEdit:", isEdit);
         const storedId = localStorage.getItem("newCompanyId");
-        console.log("저장된 ID:", storedId);
         if (!storedId) {
           try {
-            console.log("새로운 회사 ID 생성 요청");
             const result = await dispatch(createCompanyId()).unwrap();
-            console.log("회사 ID 생성 결과:", result);
             localStorage.setItem("newCompanyId", result.data.companyId);
-            console.log("local storage:", localStorage.getItem("newCompanyId"));
             setForm((prev) => ({ ...prev, id: result.data.companyId }));
           } catch (err) {
             console.error("회사 ID 생성 실패:", err);
@@ -102,12 +97,13 @@ export default function DevCompanyFormPage() {
     if (!form.name) return;
 
     try {
+      const payload = { ...form, id: id };
       if (isEdit) {
-        await dispatch(updateCompany({ id, ...form })).unwrap();
+        await dispatch(updateCompany(payload)).unwrap();
         navigate(`/dev-companies/${id}`);
       } else {
         await dispatch(createCompany(form)).unwrap();
-        localStorage.removeItem("newCompanyId"); // 성공적으로 생성 후 localStorage에서 제거
+        localStorage.removeItem("newCompanyId");
         navigate("/dev-companies");
       }
     } catch (err) {
