@@ -5,17 +5,31 @@ import * as projectAPI from "@/api/project";
 // 전체 프로젝트 조회
 export const fetchProjects = createAsyncThunk(
   "project/fetchProjects",
-  async ({ page, size, keyword = null, keywordType = null, deleted }, thunkAPI) => {
+  async ({ page, size = 10, keyword = null, keywordType = null, step = null }, thunkAPI) => {
     try {
-      const params = { page };
-      if (keyword) params.nameKeyword = keyword;
-      // if (keywordType) params.keywordType = keywordType;
-      if (deleted !== null) params.deleted = deleted;
+      const params = { 
+        page,
+        size
+      };
+      
+      if (keyword) {
+        params.keyword = keyword;
+        params.keywordType = keywordType;
+      }
+      
+      if (step) {
+        params.step = step;
+      }
 
+      console.log("API 호출 파라미터:", params);
       const response = await projectAPI.getProjects(params);
+      const { projects, totalCount } = response.data.data;
+      
       return {
-        projects: response.data.data.projects,
-        totalCount: response.data.data.totalCount,
+        projects,
+        totalCount: totalCount || 0,
+        currentPage: page,
+        pageSize: size
       };
     } catch (err) {
       return thunkAPI.rejectWithValue(err.response?.data || "Failed to fetch projects");
@@ -23,7 +37,7 @@ export const fetchProjects = createAsyncThunk(
   }
 );
 
-// 단건 조회
+// 단일 프로젝트 조회
 export const fetchProjectById = createAsyncThunk(
   "project/fetchProjectById",
   async (id, thunkAPI) => {
@@ -31,17 +45,17 @@ export const fetchProjectById = createAsyncThunk(
       const response = await projectAPI.getProjectById(id);
       return response.data.data;
     } catch (err) {
-      return thunkAPI.rejectWithValue(err.response?.data || "프로젝트 상세 조회 실패");
+      return thunkAPI.rejectWithValue(err.response?.data || "프로젝트 단건 조회 실패");
     }
   }
 );
 
-// 생성
+// 프로젝트 생성
 export const createProject = createAsyncThunk(
   "project/createProject",
-  async (data, thunkAPI) => {
+  async (projectData, thunkAPI) => {
     try {
-      const response = await projectAPI.createProject(data);
+      const response = await projectAPI.createProject(projectData);
       return response.data.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(err.response?.data || "프로젝트 생성 실패");
@@ -49,12 +63,12 @@ export const createProject = createAsyncThunk(
   }
 );
 
-// 수정
+// 프로젝트 수정
 export const updateProject = createAsyncThunk(
   "project/updateProject",
-  async ({ id, ...data }, thunkAPI) => {
+  async ({ id, projectData }, thunkAPI) => {
     try {
-      const response = await projectAPI.updateProject(id, data);
+      const response = await projectAPI.updateProject(id, projectData);
       return response.data.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(err.response?.data || "프로젝트 수정 실패");
@@ -62,7 +76,7 @@ export const updateProject = createAsyncThunk(
   }
 );
 
-// 삭제
+// 프로젝트 삭제
 export const deleteProject = createAsyncThunk(
   "project/deleteProject",
   async ({ id }, thunkAPI) => {
@@ -84,12 +98,12 @@ export const deleteProject = createAsyncThunk(
  */
 export const fetchProjectMembers = createAsyncThunk(
   "project/fetchProjectMembers",
-  async ({ companyId, projectId }, thunkAPI) => {
+  async (params, thunkAPI) => {
     try {
-      const response = await projectAPI.getProjectMembers({ companyId, projectId });
-      return response.data.data.members; // WebResponse 구조에 맞춰 adjust
+      const response = await projectAPI.getProjectMembers(params);
+      return response.data.data.members; // ProjectMemberListWebResponse
     } catch (err) {
-      return thunkAPI.rejectWithValue(err.response?.data || "프로젝트 멤버 조회 실패");
+      return thunkAPI.rejectWithValue(err.response?.data || "프로젝트 멤버 목록 조회 실패");
     }
   }
 );
@@ -100,6 +114,8 @@ const projectSlice = createSlice({
   initialState: {
     list: [],
     totalCount: 0,
+    currentPage: 1,
+    pageSize: 10,
     current: null,
     loading: false,
     error: null,
@@ -123,16 +139,16 @@ const projectSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-     .addCase(fetchProjects.fulfilled, (state, action) => {
-  state.loading = false;
-  state.list = action.payload.projects.map((proj) => ({
-    ...proj,
-    // devCompanyName이 없으면 "미지정"으로 대체
-    devCompanyName: proj.devCompanyName ?? "미지정",
-  }));
-  state.totalCount = action.payload.totalCount;
-})
-
+      .addCase(fetchProjects.fulfilled, (state, action) => {
+        state.loading = false;
+        state.list = action.payload.projects.map((proj) => ({
+          ...proj,
+          devCompanyName: proj.devCompanyName ?? "미지정",
+        }));
+        state.totalCount = action.payload.totalCount;
+        state.currentPage = action.payload.currentPage;
+        state.pageSize = action.payload.pageSize;
+      })
       .addCase(fetchProjects.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
@@ -174,8 +190,14 @@ const projectSlice = createSlice({
       })
       .addCase(updateProject.fulfilled, (state, action) => {
         state.loading = false;
-        const idx = state.list.findIndex((p) => p.id === action.payload.id);
-        if (idx !== -1) state.list[idx] = action.payload;
+        // 수정된 프로젝트를 목록에서 찾아 업데이트
+        const index = state.list.findIndex(
+          (project) => project.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.list[index] = action.payload;
+        }
+        state.current = action.payload; // 현재 선택된 프로젝트도 업데이트
       })
       .addCase(updateProject.rejected, (state, action) => {
         state.loading = false;
@@ -189,7 +211,9 @@ const projectSlice = createSlice({
       })
       .addCase(deleteProject.fulfilled, (state, action) => {
         state.loading = false;
-        state.list = state.list.filter((p) => p.id !== action.payload);
+        state.list = state.list.filter(
+          (project) => project.id !== action.payload.id
+        );
         state.totalCount -= 1;
       })
       .addCase(deleteProject.rejected, (state, action) => {
@@ -197,7 +221,7 @@ const projectSlice = createSlice({
         state.error = action.payload;
       })
 
-         // --- 프로젝트 멤버 조회 처리 ---
+      // 프로젝트 멤버 목록 조회
       .addCase(fetchProjectMembers.pending, (state) => {
         state.membersLoading = true;
         state.membersError = null;
