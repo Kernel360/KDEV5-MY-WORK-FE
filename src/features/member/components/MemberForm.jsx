@@ -39,7 +39,7 @@ export default function MemberForm({
     <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
       <Paper
         sx={{
-          p: 4,
+          px: 4,
           mb: 3,
           mx: 3,
           borderRadius: 2,
