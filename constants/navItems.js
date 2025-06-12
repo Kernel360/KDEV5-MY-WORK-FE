@@ -28,8 +28,12 @@ const navItems = [
     text: "프로젝트 관리",
     icon: FolderRoundedIcon,
     path: "/projects",
-    roles: ["ROLE_SYSTEM_ADMIN", "ROLE_DEV_ADMIN", "ROLE_USER"],
-    companyTypes: ["DEV", "SYSTEM"],
+    roles: [
+      "ROLE_SYSTEM_ADMIN",
+      "ROLE_DEV_ADMIN",
+      "ROLE_CLIENT_ADMIN",
+      "ROLE_USER",
+    ],
   },
   {
     text: "로그",
