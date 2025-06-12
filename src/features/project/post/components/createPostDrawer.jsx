@@ -153,7 +153,6 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
             </Box>
           ) : (
             <>
-              {/* 1. 단계 */}
               <Box>
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <Typography variant="subtitle1" fontWeight={600}>
@@ -195,7 +194,6 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
                 </FormControl>
               </Box>
 
-              {/* 2. 제목 */}
               <Box>
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <Typography variant="subtitle1" fontWeight={600}>
@@ -217,7 +215,6 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
                 />
               </Box>
 
-              {/* 3. 내용 */}
               <Box>
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <Typography variant="subtitle1" fontWeight={600}>
