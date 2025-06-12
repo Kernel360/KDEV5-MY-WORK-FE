@@ -22,7 +22,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { createPostId, createPost } from "@/features/project/post/postSlice";
 
-export default function CreatePostDrawer({ open, onClose }) {
+export default function CreatePostDrawer({ open, onClose, onSubmit }) {
   const theme = useTheme();
   const dispatch = useDispatch();
   const { id: projectId } = useParams();
@@ -32,6 +32,7 @@ export default function CreatePostDrawer({ open, onClose }) {
   const projectSteps = useSelector((state) => state.projectStep.items) || [];
 
   const [form, setForm] = useState({
+    id: "",
     projectStepId: "",
     title: "",
     content: "",
@@ -39,52 +40,60 @@ export default function CreatePostDrawer({ open, onClose }) {
   const [loadingId, setLoadingId] = useState(false);
   const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-      const generateNewPostId = async () => {
-          const storedId = localStorage.getItem("newPostId");
-          if (!storedId) {
-            try {
-              const result = await dispatch(createPostId()).unwrap();
-              localStorage.setItem("newPostId", result.postId);
-              setForm((prev) => ({ ...prev, id: result.postId }));
-            } catch (err) {
-              console.error("회사 ID 생성 실패:", err);
-            }
-          } else {
-            setForm((prev) => ({ ...prev, id: storedId }));
-          }
-        
-      };
-  
-      generateNewPostId();
-    }, [dispatch]);
+  // 새 글 ID 생성
+  useEffect(() => {
+    const generateNewPostId = async () => {
+      const storedId = localStorage.getItem("newPostId");
+      if (!storedId) {
+        try {
+          setLoadingId(true);
+          const result = await dispatch(createPostId()).unwrap();
+          const newId = typeof result === "string" ? result : result.postId;
+          localStorage.setItem("newPostId", newId);
+          setForm((prev) => ({ ...prev, id: newId }));
+        } catch (err) {
+          console.error("Post ID 생성 실패:", err);
+        } finally {
+          setLoadingId(false);
+        }
+      } else {
+        setForm((prev) => ({ ...prev, id: storedId }));
+      }
+    };
+
+    generateNewPostId();
+  }, [dispatch, open]);
 
   const handleChange = (key) => (e) =>
     setForm((f) => ({ ...f, [key]: e.target.value }));
 
+  // 등록 처리
   const handleSubmit = async () => {
-    const { projectStepId, title, content } = form;
-    if ( !projectStepId || !title.trim() || !content.trim()) return;
+    const { id, projectStepId, title, content } = form;
+    if (!projectStepId || !title.trim() || !content.trim()) return;
 
     setLoading(true);
     try {
-        const storedId = localStorage.getItem("newPostId");
-      await dispatch(
-        createPost({
-          projectId,
-          data: {
-            id: storedId,
-            projectStepId,
-            title,
-            content,
-            companyName,
-            authorName: userName,
-          },
-        })
-      ).unwrap();
+      const payload = {
+        id,
+        projectStepId,
+        title,
+        content,
+        companyName,
+        authorName: userName,
+      };
 
+      if (onSubmit) {
+        // 부모 컴포넌트가 createPost를 처리하도록 위임
+        await onSubmit(payload);
+      } else {
+        // 자체적으로 dispatch
+        await dispatch(createPost({ projectId, data: payload })).unwrap();
+      }
+
+      // 완료 후 초기화
       localStorage.removeItem("newPostId");
-      setForm({ projectStepId: "", title: "", content: "" });
+      setForm({ id: "", projectStepId: "", title: "", content: "" });
       onClose();
     } catch (e) {
       console.error(e);
@@ -98,7 +107,9 @@ export default function CreatePostDrawer({ open, onClose }) {
       anchor="right"
       open={open}
       onClose={onClose}
-      PaperProps={{ sx: { width: { xs: "100%", sm: "50vw" }, bgcolor: "transparent" } }}
+      PaperProps={{
+        sx: { width: { xs: "100%", sm: "50vw" }, bgcolor: "transparent" },
+      }}
     >
       <Paper
         elevation={6}
@@ -136,7 +147,11 @@ export default function CreatePostDrawer({ open, onClose }) {
                   label="단계"
                   onChange={handleChange("projectStepId")}
                   displayEmpty
-                  renderValue={(val) => val ? projectSteps.find((s) => s.projectStepId === val)?.title : "단계를 선택하세요"}
+                  renderValue={(val) =>
+                    val
+                      ? projectSteps.find((s) => s.projectStepId === val)?.title
+                      : "단계를 선택하세요"
+                  }
                 >
                   <MenuItem value="" disabled>
                     단계 선택

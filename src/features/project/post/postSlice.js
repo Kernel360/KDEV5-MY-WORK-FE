@@ -21,7 +21,14 @@ export const createPostId = createAsyncThunk(
 export const fetchPosts = createAsyncThunk(
   "post/fetchPosts",
   async (
-    { projectId, page, keyword = null, keywordType = null, projectStepId = null, deleted = null, approval = null },
+    {
+      projectId,
+      page,
+      keyword = null,
+      keywordType = null,
+      projectStepId = null,
+      approval = null,
+    },
     thunkAPI
   ) => {
     try {
@@ -29,25 +36,25 @@ export const fetchPosts = createAsyncThunk(
         keyword,
         keywordType,
         projectStepId,
-        deleted,
+        deleted: false,      // 무조건 false
         approval,
       });
-      return {
-        posts: response.data.data.posts,
-        totalCount: response.data.data.totalCount,
-      };
-    } catch (err) {
-      return thunkAPI.rejectWithValue(
-        err.response?.data || "게시글 목록 조회 실패"
-      );
-    }
-  }
-);
+       return {
+         posts: response.data.data.posts,
+         totalCount: response.data.data.totalCount,
+       };
+     } catch (err) {
+       return thunkAPI.rejectWithValue(
+         err.response?.data || "게시글 목록 조회 실패"
+       );
+     }
+   }
+ );
 
 // 3) 게시글 단건 조회
 export const fetchPostById = createAsyncThunk(
   "post/fetchPostById",
-  async ({ postId }, thunkAPI) => {
+  async (postId , thunkAPI) => {
     try {
       const response = await postAPI.getPostDetail(postId);
       return response.data.data;
