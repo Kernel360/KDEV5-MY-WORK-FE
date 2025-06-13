@@ -18,6 +18,7 @@ import {
   Select,
   MenuItem,
   TextField,
+  Avatar,
 } from "@mui/material";
 import dayjs from "dayjs";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -300,6 +301,25 @@ function renderCell(col, value, row, theme) {
           <Avatar src={value.src} sx={{ width: 28, height: 28 }} />
           <Typography variant="body2" noWrap>
             {value.name}
+          </Typography>
+        </Stack>
+      ) : (
+        <Typography variant="body2" color="text.disabled">
+          -
+        </Typography>
+      );
+    case "logo":
+      const displayName = value?.startsWith("주식회사 ")
+        ? value.slice(5) // '주식회사 ' (공백 포함 5글자 잘라냄)
+        : value;
+
+      return value ? (
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Avatar sx={{ width: 28, height: 28 }}>
+            {displayName?.[0] || "?"}
+          </Avatar>
+          <Typography variant="body2" noWrap>
+            {value}
           </Typography>
         </Stack>
       ) : (

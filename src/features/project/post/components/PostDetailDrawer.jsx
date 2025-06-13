@@ -45,8 +45,8 @@ export default function PostDetailDrawer({ open, post, onClose }) {
   };
 
   const statusMap = {
-    PENDING: { label: "검토 요청", color: "neutral" },
-    APPROVED: { label: "검토 완료", color: "success" },
+    PENDING: { label: "대기", color: "neutral" },
+    APPROVED: { label: "완료", color: "success" },
   };
   const stat = statusMap[post.approval] || {
     label: post.approval ?? "-",

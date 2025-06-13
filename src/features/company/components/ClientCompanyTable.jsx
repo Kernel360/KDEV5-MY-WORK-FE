@@ -8,20 +8,25 @@ import { fetchCompanies } from "@/features/company/companySlice";
 
 // 테이블 컬럼 정의
 const columns = [
-  { key: "companyName", label: "회사명", type: "text", searchable: true },
+  { key: "companyName", label: "회사명", type: "logo", searchable: true },
   {
     key: "businessNumber",
     label: "사업자 번호",
     type: "text",
     searchable: true,
   },
-   { key: "contactPhoneNumber", label: "연락처", type: "text" },
+  { key: "contactPhoneNumber", label: "연락처", type: "text" },
   { key: "address", label: "주소", type: "text", searchable: true },
   { key: "createdAt", label: "등록일자", type: "date" },
-  { key: "deleted", label: "활성화 여부", type: "status", statusMap: {
-      false: { color: "success",    label: "활성" },
+  {
+    key: "deleted",
+    label: "활성화 여부",
+    type: "status",
+    statusMap: {
+      false: { color: "success", label: "활성" },
       true: { color: "error", label: "비활성" },
-    }, },
+    },
+  },
 ];
 
 export default function ProjectTable() {
@@ -31,7 +36,7 @@ export default function ProjectTable() {
     list: companies,
     totalCount,
     error,
-    loading
+    loading,
   } = useSelector((state) => state.company);
 
   // 페이지 및 검색/필터 상태
@@ -52,15 +57,15 @@ export default function ProjectTable() {
 
   // 데이터 로드 함수
   const loadCompany = useCallback(() => {
-    const params = { 
+    const params = {
       page,
-      companyType: "CLIENT"
+      companyType: "CLIENT",
     };
-    
+
     if (searchText.trim()) {
       params.keyword = searchText.trim();
       // 검색 필드에 따라 keywordType 설정
-      switch(searchKey) {
+      switch (searchKey) {
         case "companyName":
           params.keywordType = "NAME";
           break;
@@ -74,7 +79,7 @@ export default function ProjectTable() {
           params.keywordType = "NAME";
       }
     }
-    
+
     if (filterValue) {
       params[filterKey] = filterValue;
     }
@@ -120,7 +125,7 @@ export default function ProjectTable() {
         }}
         filter={{
           key: filterKey,
-          label:'활성화 여부',
+          label: "활성화 여부",
           value: filterValue,
           options: filterOptions,
           onChange: (val) => {

@@ -296,14 +296,18 @@ function renderCell(col, value, row, theme, companies) {
           -
         </Typography>
       );
-    case "avatar":
-      return value?.src && value?.name ? (
+    case "logo":
+      const displayName = value?.startsWith("주식회사 ")
+        ? value.slice(5) // '주식회사 ' (공백 포함 5글자 잘라냄)
+        : value;
+
+      return value ? (
         <Stack direction="row" spacing={1} alignItems="center">
           <Avatar sx={{ width: 28, height: 28 }}>
-            {value.name?.[0] || "?"}
+            {displayName?.[0] || "?"}
           </Avatar>
           <Typography variant="body2" noWrap>
-            {value.name}
+            {value}
           </Typography>
         </Stack>
       ) : (
@@ -383,8 +387,27 @@ function renderCell(col, value, row, theme, companies) {
       );
     case "company": {
       const comp = companies.find((c) => c.id === value);
-      return comp?.name ?? "-";
+      const name = comp?.name ?? "-";
+
+      // 주식회사 제거 로직
+      const displayName = name.startsWith("주식회사 ") ? name.slice(5) : name;
+
+      return name !== "-" ? (
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Avatar sx={{ width: 28, height: 28 }}>
+            {displayName?.[0] || "?"}
+          </Avatar>
+          <Typography variant="body2" noWrap>
+            {name}
+          </Typography>
+        </Stack>
+      ) : (
+        <Typography variant="body2" color="text.disabled">
+          -
+        </Typography>
+      );
     }
+
     case "custom":
       return col.render ? col.render(value, row) : value;
     default:
