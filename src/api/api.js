@@ -11,7 +11,9 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("accessToken");
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => Promise.reject(error)
@@ -22,7 +24,6 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // ✅ 로그인 요청은 reissue 하지 않도록 예외 처리
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
@@ -40,15 +41,12 @@ api.interceptors.response.use(
 
         if (refreshRes.status !== 200) {
           localStorage.removeItem("accessToken");
-          window.location.replace("/login"); // ✅ 새로고침 없는 리다이렉트
+          window.location.replace("/login");
           return Promise.reject(refreshRes);
         }
 
         const newToken = refreshRes.data.data.accessToken;
         localStorage.setItem("accessToken", newToken);
-
-        api.defaults.headers.Authorization = `Bearer ${newToken}`;
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
 
         return api(originalRequest);
       } catch (refreshErr) {
