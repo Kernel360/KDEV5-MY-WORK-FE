@@ -23,9 +23,8 @@ import { getRoleLabel } from "@/utils/roleUtils";
 import {
   logout as logoutThunk,
   clearAuthState,
-  reissueToken,
 } from "@/features/auth/authSlice";
-import { fetchProjects } from "@/features/project/projectSlice";
+import { fetchMemberProjects } from "@/features/member/memberSlice";
 
 export default function Sidebar({ onClose }) {
   const navigate = useNavigate();
@@ -34,8 +33,10 @@ export default function Sidebar({ onClose }) {
 
   const memberName = useSelector((state) => state.auth.user?.name);
   const memberRole = useSelector((state) => state.auth.user?.role);
+  const memberId = useSelector((state) => state.auth.user?.id);
 
-  const projects = useSelector((state) => state.project.data);
+  const memberProjects = useSelector((state) => state.member.memberProjects);
+  const projects = useSelector((state) => state.project.data); // 관리자용
 
   const currentPath = location.pathname;
 
@@ -43,11 +44,12 @@ export default function Sidebar({ onClose }) {
     (item) => item.roles && item.roles.includes(memberRole)
   );
 
+  // 새로고침 시 memberProjects 재조회
   useEffect(() => {
-    if (memberRole === "USER") {
-      dispatch(fetchProjects({ page: 0, size: 100 }));
+    if (memberRole === "ROLE_USER" && memberId) {
+      dispatch(fetchMemberProjects(memberId));
     }
-  }, [memberRole, dispatch]);
+  }, [memberRole, memberId, dispatch]);
 
   const handleItemClick = (path) => {
     onClose();
@@ -78,17 +80,19 @@ export default function Sidebar({ onClose }) {
       </ProfileSection>
 
       <NavList>
-        {memberRole === "USER"
-          ? projects.map((project) => (
+        {memberRole === "ROLE_USER"
+          ? memberProjects.map((project) => (
               <NavItem
-                key={project.id}
-                onClick={() => handleItemClick(`/projects/${project.id}`)}
+                key={project.projectId}
+                onClick={() =>
+                  handleItemClick(`/projects/${project.projectId}`)
+                }
                 disablePadding
               >
                 <ListItemButton
-                  selected={currentPath === `/projects/${project.id}`}
+                  selected={currentPath === `/projects/${project.projectId}`}
                 >
-                  <ListItemText primary={project.name} />
+                  <ListItemText primary={project.projectName} />
                 </ListItemButton>
               </NavItem>
             ))
