@@ -106,6 +106,19 @@ const memberSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(fetchMembers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchMembers.fulfilled, (state, action) => {
+        state.list = action.payload.members;
+        state.totalCount = action.payload.totalCount;
+        state.loading = false;
+      })
+      .addCase(fetchMembers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
       // 페치 멤버들
       .addCase(fetchCompanyMembers.pending, (state) => {
         state.loading = true;
