@@ -64,20 +64,13 @@ export default function LoginPage() {
             if (projects.length > 0) {
               navigate(`/projects/${projects[0].id}`);
             } else {
-              navigate("/projects", {
-                state: {
-                  warningMessage:
-                    "참여 중인 프로젝트가 없습니다. 시스템 관리자에게 문의하여 프로젝트에 참여해주세요.",
-                },
-              });
+              navigate("/no-projects");
             }
           } else {
-            navigate("/projects", {
-              state: { warningMessage: "프로젝트 조회 실패" },
-            });
+            navigate("/no-projects");
           }
         } catch (err) {
-          navigate("/projects", {
+          navigate("/no-projects", {
             state: { warningMessage: "프로젝트 조회 중 오류가 발생했습니다." },
           });
         }
