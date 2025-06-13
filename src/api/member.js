@@ -71,3 +71,14 @@ export function findMembers(page, keyword, keywordType) {
     params: { page, keyword, keywordType },
   });
 }
+
+/**
+ * 멤버가 참여 중인 프로젝트 목록 조회
+ * GET /api/member/{memberId}/myProjects
+ *
+ * @param {string} memberId - 조회할 멤버 UUID
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<MemberProjectsListWebResponse>
+ */
+export function getMemberProjects(memberId) {
+  return api.get(`/api/member/${memberId}/myProjects`);
+}
