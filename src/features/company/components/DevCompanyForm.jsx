@@ -23,7 +23,9 @@ export default function DevCompanyForm({
   isSubmitted = false,
 }) {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+    <Box
+      sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}
+    >
       <Paper
         sx={{
           p: 4,
@@ -60,7 +62,9 @@ export default function DevCompanyForm({
               onChange={handleChange("name")}
               fullWidth
               error={isSubmitted && !form.name}
-              helperText={isSubmitted && !form.name ? "회사 이름을 입력해주세요." : ""}
+              helperText={
+                isSubmitted && !form.name ? "회사 이름을 입력해주세요." : ""
+              }
               sx={{ mb: 2 }}
             />
             <TextField
@@ -101,7 +105,12 @@ export default function DevCompanyForm({
 
           {/* 3) 연락처 정보 */}
           <Box>
-            <Stack direction="row" alignItems="center" spacing={1}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={1}
+              sx={{ mb: 2 }}
+            >
               <Typography variant="subtitle1" fontWeight={600}>
                 3. 연락처 정보
               </Typography>

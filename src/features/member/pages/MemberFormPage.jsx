@@ -12,7 +12,7 @@ import { fetchAllCompanyNames } from "@/features/company/companySlice";
 const MemberFormPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { id: memberId } = useParams(); // ← id 파라미터 받아오기
+  const { id: memberId } = useParams();
   const isEdit = Boolean(memberId);
 
   const { companyListOnlyIdName: companies = [], loading } = useSelector(
@@ -30,40 +30,40 @@ const MemberFormPage = () => {
     companyId: "",
   });
 
-  const [fetching, setFetching] = useState(false); // 수정 시 데이터 로딩용
+  const [fetching, setFetching] = useState(false);
 
-  // 회사목록 불러오기
+  // 회사 목록 로딩
   useEffect(() => {
     dispatch(fetchAllCompanyNames());
   }, [dispatch]);
 
-  // 수정인 경우 멤버 상세 조회
+  // 수정 모드일 때 기존 멤버 데이터 로딩
   useEffect(() => {
-    if (memberId) {
-      const fetchMember = async () => {
-        setFetching(true);
-        try {
-          const res = await getMemberById(memberId);
-          const member = res.data.data;
-          setForm({
-            name: member.name,
-            department: member.department,
-            position: member.position,
-            role: member.role,
-            phoneNumber: member.phoneNumber,
-            email: member.email,
-            birthDate: member.birthday?.substring(0, 10) || "",
-            companyId: member.companyId,
-          });
-        } catch (err) {
-          console.error(err);
-          // TODO: 에러 처리 (스낵바 등)
-        } finally {
-          setFetching(false);
-        }
-      };
-      fetchMember();
-    }
+    if (!memberId) return;
+
+    const fetchMember = async () => {
+      setFetching(true);
+      try {
+        const res = await getMemberById(memberId);
+        const member = res.data.data;
+        setForm({
+          name: member.name,
+          department: member.department,
+          position: member.position,
+          role: member.role,
+          phoneNumber: member.phoneNumber,
+          email: member.email,
+          birthDate: member.birthDate?.substring(0, 10) || "",
+          companyId: member.companyId,
+        });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setFetching(false);
+      }
+    };
+
+    fetchMember();
   }, [memberId]);
 
   const handleChange = (key) => (e) => {
@@ -74,29 +74,19 @@ const MemberFormPage = () => {
     try {
       const payload = {
         ...form,
-        ...(isEdit
-          ? {
-              id: memberId,
-              birthday: form.birthDate ? form.birthDate + "T00:00:00" : "",
-            }
-          : {
-              birthDate: form.birthDate ? form.birthDate + "T00:00:00" : "",
-            }),
+        birthDate: form.birthDate ? form.birthDate + "T00:00:00" : null,
+        ...(isEdit && { id: memberId }),
       };
 
       if (isEdit) {
-        delete payload.birthDate;
-      }
-
-      if (memberId) {
         await updateMember(payload);
       } else {
         await createMember(payload);
       }
+
       navigate("/members");
     } catch (err) {
       console.error(err);
-      // TODO: 에러 처리 (스낵바 등)
     }
   };
 
@@ -128,7 +118,7 @@ const MemberFormPage = () => {
       >
         {loading || fetching ? (
           <CircularProgress size={24} />
-        ) : memberId ? (
+        ) : isEdit ? (
           "수정"
         ) : (
           "등록"
@@ -140,9 +130,9 @@ const MemberFormPage = () => {
   return (
     <PageWrapper>
       <PageHeader
-        title={memberId ? "멤버 수정" : "멤버 등록"}
+        title={isEdit ? "멤버 수정" : "멤버 등록"}
         subtitle={
-          memberId
+          isEdit
             ? "멤버 정보를 수정합니다."
             : "새로운 멤버를 등록하여 팀을 구성하세요."
         }
@@ -153,6 +143,7 @@ const MemberFormPage = () => {
         handleChange={handleChange}
         companies={companies}
         loading={loading || fetching}
+        isEdit={isEdit}
       />
     </PageWrapper>
   );
