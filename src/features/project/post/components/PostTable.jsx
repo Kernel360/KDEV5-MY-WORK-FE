@@ -71,8 +71,8 @@ export default function PostTable() {
       sortable: true,
       type: "status",
       statusMap: {
-        PENDING: { label: "검토 요청", color: "neutral" },
-        APPROVED: { label: "검토 완료", color: "success" },
+        PENDING: { label: "대기", color: "neutral" },
+        APPROVED: { label: "완료", color: "success" },
       },
     },
     {
@@ -81,6 +81,7 @@ export default function PostTable() {
       width: "20%",
       sortable: true,
       searchable: true,
+      type: "logo",
     },
     {
       key: "createdAt",
