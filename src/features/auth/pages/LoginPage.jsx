@@ -54,18 +54,12 @@ export default function LoginPage() {
 
       if (memberRole === "ROLE_USER") {
         try {
-          const projectResult = await dispatch(
-            fetchProjects({
-              page: 1,
-              size: 1,
-              keyword: null,
-              keywordType: null,
-              step: null,
-            })
+          const memberProjectResult = await dispatch(
+            fetchMemberProjects(memberId)
           );
 
-          if (fetchProjects.fulfilled.match(projectResult)) {
-            const { projects } = projectResult.payload;
+          if (fetchMemberProjects.fulfilled.match(memberProjectResult)) {
+            const projects = memberProjectResult.payload.memberProjects || [];
 
             if (projects.length > 0) {
               navigate(`/projects/${projects[0].id}`);
@@ -78,26 +72,19 @@ export default function LoginPage() {
               });
             }
           } else {
-            console.error("프로젝트 조회 실패:", projectResult.payload);
             navigate("/projects", {
-              state: {
-                warningMessage:
-                  "프로젝트 조회 중 오류가 발생했습니다. 다시 시도해주세요.",
-              },
+              state: { warningMessage: "프로젝트 조회 실패" },
             });
           }
-        } catch (fetchError) {
-          console.error("프로젝트 조회 실패:", fetchError);
+        } catch (err) {
           navigate("/projects", {
-            state: {
-              warningMessage:
-                "프로젝트 조회 중 오류가 발생했습니다. 다시 시도해주세요.",
-            },
+            state: { warningMessage: "프로젝트 조회 중 오류가 발생했습니다." },
           });
         }
         return;
       }
 
+      // ROLE_USER 외에는 그냥 /projects로 이동
       navigate("/projects");
     } else {
       console.error("로그인 실패:", result.payload || result.error);
