@@ -7,17 +7,15 @@ import {
   createProject,
   updateProject,
 } from "@/features/project/projectSlice";
-import {
-  fetchCompanyNamesByType,
-} from "@/features/company/companySlice";
+import { fetchCompanyNamesByType } from "@/features/company/companySlice";
 import { Box, Button, Stack, CircularProgress } from "@mui/material";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
 import ProjectForm from "../components/ProjectForm";
 
 export default function ProjectFormPage() {
-  const { id } = useParams();
-  const isEdit = Boolean(id);
+  const { id: projectId } = useParams();
+  const isEdit = Boolean(projectId);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -33,11 +31,11 @@ export default function ProjectFormPage() {
   const devList = companyByType.DEV || [];
   const clientList = companyByType.CLIENT || [];
 
-  // 로컬 폼 상태 (status로 통일)
+  // 로컬 폼 상태: step 으로 통일
   const [form, setForm] = useState({
     name: "",
     detail: "",
-    status: "NOT_STARTED",
+    step: "NOT_STARTED",
     startAt: "",
     endAt: "",
     devCompanyId: "",
@@ -47,9 +45,9 @@ export default function ProjectFormPage() {
   // 편집 모드일 때 기존 프로젝트 데이터 로드
   useEffect(() => {
     if (isEdit) {
-      dispatch(fetchProjectById(id));
+      dispatch(fetchProjectById(projectId));
     }
-  }, [dispatch, id, isEdit]);
+  }, [dispatch, projectId, isEdit]);
 
   // current 데이터가 바뀌면 form 상태에 반영
   useEffect(() => {
@@ -57,7 +55,7 @@ export default function ProjectFormPage() {
       setForm({
         name: current.name || "",
         detail: current.detail || "",
-        status: current.step || "NOT_STARTED",
+        step: current.step || "NOT_STARTED",
         startAt: current.startAt || "",
         endAt: current.endAt || "",
         devCompanyId: current.devCompanyId || "",
@@ -78,38 +76,34 @@ export default function ProjectFormPage() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  // 제출 처리 (프론트에서는 status, 백엔드에 step으로 매핑)
-const handleSubmit = async () => {
-  try {
-    // 1) status → step, id·deleted 포함
-    const payload = {
-      id,                              // URL이 아니라 body에도 id 필요할 때
-      name: form.name,
-      detail: form.detail,
-      step: form.status,
-      deleted: false,                  // 수정 시 false로 고정
-      devCompanyId: form.devCompanyId,
-      clientCompanyId: form.clientCompanyId,
-      // 2) 날짜에 고정 시간 붙이기
-      ...(form.startAt && { startAt: `${form.startAt}T09:00:00` }),
-      ...(form.endAt   && {   endAt: `${form.endAt}T18:00:00` }),
-    };
+  // 제출 처리
+  const handleSubmit = async () => {
+    try {
+      // payload: form 필드를 그대로 사용
+      const payload = {
+        name: form.name,
+        detail: form.detail,
+        step: form.step,
+        deleted: false,
+        devCompanyId: form.devCompanyId,
+        clientCompanyId: form.clientCompanyId,
+        ...(form.startAt && { startAt: `${form.startAt}T09:00:00` }),
+        ...(form.endAt && { endAt: `${form.endAt}T18:00:00` }),
+      };
 
-    if (isEdit) {
-      // PUT /api/projects/:id
-      await dispatch(updateProject(payload)).unwrap();
-      navigate(`/projects/${id}`);
-    } else {
-      // POST /api/projects
-      await dispatch(createProject(payload)).unwrap();
-      navigate("/projects");
+      if (isEdit) {
+        // updateProject thunk 에는 { id, ...payload } 객체 하나를 넘깁니다.
+        await dispatch(updateProject({ id: projectId, ...payload })).unwrap();
+        navigate(`/projects/${projectId}`);
+      } else {
+        await dispatch(createProject(payload)).unwrap();
+        navigate("/projects");
+      }
+    } catch (err) {
+      console.error(err);
+      // TODO: 에러 시 UI 처리
     }
-  } catch (err) {
-    console.error(err);
-    // TODO: 에러 시 UI 처리
-  }
-};
-
+  };
 
   // 취소 시 뒤로 이동
   const handleCancel = () => {
@@ -128,13 +122,13 @@ const handleSubmit = async () => {
         onClick={handleSubmit}
         disabled={projectLoading || companyLoading || !form.name}
       >
-        {projectLoading ? (
-          isEdit ? "로딩 중..." : "로딩 중..."
-        ) : isEdit ? (
-          "저장"
-        ) : (
-          "생성"
-        )}
+        {projectLoading
+          ? isEdit
+            ? "로딩 중..."
+            : "로딩 중..."
+          : isEdit
+            ? "저장"
+            : "생성"}
       </Button>
     </Stack>
   );

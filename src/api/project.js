@@ -17,8 +17,7 @@ export function getProjects(params) {
  * @param {string} id - 조회할 프로젝트의 UUID
  * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<ProjectDetailWebResponse>
  */
-export const getProjectById = (id) =>
-  api.get(`/api/projects/${id}`);
+export const getProjectById = (id) => api.get(`/api/projects/${id}`);
 
 /**
  * 프로젝트 생성
@@ -26,8 +25,7 @@ export const getProjectById = (id) =>
  * @param {{ name: string; description?: string; }} data
  * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<ProjectCreateWebResponse>
  */
-export const createProject = (data) =>
-  api.post("/api/projects", data);
+export const createProject = (data) => api.post("/api/projects", data);
 
 /**
  * 프로젝트 수정
@@ -36,8 +34,10 @@ export const createProject = (data) =>
  * @param {{ name?: string; description?: string;  }} data
  * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<ProjectUpdateWebResponse>
  */
-export const updateProject = (projectId, webRequest) =>
-  api.put(`/api/projects/${projectId}`, webRequest);
+export const updateProject = (project) => {
+  const { id: projectId, ...webRequest } = project;
+  return api.put(`/api/projects/${projectId}`, webRequest);
+};
 
 /**
  * 프로젝트 삭제
