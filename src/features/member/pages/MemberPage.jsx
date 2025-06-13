@@ -16,6 +16,10 @@ export default function MemberPage() {
 
   const { totalCount } = useSelector((state) => state.member);
 
+  useEffect(() => {
+    dispatch(fetchMembers({ page: 1 }));
+  }, [dispatch]);
+
   return (
     <PageWrapper>
       <Box

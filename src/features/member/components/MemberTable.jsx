@@ -27,9 +27,12 @@ export default function MemberTable() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { list: members, totalCount, status, error } = useSelector(
-    (state) => state.member
-  );
+  const {
+    list: members,
+    totalCount,
+    status,
+    error,
+  } = useSelector((state) => state.member);
 
   const [page, setPage] = useState(1);
   const [keywordType, setKeywordType] = useState("");
@@ -49,12 +52,12 @@ export default function MemberTable() {
     loadMembers();
   }, [loadMembers]);
 
-  const drawMember = (members || [] ).map((p, idx)=> ({
+  const drawMember = (members || []).map((p, idx) => ({
     ...p,
     name: {
-        name: p.name,
-        src: `https://i.pravatar.cc/40?u=${p.id}`,
-    }
+      name: p.name,
+      src: `https://i.pravatar.cc/40?u=${p.id}`,
+    },
   }));
 
   return (
@@ -87,4 +90,4 @@ export default function MemberTable() {
       error={error}
     />
   );
-} 
+}
