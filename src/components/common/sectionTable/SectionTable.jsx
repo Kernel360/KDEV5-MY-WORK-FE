@@ -24,7 +24,7 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import LinearProgress from "@mui/material/LinearProgress";
 import { Stack, Typography } from "@mui/material";
-import CustomButton from "@/components/common/CustomButton/CustomButton";
+import CustomButton from "@/components/common/customButton/CustomButton";
 
 export default function SectionTable({
   columns,
@@ -100,10 +100,10 @@ export default function SectionTable({
   const filteredRows = useMemo(() => {
     let result = sortedRows;
 
-     if (selectedStep && selectedStep !== "전체") {
-     // row.projectStepTitle 필드로 비교
-     result = result.filter((row) => row.projectStepTitle === selectedStep);
-   }
+    if (selectedStep && selectedStep !== "전체") {
+      // row.projectStepTitle 필드로 비교
+      result = result.filter((row) => row.projectStepTitle === selectedStep);
+    }
 
     // 검색 필터
     if (search?.key) {
@@ -132,7 +132,11 @@ export default function SectionTable({
       {/* 단계 선택 스크롤 */}
       {steps.length > 0 && onStepChange && (
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-          <IconButton size="small" onClick={handlePrev} disabled={!canScrollPrev}>
+          <IconButton
+            size="small"
+            onClick={handlePrev}
+            disabled={!canScrollPrev}
+          >
             <ChevronLeftIcon fontSize="small" />
           </IconButton>
           <Box
@@ -149,7 +153,9 @@ export default function SectionTable({
           >
             <CustomButton
               key="전체"
-              kind={!selectedStep || selectedStep === "전체" ? "primary" : "ghost"}
+              kind={
+                !selectedStep || selectedStep === "전체" ? "primary" : "ghost"
+              }
               size="small"
               onClick={() => onStepChange(null, "전체")}
             >
@@ -166,7 +172,11 @@ export default function SectionTable({
               </CustomButton>
             ))}
           </Box>
-          <IconButton size="small" onClick={handleNext} disabled={!canScrollNext}>
+          <IconButton
+            size="small"
+            onClick={handleNext}
+            disabled={!canScrollNext}
+          >
             <ChevronRightIcon fontSize="small" />
           </IconButton>
         </Box>
@@ -207,15 +217,23 @@ export default function SectionTable({
       )}
 
       {/* 테이블 */}
-      <TableContainer sx={{ border: 0.5, borderColor: "grey.100", borderRadius: 2 }}>
+      <TableContainer
+        sx={{ border: 0.5, borderColor: "grey.100", borderRadius: 2 }}
+      >
         <Table size="small">
           <TableHead>
             <TableRow sx={{ backgroundColor: "grey.100" }}>
               {columns.map((col) => (
                 <TableCell
                   key={col.key}
-                  sx={{ fontWeight: 600, width: col.width, whiteSpace: "nowrap" }}
-                  sortDirection={sortConfig.key === col.key ? sortConfig.direction : false}
+                  sx={{
+                    fontWeight: 600,
+                    width: col.width,
+                    whiteSpace: "nowrap",
+                  }}
+                  sortDirection={
+                    sortConfig.key === col.key ? sortConfig.direction : false
+                  }
                 >
                   {col.sortable ? (
                     <TableSortLabel
@@ -241,7 +259,10 @@ export default function SectionTable({
                 sx={{ cursor: onRowClick ? "pointer" : "default" }}
               >
                 {columns.map((col) => (
-                  <TableCell key={`${row[rowKey] ?? idx}-${col.key}`} sx={{ whiteSpace: "nowrap" }}>
+                  <TableCell
+                    key={`${row[rowKey] ?? idx}-${col.key}`}
+                    sx={{ whiteSpace: "nowrap" }}
+                  >
                     {col.renderCell
                       ? col.renderCell(row)
                       : renderCell(col, row[col.key], row, theme)}
@@ -290,14 +311,30 @@ function renderCell(col, value, row, theme) {
       return <Chip label={value} size="small" variant="outlined" />;
     case "status": {
       const info = col.statusMap?.[value] || { label: value, color: "neutral" };
-      const pal = theme.palette.status?.[info.color] || theme.palette.status.neutral;
+      const pal =
+        theme.palette.status?.[info.color] || theme.palette.status.neutral;
       return (
-        <Chip label={info.label} size="small" sx={{ bgcolor: pal.bg, color: pal.main, fontSize: 13, fontWeight: 500 }} />
+        <Chip
+          label={info.label}
+          size="small"
+          sx={{
+            bgcolor: pal.bg,
+            color: pal.main,
+            fontSize: 13,
+            fontWeight: 500,
+          }}
+        />
       );
     }
     case "link":
       return (
-        <Link href={value} target="_blank" underline="hover" onClick={(e) => e.stopPropagation()} sx={{ fontSize: 13 }}>
+        <Link
+          href={value}
+          target="_blank"
+          underline="hover"
+          onClick={(e) => e.stopPropagation()}
+          sx={{ fontSize: 13 }}
+        >
           {value}
         </Link>
       );
@@ -309,7 +346,15 @@ function renderCell(col, value, row, theme) {
       return value ? "Yes" : "No";
     case "action":
       return col.actions?.map((act, i) => (
-        <Button key={i} size="small" variant={act.variant || "outlined"} onClick={(e) => { e.stopPropagation(); act.onClick(row); }}>
+        <Button
+          key={i}
+          size="small"
+          variant={act.variant || "outlined"}
+          onClick={(e) => {
+            e.stopPropagation();
+            act.onClick(row);
+          }}
+        >
           {act.label}
         </Button>
       ));
@@ -317,7 +362,17 @@ function renderCell(col, value, row, theme) {
       return (
         <Stack direction="row" spacing={1} alignItems="center">
           <Box flexGrow={1}>
-            <LinearProgress variant="determinate" value={value ?? 0} sx={{ height: 8, borderRadius: 1, "& .MuiLinearProgress-bar": { bgcolor: theme.palette.primary.main } }} />
+            <LinearProgress
+              variant="determinate"
+              value={value ?? 0}
+              sx={{
+                height: 8,
+                borderRadius: 1,
+                "& .MuiLinearProgress-bar": {
+                  bgcolor: theme.palette.primary.main,
+                },
+              }}
+            />
           </Box>
           <Typography variant="caption">{value ?? 0}%</Typography>
         </Stack>

@@ -8,7 +8,6 @@ import {
   IconButton,
 } from "@mui/material";
 import ReplyIcon from "@mui/icons-material/Reply";
-import CustomButton from "@/components/common/customButton/CustomButton";
 import CommentInput from "./CommentInput";
 
 // 재귀적으로 리뷰를 렌더링하는 컴포넌트
