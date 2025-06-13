@@ -37,9 +37,9 @@ export default function CustomTable({
   filter = null,
 }) {
   // 대신 컴포넌트 최상단에
- const { companyListOnlyIdName: companies = [] } = useSelector(
-   (state) => state.company
- );
+  const { companyListOnlyIdName: companies = [] } = useSelector(
+    (state) => state.company
+  );
   const theme = useTheme();
 
   // 정렬 설정
@@ -47,8 +47,7 @@ export default function CustomTable({
   const handleSort = (key) =>
     setSortConfig((prev) => ({
       key,
-      direction:
-        prev.key === key && prev.direction === "asc" ? "desc" : "asc",
+      direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
     }));
 
   // 검색 설정
@@ -72,10 +71,7 @@ export default function CustomTable({
             cell = JSON.stringify(cell);
           }
         }
-        return cell
-          ?.toString()
-          .toLowerCase()
-          .includes(kw);
+        return cell?.toString().toLowerCase().includes(kw);
       });
     }
 
@@ -113,7 +109,7 @@ export default function CustomTable({
       sx={{
         display: "flex",
         flexDirection: "column",
-        height: "100%",  // 부모로부터 height 상속
+        height: "100%", // 부모로부터 height 상속
         px: 3,
         pb: 3,
       }}
@@ -133,25 +129,28 @@ export default function CustomTable({
         {/* 검색 & 필터 */}
         <Box p={2} bgcolor={theme.palette.background.default}>
           <Stack direction="row" spacing={2} alignItems="center">
-          {filter && filter.key && (
-  <FormControl size="small" sx={{ minWidth: 120 }}>
-    <InputLabel>
-      {filter.label ?? columns.find((c) => c.key === filter.key)?.label}
-    </InputLabel>
-    <Select
-      value={filter.value}
-      onChange={(e) => filter.onChange?.(e.target.value)}
-      label={filter.label ?? columns.find((c) => c.key === filter.key)?.label}
-    >
-      {filter.options.map((opt) => (
-        <MenuItem key={String(opt.value)} value={opt.value}>
-          {opt.label}
-        </MenuItem>
-      ))}
-    </Select>
-  </FormControl>
-)}
-
+            {filter && filter.key && (
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>
+                  {filter.label ??
+                    columns.find((c) => c.key === filter.key)?.label}
+                </InputLabel>
+                <Select
+                  value={filter.value}
+                  onChange={(e) => filter.onChange?.(e.target.value)}
+                  label={
+                    filter.label ??
+                    columns.find((c) => c.key === filter.key)?.label
+                  }
+                >
+                  {filter.options.map((opt) => (
+                    <MenuItem key={String(opt.value)} value={opt.value}>
+                      {opt.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
 
             {search && (
               <>
@@ -203,11 +202,7 @@ export default function CustomTable({
             overflowY: "auto",
           }}
         >
-          <Table
-            size="small"
-            stickyHeader
-            sx={{ minWidth: "max-content" }}
-          >
+          <Table size="small" stickyHeader sx={{ minWidth: "max-content" }}>
             <TableHead>
               <TableRow sx={{ bgcolor: theme.palette.background.default }}>
                 {columns.map((col) => (
@@ -216,7 +211,11 @@ export default function CustomTable({
                     sortDirection={
                       sortConfig.key === col.key ? sortConfig.direction : false
                     }
-                    sx={{ fontWeight: 600, fontSize: 13, color: theme.palette.text.primary }}
+                    sx={{
+                      fontWeight: 600,
+                      fontSize: 13,
+                      color: theme.palette.text.primary,
+                    }}
                   >
                     {col.sortable ? (
                       <TableSortLabel
@@ -240,11 +239,7 @@ export default function CustomTable({
 
             <TableBody>
               {sortedRows.map((row, idx) => (
-                <TableRow
-                  key={idx}
-                  hover
-                  onClick={() => onRowClick?.(row)}
-                >
+                <TableRow key={idx} hover onClick={() => onRowClick?.(row)}>
                   {columns.map((col) => (
                     <TableCell
                       key={col.key}
@@ -289,7 +284,24 @@ function renderCell(col, value, row, theme, companies) {
     case "avatar":
       return value?.src && value?.name ? (
         <Stack direction="row" spacing={1} alignItems="center">
-          <Avatar src={value.src} sx={{ width: 28, height: 28 }} />
+          <Avatar sx={{ width: 28, height: 28 }}>
+            {value.name?.[0] || "?"}
+          </Avatar>
+          <Typography variant="body2" noWrap>
+            {value.name}
+          </Typography>
+        </Stack>
+      ) : (
+        <Typography variant="body2" color="text.disabled">
+          -
+        </Typography>
+      );
+    case "avatar":
+      return value?.src && value?.name ? (
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Avatar sx={{ width: 28, height: 28 }}>
+            {value.name?.[0] || "?"}
+          </Avatar>
           <Typography variant="body2" noWrap>
             {value.name}
           </Typography>
@@ -309,7 +321,12 @@ function renderCell(col, value, row, theme, companies) {
         <Chip
           label={info.label}
           size="small"
-          sx={{ bgcolor: pal.bg, color: pal.main, fontSize: 13, fontWeight: 500 }}
+          sx={{
+            bgcolor: pal.bg,
+            color: pal.main,
+            fontSize: 13,
+            fontWeight: 500,
+          }}
         />
       );
     }
@@ -325,10 +342,8 @@ function renderCell(col, value, row, theme, companies) {
           {value}
         </Link>
       );
-  case "date":
-    return dayjs(value).isValid()
-      ? dayjs(value).format("YYYY.MM.DD")
-      : "-";
+    case "date":
+      return dayjs(value).isValid() ? dayjs(value).format("YYYY.MM.DD") : "-";
     case "number":
       return <Typography variant="body2">{value}</Typography>;
     case "boolean":
@@ -366,7 +381,7 @@ function renderCell(col, value, row, theme, companies) {
           <Typography variant="caption">{value ?? 0}%</Typography>
         </Stack>
       );
- case "company": {
+    case "company": {
       const comp = companies.find((c) => c.id === value);
       return comp?.name ?? "-";
     }
