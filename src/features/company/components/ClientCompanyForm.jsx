@@ -24,7 +24,9 @@ export default function ClientCompanyForm({
   isSubmitted = false,
 }) {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+    <Box
+      sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}
+    >
       <Paper
         sx={{
           p: 4,
@@ -61,7 +63,9 @@ export default function ClientCompanyForm({
               onChange={handleChange("name")}
               fullWidth
               error={isSubmitted && !form.name}
-              helperText={isSubmitted && !form.name ? "회사 이름을 입력해주세요." : ""}
+              helperText={
+                isSubmitted && !form.name ? "회사 이름을 입력해주세요." : ""
+              }
               sx={{ mb: 2 }}
             />
             <TextField
@@ -112,7 +116,7 @@ export default function ClientCompanyForm({
             </Stack>
             <Divider sx={{ mt: 1, mb: 2 }} />
 
-            <Grid container spacing={3}>
+            <Grid container spacing={3} sx={{ mb: 2 }}>
               <Grid item xs={12}>
                 <TextField
                   label="주소"

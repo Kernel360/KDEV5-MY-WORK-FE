@@ -1,4 +1,3 @@
-// src/components/MemberForm.jsx
 import React from "react";
 import {
   TextField,
@@ -14,7 +13,10 @@ import {
   MenuItem,
   Tooltip,
 } from "@mui/material";
-import { InfoOutlined } from "@mui/icons-material";
+import { InfoOutlined, CalendarTodayRounded } from "@mui/icons-material";
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 
 /**
  * MemberForm
@@ -27,6 +29,7 @@ export default function MemberForm({
   handleChange,
   companies = [],
   loading = false,
+  isEdit = false,
 }) {
   const ROLES = [
     { value: "DEV_ADMIN", label: "개발사 관리자" },
@@ -66,66 +69,76 @@ export default function MemberForm({
               </Tooltip>
             </Stack>
             <Divider sx={{ mt: 1, mb: 2 }} />
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="이름"
-                  value={form.name}
-                  onChange={handleChange("name")}
-                  required
-                  disabled={loading}
-                  error={!form.name}
-                  helperText={!form.name ? "이름을 입력해주세요." : " "}
-                />
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="이름"
+                    value={form.name}
+                    onChange={handleChange("name")}
+                    required
+                    disabled={loading}
+                    error={!form.name}
+                    helperText={!form.name ? "이름을 입력해주세요." : " "}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="이메일"
+                    type="email"
+                    value={form.email}
+                    onChange={handleChange("email")}
+                    required
+                    disabled={loading}
+                    error={!form.email}
+                    helperText={!form.email ? "이메일을 입력해주세요." : " "}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="연락처"
+                    value={form.phoneNumber}
+                    onChange={handleChange("phoneNumber")}
+                    required
+                    disabled={loading}
+                    error={!form.phoneNumber}
+                    helperText={
+                      !form.phoneNumber ? "연락처를 입력해주세요." : " "
+                    }
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <DatePicker
+                    label="생년월일"
+                    format="YYYY-MM-DD"
+                    slots={{ openPickerIcon: CalendarTodayRounded }}
+                    slotProps={{ openPickerIcon: { fontSize: "small" } }}
+                    value={form.birthDate ? dayjs(form.birthDate) : null}
+                    onChange={(newDate) => {
+                      const val = newDate ? newDate.format("YYYY-MM-DD") : "";
+                      handleChange("birthDate")({ target: { value: val } });
+                    }}
+                    disabled={loading}
+                    readOnly={isEdit}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        required
+                        fullWidth
+                        error={!form.birthDate}
+                        helperText={
+                          !form.birthDate ? "생년월일을 입력해주세요." : " "
+                        }
+                        InputLabelProps={{ shrink: true }}
+                      />
+                    )}
+                  />
+                </Grid>
               </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="이메일"
-                  type="email"
-                  value={form.email}
-                  onChange={handleChange("email")}
-                  required
-                  disabled={loading}
-                  error={!form.email}
-                  helperText={!form.email ? "이메일을 입력해주세요." : " "}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="연락처"
-                  value={form.phoneNumber}
-                  onChange={handleChange("phoneNumber")}
-                  required
-                  disabled={loading}
-                  error={!form.phoneNumber}
-                  helperText={
-                    !form.phoneNumber ? "연락처를 입력해주세요." : " "
-                  }
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="생년월일"
-                  type="date"
-                  value={form.birthDate}
-                  onChange={handleChange("")}
-                  required
-                  disabled={loading}
-                  error={!form.birthDate}
-                  helperText={
-                    !form.birthDate ? "생년월일을 입력해주세요." : " "
-                  }
-                  InputLabelProps={{ shrink: true }}
-                  InputProps={{
-                    readOnly: true,
-                  }}
-                />
-              </Grid>
-            </Grid>
+            </LocalizationProvider>
           </Box>
 
           {/* 2) 소속 정보 */}
