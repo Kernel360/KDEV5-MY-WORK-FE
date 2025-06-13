@@ -148,20 +148,6 @@ const memberSlice = createSlice({
       .addCase(updateMember.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      })
-      // 삭제
-      .addCase(deleteMember.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(deleteMember.fulfilled, (state, action) => {
-        state.list = state.list.filter((m) => m.id !== action.payload.id);
-        if (state.current?.id === action.payload.id) state.current = null;
-        state.loading = false;
-      })
-      .addCase(deleteMember.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
       });
   },
 });

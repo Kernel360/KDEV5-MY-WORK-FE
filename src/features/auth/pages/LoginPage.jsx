@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   TextField,
   Typography,
-  Paper,
   Stack,
   Link,
   Snackbar,
@@ -13,11 +12,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootBox, LoginPaper, LoginButton } from "./LoginPage.styles";
 import { login, clearAuthState } from "@/features/auth/authSlice";
+import { fetchProjects } from "@/features/project/projectSlice";
 
 export default function LoginPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { status, error } = useSelector((state) => state.auth);
+  const { status, error, accessToken } = useSelector((state) => state.auth);
   const loading = status === "loading";
 
   const [form, setForm] = useState({
@@ -39,50 +39,70 @@ export default function LoginPage() {
     setSnackbarMessage("");
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  useEffect(() => {
+    if (accessToken) {
+      navigate("/projects", { replace: true });
+    }
+  }, [accessToken, navigate]);
 
-  const result = await dispatch(login(form));
-  if (login.fulfilled.match(result)) {
-    const { memberRole, memberId } = result.payload;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    if (memberRole === "ROLE_USER") {
-      try {
-        const response = await fetch(
-          `/api/projects?memberId=${memberId}&page=1&pageSize=1`
-        );
-        const json = await response.json();
-        const projects = Array.isArray(json.data) ? json.data : [];
+    const result = await dispatch(login(form));
+    if (login.fulfilled.match(result)) {
+      const { memberRole, memberId } = result.payload;
 
-        if (projects.length > 0) {
-          navigate(`/projects/${projects[0].id}`);
-        } else {
+      if (memberRole === "ROLE_USER") {
+        try {
+          const projectResult = await dispatch(
+            fetchProjects({
+              page: 1,
+              size: 1,
+              keyword: null,
+              keywordType: null,
+              step: null,
+            })
+          );
+
+          if (fetchProjects.fulfilled.match(projectResult)) {
+            const { projects } = projectResult.payload;
+
+            if (projects.length > 0) {
+              navigate(`/projects/${projects[0].id}`);
+            } else {
+              navigate("/projects", {
+                state: {
+                  warningMessage:
+                    "참여 중인 프로젝트가 없습니다. 시스템 관리자에게 문의하여 프로젝트에 참여해주세요.",
+                },
+              });
+            }
+          } else {
+            console.error("프로젝트 조회 실패:", projectResult.payload);
+            navigate("/projects", {
+              state: {
+                warningMessage:
+                  "프로젝트 조회 중 오류가 발생했습니다. 다시 시도해주세요.",
+              },
+            });
+          }
+        } catch (fetchError) {
+          console.error("프로젝트 조회 실패:", fetchError);
           navigate("/projects", {
             state: {
               warningMessage:
-                "참여 중인 프로젝트가 없습니다. 시스템 관리자에게 문의하여 프로젝트에 참여해주세요.",
+                "프로젝트 조회 중 오류가 발생했습니다. 다시 시도해주세요.",
             },
           });
         }
-      } catch (fetchError) {
-        console.error("프로젝트 조회 실패:", fetchError);
-+       // 조회 에러일 때도 이동하면서 메시지 전달
-        navigate("/projects", {
-          state: {
-            warningMessage:
-              "프로젝트 조회 중 오류가 발생했습니다. 다시 시도해주세요.",
-          },
-        });
+        return;
       }
-      return;
-    }
 
-    // ROLE_USER 외에는 그냥 리스트로
-    navigate("/projects");
-  } else {
-    console.error("로그인 실패:", result.payload || result.error);
-  }
-};
+      navigate("/projects");
+    } else {
+      console.error("로그인 실패:", result.payload || result.error);
+    }
+  };
 
   return (
     <RootBox>
@@ -129,9 +149,7 @@ const handleSubmit = async (e) => {
 
             {error && (
               <Typography variant="body2" color="error">
-                {typeof error === "string"
-                  ? error
-                  : "로그인에 실패했습니다."}
+                {typeof error === "string" ? error : "로그인에 실패했습니다."}
               </Typography>
             )}
 
