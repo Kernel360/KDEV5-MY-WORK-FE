@@ -11,7 +11,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootBox, LoginPaper, LoginButton } from "./LoginPage.styles";
-import { login, clearAuthState } from "@/features/auth/authSlice";
+import { login } from "@/features/auth/authSlice";
 import { fetchProjects } from "@/features/project/projectSlice";
 
 export default function LoginPage() {
@@ -46,6 +46,7 @@ export default function LoginPage() {
   }, [accessToken, navigate]);
 
   const handleSubmit = async (e) => {
+    localStorage.removeItem("accessToken");
     e.preventDefault();
 
     const result = await dispatch(login(form));
