@@ -5,34 +5,38 @@ import * as projectAPI from "@/api/project";
 // 전체 프로젝트 조회
 export const fetchProjects = createAsyncThunk(
   "project/fetchProjects",
-  async ({ page, size = 10, keyword = null, keywordType = null, step = null }, thunkAPI) => {
+  async (
+    { page, size = 10, keyword = null, keywordType = null, step = null },
+    thunkAPI
+  ) => {
     try {
-      const params = { 
+      const params = {
         page,
-        size
+        size,
       };
-      
+
       if (keyword) {
         params.keyword = keyword;
         params.keywordType = keywordType;
       }
-      
+
       if (step) {
         params.step = step;
       }
 
-      console.log("API 호출 파라미터:", params);
       const response = await projectAPI.getProjects(params);
       const { projects, totalCount } = response.data.data;
-      
+
       return {
         projects,
         totalCount: totalCount || 0,
         currentPage: page,
-        pageSize: size
+        pageSize: size,
       };
     } catch (err) {
-      return thunkAPI.rejectWithValue(err.response?.data || "Failed to fetch projects");
+      return thunkAPI.rejectWithValue(
+        err.response?.data || "Failed to fetch projects"
+      );
     }
   }
 );
@@ -45,7 +49,9 @@ export const fetchProjectById = createAsyncThunk(
       const response = await projectAPI.getProjectById(id);
       return response.data.data;
     } catch (err) {
-      return thunkAPI.rejectWithValue(err.response?.data || "프로젝트 단건 조회 실패");
+      return thunkAPI.rejectWithValue(
+        err.response?.data || "프로젝트 단건 조회 실패"
+      );
     }
   }
 );
@@ -58,20 +64,23 @@ export const createProject = createAsyncThunk(
       const response = await projectAPI.createProject(projectData);
       return response.data.data;
     } catch (err) {
-      return thunkAPI.rejectWithValue(err.response?.data || "프로젝트 생성 실패");
+      return thunkAPI.rejectWithValue(
+        err.response?.data || "프로젝트 생성 실패"
+      );
     }
   }
 );
 
-// 프로젝트 수정
 export const updateProject = createAsyncThunk(
   "project/updateProject",
-  async ({ id, projectData }, thunkAPI) => {
+  async (project, thunkAPI) => {
     try {
-      const response = await projectAPI.updateProject(id, projectData);
+      const response = await projectAPI.updateProject(project);
       return response.data.data;
     } catch (err) {
-      return thunkAPI.rejectWithValue(err.response?.data || "프로젝트 수정 실패");
+      return thunkAPI.rejectWithValue(
+        err.response?.data || "프로젝트 수정 실패"
+      );
     }
   }
 );
@@ -91,7 +100,6 @@ export const deleteProject = createAsyncThunk(
   }
 );
 
-
 /**
  * 프로젝트 멤버 목록 조회
  * @param {{ companyId: string; projectId: string }} params
@@ -103,11 +111,12 @@ export const fetchProjectMembers = createAsyncThunk(
       const response = await projectAPI.getProjectMembers(params);
       return response.data.data.members; // ProjectMemberListWebResponse
     } catch (err) {
-      return thunkAPI.rejectWithValue(err.response?.data || "프로젝트 멤버 목록 조회 실패");
+      return thunkAPI.rejectWithValue(
+        err.response?.data || "프로젝트 멤버 목록 조회 실패"
+      );
     }
   }
 );
-
 
 const projectSlice = createSlice({
   name: "project",
