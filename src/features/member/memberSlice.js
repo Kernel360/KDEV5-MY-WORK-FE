@@ -77,6 +77,18 @@ export const updateMember = createAsyncThunk(
   }
 );
 
+export const fetchMemberProjects = createAsyncThunk(
+  "member/fetchMemberProjects",
+  async (memberId, thunkAPI) => {
+    try {
+      const response = await memberAPI.getMemberProjects(memberId);
+      return response.data.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data || "Error");
+    }
+  }
+);
+
 const memberSlice = createSlice({
   name: "member",
   initialState: {
@@ -85,6 +97,7 @@ const memberSlice = createSlice({
     loading: false,
     error: null,
     totalCount: 0,
+    memberProjects: [],
   },
   reducers: {
     clearCurrentMember(state) {
@@ -146,6 +159,20 @@ const memberSlice = createSlice({
         state.loading = false;
       })
       .addCase(updateMember.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // 멤버 프로젝트 조회
+      .addCase(fetchMemberProjects.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchMemberProjects.fulfilled, (state, action) => {
+        // memberProjectList라는 별도 state에 저장할 수도 있고, 기존 list에 덮어써도 됨
+        state.memberProjects = action.payload.memberProjects;
+        state.loading = false;
+      })
+      .addCase(fetchMemberProjects.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
