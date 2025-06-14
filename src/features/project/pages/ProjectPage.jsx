@@ -15,9 +15,9 @@ export default function ProjectPage() {
   const dispatch = useDispatch();
 
   const { totalCount } = useSelector((state) => state.project);
+  const userRole = useSelector((state) => state.auth.user?.role);
 
   useEffect(() => {
-    // 페이지 로드 시 한 번만 회사 목록을 가져오도록 dispatch
     dispatch(fetchAllCompanyNames());
   }, [dispatch]);
 
@@ -35,12 +35,14 @@ export default function ProjectPage() {
           title="프로젝트"
           subtitle={`총 ${totalCount ?? 0}개의 프로젝트가 있습니다.`}
           action={
-            <CustomButton
-              startIcon={<Add />}
-              onClick={() => navigate("/projects/new")}
-            >
-              프로젝트 생성
-            </CustomButton>
+            userRole === "ROLE_SYSTEM_ADMIN" && (
+              <CustomButton
+                startIcon={<Add />}
+                onClick={() => navigate("/projects/new")}
+              >
+                프로젝트 생성
+              </CustomButton>
+            )
           }
         />
         <Box sx={{ flex: 1, overflow: "hidden", mb: 0.3 }}>
