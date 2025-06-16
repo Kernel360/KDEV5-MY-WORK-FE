@@ -1,33 +1,16 @@
 // src/components/layout/navItems.js
-import DeveloperModeRoundedIcon from "@mui/icons-material/DeveloperModeRounded";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
 import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
 import PersonIcon from "@mui/icons-material/Person";
-import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
-import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
+import AddBoxRoundedIcon from "@mui/icons-material/AddBoxRounded";
+import ListRoundedIcon from "@mui/icons-material/ListRounded";
 
 const navItems = [
   {
-    text: "개발사 관리",
-    icon: DeveloperModeRoundedIcon,
-    path: "/dev-companies",
-    roles: ["ROLE_SYSTEM_ADMIN"],
-  },
-  {
-    text: "고객사 관리",
-    icon: BusinessRoundedIcon,
-    path: "/client-companies",
-    roles: ["ROLE_SYSTEM_ADMIN"],
-  },
-  {
-    text: "회원 관리",
-    icon: PersonIcon,
-    path: "/members",
-    roles: ["ROLE_SYSTEM_ADMIN", "ROLE_DEV_ADMIN", "ROLE_CLIENT_ADMIN"],
-  },
-  {
-    text: "프로젝트 관리",
-    icon: FolderRoundedIcon,
-    path: "/projects",
+    text: "대시보드",
+    icon: DashboardIcon,
+    path: "/dashboard",
     roles: [
       "ROLE_SYSTEM_ADMIN",
       "ROLE_DEV_ADMIN",
@@ -36,10 +19,60 @@ const navItems = [
     ],
   },
   {
-    text: "로그",
-    icon: HistoryRoundedIcon,
-    path: "/logs",
+    text: "프로젝트",
+    icon: FolderRoundedIcon,
+    roles: [
+      "ROLE_SYSTEM_ADMIN",
+      "ROLE_DEV_ADMIN",
+      "ROLE_CLIENT_ADMIN",
+      "ROLE_USER",
+    ],
+    children: [
+      {
+        text: "프로젝트 생성",
+        icon: AddBoxRoundedIcon,
+        path: "/projects/create",
+      },
+      {
+        text: "프로젝트 목록",
+        icon: ListRoundedIcon,
+        path: "/projects",
+      },
+    ],
+  },
+  {
+    text: "업체",
+    icon: BusinessRoundedIcon,
     roles: ["ROLE_SYSTEM_ADMIN"],
+    children: [
+      {
+        text: "업체 생성",
+        icon: AddBoxRoundedIcon,
+        path: "/companies/create",
+      },
+      {
+        text: "업체 목록",
+        icon: ListRoundedIcon,
+        path: "/companies",
+      },
+    ],
+  },
+  {
+    text: "회원",
+    icon: PersonIcon,
+    roles: ["ROLE_SYSTEM_ADMIN", "ROLE_DEV_ADMIN", "ROLE_CLIENT_ADMIN"],
+    children: [
+      {
+        text: "회원 생성",
+        icon: AddBoxRoundedIcon,
+        path: "/members/create",
+      },
+      {
+        text: "회원 목록",
+        icon: ListRoundedIcon,
+        path: "/members",
+      },
+    ],
   },
 ];
 
