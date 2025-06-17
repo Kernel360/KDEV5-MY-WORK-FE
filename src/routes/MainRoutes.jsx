@@ -17,6 +17,7 @@ import MemberFormPage from "@/features/member/pages/MemberFormPage";
 import MemberDetailPage from "@/features/member/pages/MemberDetailPage";
 import ClientCompanyDetailPage from "@/features/company/pages/ClientCompanyDetailPage";
 import NoProjectsPage from "@/features/project/pages/NoProjectsPage";
+import DashboardPage from "@/features/dashboard/pages/DashboardPage";
 
 export default function MainRoutes() {
   const isAuthenticated = useSelector((state) =>
@@ -42,6 +43,8 @@ export default function MainRoutes() {
           isAuthenticated ? <MainLayout /> : <Navigate to="/login" replace />
         }
       >
+        <Route path="/dashboard" element={<DashboardPage />} />
+
         <Route path="/projects" element={<ProjectPage />} />
         <Route path="/no-projects" element={<NoProjectsPage />} />
 
