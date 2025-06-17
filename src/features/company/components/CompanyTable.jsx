@@ -1,4 +1,3 @@
-// src/features/project/components/ProjectTable.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -6,7 +5,6 @@ import { Box } from "@mui/material";
 import CustomTable from "@/components/common/customTable/CustomTable";
 import { fetchCompanies } from "@/features/company/companySlice";
 
-// 테이블 컬럼 정의
 const columns = [
   { key: "companyName", label: "회사명", type: "logo", searchable: true },
   {
@@ -17,7 +15,7 @@ const columns = [
   },
   { key: "contactPhoneNumber", label: "연락처", type: "text" },
   { key: "address", label: "주소", type: "text", searchable: true },
-  { key: "createdAt", label: "등록일자", type: "date" },
+  { key: "createdAt", label: "등록일", type: "date" },
   {
     key: "deleted",
     label: "활성화 여부",
@@ -29,7 +27,7 @@ const columns = [
   },
 ];
 
-export default function ProjectTable() {
+export default function CompanyTable() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const {
@@ -39,32 +37,27 @@ export default function ProjectTable() {
     loading,
   } = useSelector((state) => state.company);
 
-  // 페이지 및 검색/필터 상태
   const [page, setPage] = useState(1);
   const [searchKey, setSearchKey] = useState("companyName");
   const [searchText, setSearchText] = useState("");
   const [filterValue, setFilterValue] = useState("");
 
-  // 고정 필터 키
   const filterKey = "deleted";
 
-  // 필터 옵션: boolean 전용
   const filterOptions = [
     { label: "전체", value: "" },
     { label: "활성", value: "false" },
     { label: "비활성", value: "true" },
   ];
 
-  // 데이터 로드 함수
   const loadCompany = useCallback(() => {
     const params = {
       page,
-      companyType: "CLIENT",
+      companyType: "DEV",
     };
 
     if (searchText.trim()) {
       params.keyword = searchText.trim();
-      // 검색 필드에 따라 keywordType 설정
       switch (searchKey) {
         case "companyName":
           params.keywordType = "NAME";
@@ -87,14 +80,12 @@ export default function ProjectTable() {
     dispatch(fetchCompanies(params));
   }, [dispatch, page, searchKey, searchText, filterValue]);
 
-  // 검색 필드 변경 시 페이지 초기화
   const handleSearchKeyChange = (newKey) => {
     setPage(1);
     setSearchKey(newKey);
-    setSearchText(""); // 검색어 초기화
+    setSearchText("");
   };
 
-  // 검색어 변경 시 페이지 초기화
   const handleSearchTextChange = (newText) => {
     setPage(1);
     setSearchText(newText);
@@ -104,7 +95,6 @@ export default function ProjectTable() {
     loadCompany();
   }, [loadCompany]);
 
-  // 프로젝트 데이터 가공 필요하면 여기서 추가
   return (
     <Box>
       <CustomTable
@@ -115,7 +105,9 @@ export default function ProjectTable() {
           total: totalCount,
           onPageChange: setPage,
         }}
-        onRowClick={(row) => navigate(`/client-companies/${row.companyId}`)}
+        onRowClick={(row) => {
+          navigate(`/companies/${row.companyId}`);
+        }}
         search={{
           key: searchKey,
           placeholder: "검색어를 입력하세요",
@@ -125,8 +117,8 @@ export default function ProjectTable() {
         }}
         filter={{
           key: filterKey,
-          label: "활성화 여부",
           value: filterValue,
+          label: "활성화 여부",
           options: filterOptions,
           onChange: (val) => {
             setPage(1);

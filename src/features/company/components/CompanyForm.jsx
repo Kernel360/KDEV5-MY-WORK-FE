@@ -1,24 +1,17 @@
-// src/components/ClientCompanyForm.jsx
 import React from "react";
 import {
-  Box,
+  TextField,
   Paper,
   Stack,
+  Box,
   Typography,
-  Tooltip,
   Divider,
   Grid,
-  TextField,
+  Tooltip,
 } from "@mui/material";
 import { InfoOutlined } from "@mui/icons-material";
 
-/**
- * ClientCompanyForm
- * - 고객사(회사) 정보를 입력하는 폼
- * - ProjectForm과 동일한 디자인 패턴, 간격, 레이아웃 적용
- * - 기능은 변경 없이 유지
- */
-export default function ClientCompanyForm({
+export default function CompanyForm({
   form,
   handleChange,
   isSubmitted = false,
@@ -49,7 +42,7 @@ export default function ClientCompanyForm({
               <Typography variant="subtitle1" fontWeight={600}>
                 1. 기본 정보
               </Typography>
-              <Tooltip title="회사 이름과 설명을 입력하세요.">
+              <Tooltip title="회사 이름과 상세 설명을 입력하세요.">
                 <InfoOutlined fontSize="small" color="action" />
               </Tooltip>
             </Stack>
@@ -58,7 +51,7 @@ export default function ClientCompanyForm({
             <TextField
               required
               label="회사 이름"
-              placeholder="예) 고객사 이름"
+              placeholder="예) MyWork"
               value={form.name || ""}
               onChange={handleChange("name")}
               fullWidth
@@ -106,17 +99,22 @@ export default function ClientCompanyForm({
 
           {/* 3) 연락처 정보 */}
           <Box>
-            <Stack direction="row" alignItems="center" spacing={1}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={1}
+              sx={{ mb: 2 }}
+            >
               <Typography variant="subtitle1" fontWeight={600}>
                 3. 연락처 정보
               </Typography>
-              <Tooltip title="주소, 전화번호, 이메일을 입력하세요.">
+              <Tooltip title="회사 주소, 전화번호, 이메일을 입력하세요.">
                 <InfoOutlined fontSize="small" color="action" />
               </Tooltip>
             </Stack>
             <Divider sx={{ mt: 1, mb: 2 }} />
 
-            <Grid container spacing={3} sx={{ mb: 2 }}>
+            <Grid container spacing={3}>
               <Grid item xs={12}>
                 <TextField
                   label="주소"
@@ -128,7 +126,7 @@ export default function ClientCompanyForm({
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
-                  label="전화번호"
+                  label="회사 전화번호"
                   placeholder="02-0000-0000"
                   value={form.contactPhoneNumber || ""}
                   onChange={handleChange("contactPhoneNumber")}
@@ -154,11 +152,12 @@ export default function ClientCompanyForm({
               <Typography variant="subtitle1" fontWeight={600}>
                 4. 로고 이미지
               </Typography>
-              <Tooltip title="회사 로고 경로를 입력하세요.">
+              <Tooltip title="회사 로고 이미지 경로를 입력하세요.">
                 <InfoOutlined fontSize="small" color="action" />
               </Tooltip>
             </Stack>
             <Divider sx={{ mt: 1, mb: 2 }} />
+
             <TextField
               label="로고 이미지 경로"
               placeholder="/images/company-logo.png"

@@ -12,9 +12,8 @@ import {
   TextField,
   CircularProgress,
   Avatar,
-  useTheme,
 } from "@mui/material";
-import { InfoOutlined } from "@mui/icons-material";
+import { InfoOutlined, Close as CloseIcon } from "@mui/icons-material";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
 import ConfirmDialog from "@/components/common/confirmDialog/ConfirmDialog";
@@ -26,8 +25,9 @@ import {
   deleteCompany,
 } from "@/features/company/companySlice";
 import { getCompanyMembers } from "@/api/member";
+import { useTheme } from "@mui/material/styles";
 
-export default function ClientCompanyDetailPage() {
+export default function CompanyDetailPage() {
   const theme = useTheme();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -38,9 +38,10 @@ export default function ClientCompanyDetailPage() {
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [members, setMembers] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
-  const [searchText, setSearchText] = useState("");
   const [loadingMembers, setLoadingMembers] = useState(false);
+  const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     dispatch(fetchCompanyById(id));
@@ -50,13 +51,16 @@ export default function ClientCompanyDetailPage() {
     if (!company?.companyId) return;
     setLoadingMembers(true);
     getCompanyMembers(company.companyId, page, searchText)
-      .then((res) => setMembers(res.data.data.members))
+      .then((res) => {
+        setMembers(res.data.data.members);
+        setTotalCount(res.data.data.totalCount);
+      })
       .finally(() => setLoadingMembers(false));
   }, [company?.companyId, page, searchText]);
 
   const handleDelete = async () => {
     await dispatch(deleteCompany(id)).unwrap();
-    navigate("/client-companies");
+    navigate("/companies");
   };
 
   if (companyLoading) {
@@ -82,7 +86,7 @@ export default function ClientCompanyDetailPage() {
           alignItems="center"
           justifyContent="center"
         >
-          거래처를 찾을 수 없습니다.
+          개발사를 찾을 수 없습니다.
         </Box>
       </PageWrapper>
     );
@@ -104,7 +108,7 @@ export default function ClientCompanyDetailPage() {
             </CustomButton>
             <CustomButton
               startIcon={<CreateRoundedIcon />}
-              onClick={() => navigate(`/client-companies/${id}/edit`)}
+              onClick={() => navigate(`/companies/${id}/edit`)}
             >
               수정하기
             </CustomButton>
@@ -114,7 +118,7 @@ export default function ClientCompanyDetailPage() {
 
       <ConfirmDialog
         open={confirmOpen}
-        title="거래처를 삭제하시겠습니까?"
+        title="개발사를 삭제하시겠습니까?"
         description="삭제 후에는 복구할 수 없습니다."
         cancelText="취소"
         confirmText="삭제하기"
@@ -139,7 +143,7 @@ export default function ClientCompanyDetailPage() {
           }}
         >
           <Stack spacing={4}>
-            {/* 1) 사업자 정보 */}
+            {/* 1. 사업자 정보 */}
             <Box>
               <Stack direction="row" alignItems="center" spacing={1}>
                 <Typography variant="subtitle1" fontWeight={600}>
@@ -168,7 +172,7 @@ export default function ClientCompanyDetailPage() {
               </Grid>
             </Box>
 
-            {/* 2) 연락처 정보 */}
+            {/* 2. 연락처 정보 */}
             <Box>
               <Stack direction="row" alignItems="center" spacing={1}>
                 <Typography variant="subtitle1" fontWeight={600}>
@@ -199,20 +203,20 @@ export default function ClientCompanyDetailPage() {
               </Grid>
             </Box>
 
-            {/* 3) 소속 사원 목록 */}
+            {/* 3. 소속 사원 목록 */}
             <Box>
               <Stack direction="row" alignItems="center" spacing={1}>
                 <Typography variant="subtitle1" fontWeight={600}>
                   3. 소속 사원 목록
                 </Typography>
-                <Tooltip title="해당 거래처에 소속된 사원 목록입니다.">
+                <Tooltip title="해당 개발사에 소속된 사원 목록입니다.">
                   <InfoOutlined fontSize="small" color="action" />
                 </Tooltip>
               </Stack>
               <Divider sx={{ mt: 1, mb: 2 }} />
               <TextField
                 fullWidth
-                placeholder="사원 이름을 검색하세요"
+                placeholder="직원 이름을 검색하세요"
                 size="small"
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
@@ -228,7 +232,7 @@ export default function ClientCompanyDetailPage() {
                   },
                 }}
               />
-              <Stack spacing={2}>
+              <Stack spacing={1}>
                 {members.map((m) => (
                   <Stack
                     key={m.id}

@@ -1,14 +1,13 @@
-// src/features/company/pages/DevCompanyPage.jsx
 import { useSelector } from "react-redux";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
-import DevCompanyTable from "@/features/company/components/DevCompanyTable";
 import CustomButton from "@/components/common/customButton/CustomButton";
 import { useNavigate } from "react-router-dom";
 import { Add } from "@mui/icons-material";
 import { Box } from "@mui/material";
+import CompanyTable from "../components/CompanyTable";
 
-export default function ProjectPage() {
+export default function CompanyPage() {
   const navigate = useNavigate();
 
   const { totalCount } = useSelector((state) => state.company);
@@ -29,14 +28,14 @@ export default function ProjectPage() {
           action={
             <CustomButton
               startIcon={<Add />}
-              onClick={() => navigate("/dev-companies/new")}
+              onClick={() => navigate("/companies/new")}
             >
               회사 생성
             </CustomButton>
           }
         />
         <Box sx={{ flex: 1, overflow: "hidden", mb: 3 }}>
-          <DevCompanyTable />
+          <CompanyTable />
         </Box>
       </Box>
     </PageWrapper>

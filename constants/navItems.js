@@ -48,7 +48,7 @@ const navItems = [
       {
         text: "업체 생성",
         icon: AddBoxRoundedIcon,
-        path: "/companies/create",
+        path: "/companies/new",
       },
       {
         text: "업체 목록",
@@ -65,7 +65,7 @@ const navItems = [
       {
         text: "회원 생성",
         icon: AddBoxRoundedIcon,
-        path: "/members/create",
+        path: "/members/new",
       },
       {
         text: "회원 목록",
