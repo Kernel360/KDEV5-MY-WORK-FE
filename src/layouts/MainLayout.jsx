@@ -1,4 +1,3 @@
-// src/components/layout/MainLayout.jsx
 import React, { useState } from "react";
 import { useMediaQuery } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
