@@ -31,7 +31,7 @@ const navItems = [
       {
         text: "프로젝트 생성",
         icon: AddBoxRoundedIcon,
-        path: "/projects/create",
+        path: "/projects/new",
       },
       {
         text: "프로젝트 목록",
