@@ -5,19 +5,16 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import ProjectPage from "@/features/project/pages/ProjectPage";
 import ProjectDetailPage from "@/features/project/pages/ProjectDetailPage";
 import ProjectFormPage from "@/features/project/pages/ProjectFormPage";
-import DevCompanyPage from "@/features/company/pages/DevCompanyPage";
-import ClientCompanyPage from "@/features/company/pages/ClientCompanyPage";
-import DevCompanyFormPage from "@/features/company/pages/DevCompanyFormPage";
-import DevCompanyDetailPage from "@/features/company/pages/DevCompanyDetailPage";
-import ClientCompanyFormPage from "@/features/company/pages/ClientCompanyFormPage";
 import MainLayout from "@/layouts/MainLayout";
 import LoginPage from "@/features/auth/pages/LoginPage";
 import MemberPage from "@/features/member/pages/MemberPage";
 import MemberFormPage from "@/features/member/pages/MemberFormPage";
 import MemberDetailPage from "@/features/member/pages/MemberDetailPage";
-import ClientCompanyDetailPage from "@/features/company/pages/ClientCompanyDetailPage";
 import NoProjectsPage from "@/features/project/pages/NoProjectsPage";
 import DashboardPage from "@/features/dashboard/pages/DashboardPage";
+import CompanyPage from "@/features/company/pages/CompanyPage";
+import CompanyFormPage from "@/features/company/pages/CompanyFormPage";
+import CompanyDetailPage from "@/features/company/pages/CompanyDetailPage";
 
 export default function MainRoutes() {
   const isAuthenticated = useSelector((state) =>
@@ -63,27 +60,10 @@ export default function MainRoutes() {
         <Route path="/members/new" element={<MemberFormPage />} />
         <Route path="/members/:id/edit" element={<MemberFormPage />} />
 
-        <Route path="/dev-companies" element={<DevCompanyPage />} />
-        <Route path="/dev-companies/new" element={<DevCompanyFormPage />} />
-        <Route
-          path="/dev-companies/:id/edit"
-          element={<DevCompanyFormPage />}
-        />
-        <Route path="/dev-companies/:id" element={<DevCompanyDetailPage />} />
-
-        <Route path="/client-companies" element={<ClientCompanyPage />} />
-        <Route
-          path="/client-companies/new"
-          element={<ClientCompanyFormPage />}
-        />
-        <Route
-          path="/client-companies/:id/edit"
-          element={<ClientCompanyFormPage />}
-        />
-        <Route
-          path="/client-companies/:id"
-          element={<ClientCompanyDetailPage />}
-        />
+        <Route path="/companies" element={<CompanyPage />} />
+        <Route path="/companies/new" element={<CompanyFormPage />} />
+        <Route path="/companies/:id/edit" element={<CompanyFormPage />} />
+        <Route path="/companies/:id" element={<CompanyDetailPage />} />
       </Route>
 
       <Route
