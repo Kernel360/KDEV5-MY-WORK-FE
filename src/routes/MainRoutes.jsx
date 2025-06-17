@@ -1,4 +1,3 @@
-// src/routes/MainRoutes.jsx
 import React from "react";
 import { useSelector } from "react-redux";
 import { Routes, Route, Navigate } from "react-router-dom";
@@ -15,7 +14,7 @@ import DashboardPage from "@/features/dashboard/pages/DashboardPage";
 import CompanyPage from "@/features/company/pages/CompanyPage";
 import CompanyFormPage from "@/features/company/pages/CompanyFormPage";
 import CompanyDetailPage from "@/features/company/pages/CompanyDetailPage";
-
+import ProtectedRoute from "@/components/common/protectedRoute/ProtectedRoute";
 export default function MainRoutes() {
   const isAuthenticated = useSelector((state) =>
     Boolean(state.auth?.accessToken)
@@ -52,7 +51,14 @@ export default function MainRoutes() {
           <Route path="progress" element={<ProjectDetailPage />} />
         </Route>
 
-        <Route path="/projects/new" element={<ProjectFormPage />} />
+        <Route
+          path="/projects/new"
+          element={
+            <ProtectedRoute allowedRoles={["ROLE_SYSTEM_ADMIN"]}>
+              <ProjectFormPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/projects/:id/edit" element={<ProjectFormPage />} />
 
         <Route path="/members" element={<MemberPage />} />

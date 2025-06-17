@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Box,
@@ -17,7 +17,7 @@ import {
   NavList,
   NavItem,
 } from "./Sidebar.styles";
-import navItems from "../../constants/navItems";
+import navItems from "@/constants/navItems";
 import { getRoleLabel } from "@/utils/roleUtils";
 import {
   logout as logoutThunk,
@@ -25,8 +25,8 @@ import {
 } from "@/features/auth/authSlice";
 
 export default function Sidebar({ onClose }) {
-  const navigate = useNavigate();
   const location = useLocation();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const memberName = useSelector((state) => state.auth.user?.name);
@@ -69,18 +69,7 @@ export default function Sidebar({ onClose }) {
         <Box>
           {filteredNavItems.map(({ text, icon: Icon, path, children }) => (
             <Box key={text} sx={{ mb: 2 }}>
-              {/* children 있을 때만 섹션 타이틀 노출 */}
-              {children && (
-                <Typography
-                  variant="caption"
-                  color="primary.contrastText"
-                  sx={{ pl: 1 }}
-                >
-                  {text}
-                </Typography>
-              )}
-
-              {/* children 없는 경우 단일 메뉴 */}
+              {/* 상위 메뉴 */}
               {!children && (
                 <NavItem disablePadding onClick={() => handleItemClick(path)}>
                   <ListItemButton
@@ -101,32 +90,44 @@ export default function Sidebar({ onClose }) {
                 </NavItem>
               )}
 
-              {/* children 있는 경우 하위 메뉴 노출 */}
-              {children?.map(
-                ({ text: childText, icon: ChildIcon, path: childPath }) => (
-                  <NavItem
-                    key={childText}
-                    disablePadding
-                    onClick={() => handleItemClick(childPath)}
-                    sx={{ pl: 3 }}
+              {/* 하위 메뉴 */}
+              {children && (
+                <>
+                  <Typography
+                    variant="caption"
+                    color="primary.contrastText"
+                    sx={{ pl: 1 }}
                   >
-                    <ListItemButton
-                      selected={currentPath === childPath}
-                      sx={{ borderRadius: 1, px: 1.5, py: 0.8 }}
-                    >
-                      <ListItemIcon sx={{ minWidth: 32 }}>
-                        <ChildIcon fontSize="small" />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={childText}
-                        primaryTypographyProps={{
-                          noWrap: true,
-                          sx: { fontSize: 14 },
-                        }}
-                      />
-                    </ListItemButton>
-                  </NavItem>
-                )
+                    {text}
+                  </Typography>
+
+                  {children.map(
+                    ({ text: childText, icon: ChildIcon, path: childPath }) => (
+                      <NavItem
+                        key={childText}
+                        disablePadding
+                        onClick={() => handleItemClick(childPath)}
+                        sx={{ pl: 3 }}
+                      >
+                        <ListItemButton
+                          selected={currentPath === childPath}
+                          sx={{ borderRadius: 1, px: 1.5, py: 0.8 }}
+                        >
+                          <ListItemIcon sx={{ minWidth: 32 }}>
+                            <ChildIcon fontSize="small" />
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={childText}
+                            primaryTypographyProps={{
+                              noWrap: true,
+                              sx: { fontSize: 14 },
+                            }}
+                          />
+                        </ListItemButton>
+                      </NavItem>
+                    )
+                  )}
+                </>
               )}
             </Box>
           ))}
