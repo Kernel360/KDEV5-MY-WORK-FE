@@ -16,17 +16,19 @@ import {
   TableSortLabel,
   Pagination,
   Stack,
-  Checkbox,
   Avatar,
   Typography,
   Chip,
   Link,
   Button,
   LinearProgress,
+  IconButton,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 
 export default function CustomTable({
   columns,
@@ -35,8 +37,9 @@ export default function CustomTable({
   onRowClick,
   search = null,
   filter = null,
+  onEdit, // (row) => void
+  onDelete, // (row) => void
 }) {
-  // 대신 컴포넌트 최상단에
   const { companyListOnlyIdName: companies = [] } = useSelector(
     (state) => state.company
   );
@@ -57,13 +60,10 @@ export default function CustomTable({
   // 필터와 검색을 조합한 행 목록
   const filteredRows = useMemo(() => {
     let result = rows;
-
-    // 검색 적용
     if (search && searchKey) {
       const kw = searchText.toLowerCase();
       result = result.filter((row) => {
         let cell = row[searchKey];
-        // avatar 같은 객체는 name 프로퍼티로 검색
         if (cell && typeof cell === "object") {
           if ("name" in cell) {
             cell = cell.name;
@@ -74,8 +74,6 @@ export default function CustomTable({
         return cell?.toString().toLowerCase().includes(kw);
       });
     }
-
-    // 필터 적용
     if (filter && filter.key) {
       const { key, value } = filter;
       if (value !== "") {
@@ -86,7 +84,6 @@ export default function CustomTable({
         );
       }
     }
-
     return result;
   }, [rows, searchKey, searchText, search, filter]);
 
@@ -104,12 +101,22 @@ export default function CustomTable({
 
   const pageCount = pagination ? Math.ceil(pagination.total / 10) : 1;
 
+  // columns에 action 컬럼 추가
+  const fullColumns = [
+    ...columns,
+    {
+      key: "__actions__",
+      label: "",
+      type: "actions",
+    },
+  ];
+
   return (
     <Box
       sx={{
         display: "flex",
         flexDirection: "column",
-        height: "100%", // 부모로부터 height 상속
+        height: "100%",
         px: 3,
         pb: 3,
       }}
@@ -204,19 +211,9 @@ export default function CustomTable({
         >
           <Table size="small" stickyHeader sx={{ minWidth: "max-content" }}>
             <TableHead>
-              <TableRow sx={{ bgcolor: theme.palette.background.default }}>
-                {columns.map((col) => (
-                  <TableCell
-                    key={col.key}
-                    sortDirection={
-                      sortConfig.key === col.key ? sortConfig.direction : false
-                    }
-                    sx={{
-                      fontWeight: 600,
-                      fontSize: 13,
-                      color: theme.palette.text.primary,
-                    }}
-                  >
+              <TableRow>
+                {fullColumns.map((col) => (
+                  <TableCell key={col.key}>
                     {col.sortable ? (
                       <TableSortLabel
                         active={sortConfig.key === col.key}
@@ -241,19 +238,63 @@ export default function CustomTable({
               {sortedRows.map((row, idx) => (
                 <TableRow key={idx} hover onClick={() => onRowClick?.(row)}>
                   {columns.map((col) => (
-                    <TableCell
-                      key={col.key}
-                      sx={{
-                        fontSize: 13,
-                        color: theme.palette.text.secondary,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
+                    <TableCell key={col.key}>
                       {renderCell(col, row[col.key], row, theme, companies)}
                     </TableCell>
                   ))}
+                  {/* 액션 컬럼 */}
+                  <TableCell key="__actions__" align="center">
+                    <Stack direction="row" spacing={1} justifyContent="center">
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                          borderRadius: "8px",
+                          color: theme.palette.grey[700],
+                          borderColor: theme.palette.grey[300],
+                          fontWeight: 600,
+                          px: 1.5,
+                          minWidth: 70,
+                          boxShadow: "none",
+                          textTransform: "none",
+                          "&:hover": {
+                            borderColor: theme.palette.primary.main,
+                            background: theme.palette.action.hover,
+                          },
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEdit?.(row);
+                        }}
+                      >
+                        수정
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                          borderRadius: "8px",
+                          color: theme.palette.status.error.main,
+                          borderColor: theme.palette.status.error.main,
+                          fontWeight: 600,
+                          px: 1.5,
+                          minWidth: 70,
+                          boxShadow: "none",
+                          textTransform: "none",
+                          "&:hover": {
+                            borderColor: theme.palette.status.error.dark,
+                            background: theme.palette.action.hover,
+                          },
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete?.(row);
+                        }}
+                      >
+                        삭제
+                      </Button>
+                    </Stack>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -279,8 +320,6 @@ export default function CustomTable({
 
 function renderCell(col, value, row, theme, companies) {
   switch (col.type) {
-    case "checkbox":
-      return <Checkbox checked={!!value} disabled size="small" />;
     case "avatar":
       return value?.src && value?.name ? (
         <Stack direction="row" spacing={1} alignItems="center">
@@ -298,9 +337,8 @@ function renderCell(col, value, row, theme, companies) {
       );
     case "logo":
       const displayName = value?.startsWith("주식회사 ")
-        ? value.slice(5) // '주식회사 ' (공백 포함 5글자 잘라냄)
+        ? value.slice(5)
         : value;
-
       return value ? (
         <Stack direction="row" spacing={1} alignItems="center">
           <Avatar sx={{ width: 28, height: 28 }}>
@@ -388,10 +426,7 @@ function renderCell(col, value, row, theme, companies) {
     case "company": {
       const comp = companies.find((c) => c.id === value);
       const name = comp?.name ?? "-";
-
-      // 주식회사 제거 로직
       const displayName = name.startsWith("주식회사 ") ? name.slice(5) : name;
-
       return name !== "-" ? (
         <Stack direction="row" spacing={1} alignItems="center">
           <Avatar sx={{ width: 28, height: 28 }}>
@@ -407,7 +442,6 @@ function renderCell(col, value, row, theme, companies) {
         </Typography>
       );
     }
-
     case "custom":
       return col.render ? col.render(value, row) : value;
     default:
