@@ -22,11 +22,11 @@ import {
   Link,
   Button,
   LinearProgress,
-  IconButton,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
+import CustomButton from "../customButton/CustomButton";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 
@@ -43,6 +43,7 @@ export default function CustomTable({
   const { companyListOnlyIdName: companies = [] } = useSelector(
     (state) => state.company
   );
+  const userRole = useSelector((state) => state.auth.user.role);
   const theme = useTheme();
 
   // 정렬 설정
@@ -244,56 +245,35 @@ export default function CustomTable({
                   ))}
                   {/* 액션 컬럼 */}
                   <TableCell key="__actions__" align="center">
-                    <Stack direction="row" spacing={1} justifyContent="center">
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        sx={{
-                          borderRadius: "8px",
-                          color: theme.palette.grey[700],
-                          borderColor: theme.palette.grey[300],
-                          fontWeight: 600,
-                          px: 1.5,
-                          minWidth: 70,
-                          boxShadow: "none",
-                          textTransform: "none",
-                          "&:hover": {
-                            borderColor: theme.palette.primary.main,
-                            background: theme.palette.action.hover,
-                          },
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onEdit?.(row);
-                        }}
+                    {userRole === "ROLE_SYSTEM_ADMIN" && (
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        justifyContent="center"
                       >
-                        수정
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        sx={{
-                          borderRadius: "8px",
-                          color: theme.palette.status.error.main,
-                          borderColor: theme.palette.status.error.main,
-                          fontWeight: 600,
-                          px: 1.5,
-                          minWidth: 70,
-                          boxShadow: "none",
-                          textTransform: "none",
-                          "&:hover": {
-                            borderColor: theme.palette.status.error.dark,
-                            background: theme.palette.action.hover,
-                          },
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDelete?.(row);
-                        }}
-                      >
-                        삭제
-                      </Button>
-                    </Stack>
+                        <CustomButton
+                          kind="ghost"
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEdit?.(row);
+                          }}
+                        >
+                          수정
+                        </CustomButton>
+
+                        <CustomButton
+                          kind="ghost-danger"
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete?.(row);
+                          }}
+                        >
+                          삭제
+                        </CustomButton>
+                      </Stack>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
