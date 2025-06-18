@@ -61,10 +61,38 @@ export default function MainRoutes() {
         />
         <Route path="/projects/:id/edit" element={<ProjectFormPage />} />
 
-        <Route path="/members" element={<MemberPage />} />
-        <Route path="/members/:id" element={<MemberDetailPage />} />
-        <Route path="/members/new" element={<MemberFormPage />} />
-        <Route path="/members/:id/edit" element={<MemberFormPage />} />
+        <Route
+          path="/members"
+          element={
+            <ProtectedRoute allowedRoles={["ROLE_SYSTEM_ADMIN", "ROLE_DEV_ADMIN", "ROLE_CLIENT_ADMIN"]}>
+              <MemberPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/members/:id"
+          element={
+            <ProtectedRoute allowedRoles={["ROLE_SYSTEM_ADMIN", "ROLE_DEV_ADMIN", "ROLE_CLIENT_ADMIN"]}>
+              <MemberDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/members/new"
+          element={
+            <ProtectedRoute allowedRoles={["ROLE_SYSTEM_ADMIN", "ROLE_DEV_ADMIN", "ROLE_CLIENT_ADMIN"]}>
+              <MemberFormPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/members/:id/edit"
+          element={
+            <ProtectedRoute allowedRoles={["ROLE_SYSTEM_ADMIN", "ROLE_DEV_ADMIN", "ROLE_CLIENT_ADMIN"]}>
+              <MemberFormPage />
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="/companies" element={<CompanyPage />} />
         <Route path="/companies/new" element={<CompanyFormPage />} />
