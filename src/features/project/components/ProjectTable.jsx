@@ -1,11 +1,14 @@
-// src/features/project/components/ProjectTable.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import CustomTable from "@/components/common/customTable/CustomTable";
-import { fetchProjects } from "@/features/project/projectSlice";
+import {
+  fetchProjects,
+  deleteProject, // 단건 삭제로 바꿔주세요!
+} from "@/features/project/projectSlice";
+import { Box } from "@mui/material";
 
-// 테이블 컬럼 정의
+// 컬럼 정의
 const columns = [
   { key: "name", label: "제목", type: "text", searchable: true },
   {
@@ -35,15 +38,11 @@ export default function ProjectTable() {
     error,
   } = useSelector((state) => state.project);
 
-  // 페이지 및 검색/필터 상태
+  // 페이지, 검색, 필터 상태
   const [page, setPage] = useState(1);
   const [searchText, setSearchText] = useState("");
   const [filterValue, setFilterValue] = useState("");
-
-  // 고정 필터 키
   const filterKey = "step";
-
-  // 필터 옵션: boolean 전용
   const filterOptions = [
     { label: "전체", value: "" },
     { label: "계획", value: "NOT_STARTED" },
@@ -52,47 +51,41 @@ export default function ProjectTable() {
     { label: "완료", value: "COMPLETED" },
   ];
 
-  // 데이터 로드 함수
+  // 데이터 조회 함수
   const loadProjects = useCallback(() => {
-    const params = {
-      page,
-      size: 10,
-    };
-
+    const params = { page, size: 10 };
     if (searchText.trim()) {
       params.keyword = searchText.trim();
       params.keywordType = "PROJECT_NAME";
     }
-
-    if (filterValue) {
-      params[filterKey] = filterValue;
-    }
-
+    if (filterValue) params[filterKey] = filterValue;
     dispatch(fetchProjects(params));
   }, [dispatch, page, searchText, filterValue]);
-
-  // 검색어 변경 시 페이지 초기화
-  const handleSearchTextChange = (newText) => {
-    setPage(1);
-    setSearchText(newText);
-  };
-
-  // 필터 변경 시 페이지 초기화
-  const handleFilterChange = (val) => {
-    setPage(1);
-    setFilterValue(val);
-  };
 
   useEffect(() => {
     loadProjects();
   }, [loadProjects]);
 
-  // 프로젝트 데이터 가공
+  // 개별 삭제
+  const handleDelete = (row) => {
+    if (window.confirm(`프로젝트 "${row.name}"을 삭제하시겠습니까?`)) {
+      dispatch(deleteProject({ id: row.id })).then(() => {
+        loadProjects(); // 삭제 후 목록 재조회
+      });
+    }
+  };
+
+  // 수정(예시: 프로젝트 상세로 이동)
+  const handleEdit = (row) => {
+    navigate(`/projects/${row.id}/edit`);
+  };
+
+  // 가공된 row 데이터
   const enrichedProjects = (rawProjects || []).map((p, idx) => ({
     ...p,
     progress: Math.min((idx + 1) * 10, 100),
     manager: {
-      name: `담당자 ${p.id.slice(0, 4)}`,
+      name: `담당자 ${p.id?.slice(0, 4)}`,
       src: `https://i.pravatar.cc/40?u=${p.id}`,
     },
   }));
@@ -103,10 +96,8 @@ export default function ProjectTable() {
       rows={enrichedProjects}
       pagination={{
         page,
-        total: totalCount || 0, // totalCount가 없을 경우 0으로 처리
-        onPageChange: (newPage) => {
-          setPage(newPage);
-        },
+        total: totalCount || 0,
+        onPageChange: (newPage) => setPage(newPage),
         pageSize: 10,
       }}
       onRowClick={(row) => navigate(`/projects/${row.id}`)}
@@ -114,17 +105,25 @@ export default function ProjectTable() {
         key: "name",
         placeholder: "프로젝트 제목을 입력하세요",
         value: searchText,
-        onChange: handleSearchTextChange,
+        onChange: (newText) => {
+          setPage(1);
+          setSearchText(newText);
+        },
       }}
       filter={{
         key: filterKey,
         label: "상태",
         value: filterValue,
         options: filterOptions,
-        onChange: handleFilterChange,
+        onChange: (val) => {
+          setPage(1);
+          setFilterValue(val);
+        },
       }}
       loading={status === "loading"}
       error={error}
+      onEdit={handleEdit}
+      onDelete={handleDelete}
     />
   );
 }
