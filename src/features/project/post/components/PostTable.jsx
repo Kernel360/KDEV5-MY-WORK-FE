@@ -94,13 +94,6 @@ export default function PostTable() {
 
   return (
     <Box sx={{ width: "100%", mt: 2 }}>
-      {/* 새 글 작성 버튼 */}
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
-        <CustomButton variant="contained" onClick={() => setCreateOpen(true)}>
-          새 글 작성
-        </CustomButton>
-      </Box>
-
       {/* 테이블 */}
       <SectionTable
         columns={columns}
@@ -123,11 +116,16 @@ export default function PostTable() {
           onKeyChange: (newKey) => {
             setPage(1);
             setSearchKey(newKey);
+            if (!newKey) setSearchText(""); // 검색 조건 해제 시 검색어 초기화
           },
           onChange: (newText) => {
             setPage(1);
             setSearchText(newText);
           },
+          onEnter: () => setPage(1),
+          onCreate: () => setCreateOpen(true),
+          createLabel: "새 글 작성",
+          showInput: !!searchKey,
         }}
       />
 
