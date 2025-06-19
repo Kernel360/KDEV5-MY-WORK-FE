@@ -130,89 +130,77 @@ export default function SectionTable({
 
   return (
     <Box sx={sx}>
-      {/* 단계 선택 스크롤 */}
+      {/* 단계(스탭) 카드형 UI - 번호/이름만, 연필 등 아이콘 없이, 가로 스크롤 */}
       {steps.length > 0 && onStepChange && (
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-          <IconButton
-            size="small"
-            onClick={handlePrev}
-            disabled={!canScrollPrev}
-          >
-            <ChevronLeftIcon fontSize="small" />
-          </IconButton>
-          <Box
-            ref={scrollRef}
-            sx={{
-              display: "flex",
-              overflowX: "hidden",
-              flexGrow: 1,
-              gap: theme.spacing(1),
-              "& > button": { flexShrink: 0, whiteSpace: "nowrap" },
-              "&::-webkit-scrollbar": { display: "none" },
-              scrollbarWidth: "none",
-            }}
-          >
-            <CustomButton
-              key="전체"
-              kind={
-                !selectedStep || selectedStep === "전체" ? "primary" : "ghost"
-              }
-              size="small"
-              onClick={() => onStepChange(null, "전체")}
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, overflowX: 'auto', gap: 2, pb: 1, justifyContent: 'center' }}>
+          {steps.map((step, idx) => (
+            <Box
+              key={step.projectStepId || step.title || idx}
+              onClick={() => onStepChange(step.projectStepId, step.title)}
+              sx={{
+                cursor: 'pointer',
+                minWidth: 140,
+                maxWidth: 180,
+                p: 2,
+                borderRadius: 2,
+                bgcolor: selectedStep === step.title ? '#e7f0fa' : '#fff',
+                border: selectedStep === step.title ? '2px solid #b5d3f3' : '1px solid #eee',
+                boxShadow: selectedStep === step.title ? '0 2px 8px 0 rgba(0,0,0,0.04)' : 'none',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 0.2s',
+                mr: 1,
+              }}
             >
-              전체
-            </CustomButton>
-            {steps.map((step) => (
-              <CustomButton
-                key={step.projectStepId}
-                kind={selectedStep === step.title ? "primary" : "ghost"}
-                size="small"
-                onClick={() => onStepChange(step.projectStepId, step.title)}
-              >
-                {step.title}
-              </CustomButton>
-            ))}
-          </Box>
-          <IconButton
-            size="small"
-            onClick={handleNext}
-            disabled={!canScrollNext}
-          >
-            <ChevronRightIcon fontSize="small" />
-          </IconButton>
+              <Box sx={{
+                width: 32, height: 32, borderRadius: '50%', bgcolor: '#222', color: '#fff',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 18, mb: 1
+              }}>{idx + 1}</Box>
+              <Box sx={{ fontWeight: 600, fontSize: 16, textAlign: 'center', wordBreak: 'keep-all' }}>{step.title}</Box>
+            </Box>
+          ))}
         </Box>
       )}
 
-      {/* 검색 조건 UI */}
+      {/* 검색 조건 + 새 글 작성 버튼 한 줄 */}
       {search && (
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-          <FormControl size="small" sx={{ minWidth: 120, mr: 2 }}>
-            <InputLabel>검색 조건</InputLabel>
-            <Select
-              value={search.key}
-              onChange={(e) => {
-                search.onKeyChange?.(e.target.value);
-              }}
-              label="검색 조건"
-            >
-              <MenuItem value="">선택</MenuItem>
-              {columns
-                .filter((c) => c.searchable)
-                .map((c) => (
-                  <MenuItem key={c.key} value={c.key}>
-                    {c.label}
-                  </MenuItem>
-                ))}
-            </Select>
-          </FormControl>
-          {search.key && (
-            <TextField
-              size="small"
-              placeholder={search.placeholder || "검색어 입력"}
-              value={search.value}
-              onChange={(e) => search.onChange?.(e.target.value)}
-              sx={{ flex: 1 }}
-            />
+        <Box sx={{ display: "flex", alignItems: "center", mb: 2, justifyContent: 'space-between' }}>
+          <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center' }}>
+            <FormControl size="small" sx={{ minWidth: 120, mr: 2 }}>
+              <InputLabel>검색 조건</InputLabel>
+              <Select
+                value={search.key}
+                onChange={(e) => {
+                  search.onKeyChange?.(e.target.value);
+                }}
+                label="검색 조건"
+              >
+                <MenuItem value="">선택</MenuItem>
+                {columns
+                  .filter((c) => c.searchable)
+                  .map((col) => (
+                    <MenuItem key={col.key} value={col.key}>
+                      {col.label}
+                    </MenuItem>
+                  ))}
+              </Select>
+            </FormControl>
+            {search.showInput && (
+              <TextField
+                size="small"
+                placeholder={search.placeholder || "검색어를 입력하세요"}
+                value={search.value}
+                onChange={(e) => search.onChange?.(e.target.value)}
+                sx={{ width: '70%', minWidth: 200 }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') search.onEnter?.();
+                }}
+              />
+            )}
+          </Box>
+          {search.onCreate && (
+            <CustomButton variant="contained" onClick={search.onCreate} sx={{ ml: 2 }}>
+              {search.createLabel || '새 글 작성'}
+            </CustomButton>
           )}
         </Box>
       )}
