@@ -27,7 +27,7 @@ export default function ProjectDetailPage() {
   const location = useLocation();
   const dispatch = useDispatch();
   const projectState = useSelector((state) => state.project) || {};
-  const { current: project } = projectState;
+  const { current: project, error, loading } = projectState;
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const statusMap = {
@@ -56,6 +56,13 @@ export default function ProjectDetailPage() {
   useEffect(() => {
     dispatch(fetchProjectById(id));
   }, [dispatch, id]);
+
+  // 프로젝트가 없고 에러가 있을 때 404로 이동
+  useEffect(() => {
+    if (!loading && !project && error) {
+      navigate("/not-found", { replace: true });
+    }
+  }, [loading, project, error, navigate]);
 
   const handleDelete = () => {
     dispatch(deleteProject({ id }))

@@ -15,6 +15,9 @@ import CompanyPage from "@/features/company/pages/CompanyPage";
 import CompanyFormPage from "@/features/company/pages/CompanyFormPage";
 import CompanyDetailPage from "@/features/company/pages/CompanyDetailPage";
 import ProtectedRoute from "@/components/common/protectedRoute/ProtectedRoute";
+import ForbiddenPage from "@/components/common/errorPage/ForbiddenPage";
+import NotFoundPage from "@/components/common/errorPage/NotFoundPage";
+
 export default function MainRoutes() {
   const isAuthenticated = useSelector((state) =>
     Boolean(state.auth?.accessToken)
@@ -23,34 +26,19 @@ export default function MainRoutes() {
   return (
     <Routes>
       <Route
-        path="/"
-        element={
-          isAuthenticated ? (
-            <Navigate to="/projects" replace />
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-
-      <Route path="/login" element={<LoginPage />} />
-      <Route
         element={
           isAuthenticated ? <MainLayout /> : <Navigate to="/login" replace />
         }
       >
         <Route path="/dashboard" element={<DashboardPage />} />
-
         <Route path="/projects" element={<ProjectPage />} />
         <Route path="/no-projects" element={<NoProjectsPage />} />
-
         <Route path="/projects/:id">
           <Route index element={<Navigate to="tasks" replace />} />
           <Route path="management" element={<ProjectDetailPage />} />
           <Route path="tasks" element={<ProjectDetailPage />} />
           <Route path="progress" element={<ProjectDetailPage />} />
         </Route>
-
         <Route
           path="/projects/new"
           element={
@@ -60,7 +48,6 @@ export default function MainRoutes() {
           }
         />
         <Route path="/projects/:id/edit" element={<ProjectFormPage />} />
-
         <Route
           path="/members"
           element={
@@ -93,15 +80,17 @@ export default function MainRoutes() {
             </ProtectedRoute>
           }
         />
-
         <Route path="/companies" element={<CompanyPage />} />
         <Route path="/companies/new" element={<CompanyFormPage />} />
         <Route path="/companies/:id/edit" element={<CompanyFormPage />} />
         <Route path="/companies/:id" element={<CompanyDetailPage />} />
+        <Route path="/forbidden" element={<ForbiddenPage />} />
+        <Route path="/not-found" element={<NotFoundPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
-
+      <Route path="/login" element={<LoginPage />} />
       <Route
-        path="*"
+        path="/"
         element={
           isAuthenticated ? (
             <Navigate to="/projects" replace />
