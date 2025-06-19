@@ -1,7 +1,7 @@
 // src/components/common/postTable/PostTable.jsx
 
 import React, { useState, useEffect } from "react";
-import { Box, Pagination } from "@mui/material";
+import { Box, Pagination, FormControl, InputLabel, Select, MenuItem, TextField } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import SectionTable from "@/components/common/sectionTable/SectionTable";
@@ -11,7 +11,7 @@ import CustomButton from "@/components/common/customButton/CustomButton";
 import { fetchPosts, fetchPostById, createPost } from "../postSlice";
 import { fetchProjectStages } from "../../projectStepSlice";
 
-export default function PostTable() {
+export default function PostTable({ selectedStepTitle, selectedStepId, setSelectedStepTitle, setSelectedStepId }) {
   const dispatch = useDispatch();
   const { id: projectId } = useParams();
 
@@ -21,8 +21,6 @@ export default function PostTable() {
   const steps = useSelector((state) => state.projectStep.items) || [];
 
   const [page, setPage] = useState(1);
-  const [selectedStepTitle, setSelectedStepTitle] = useState("전체");
-  const [selectedStepId, setSelectedStepId] = useState(null);
   const [searchKey, setSearchKey] = useState("");
   const [searchText, setSearchText] = useState("");
   const [selectedPost, setSelectedPost] = useState(null);
@@ -94,8 +92,44 @@ export default function PostTable() {
 
   return (
     <Box sx={{ width: "100%", mt: 2 }}>
-      {/* 새 글 작성 버튼 */}
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
+      {/* 검색 조건 + 검색창 + 새 글 작성 버튼 한 줄 */}
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
+        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center' }}>
+          <FormControl size="small" sx={{ minWidth: 120, mr: 2 }}>
+            <InputLabel>검색 조건</InputLabel>
+            <Select
+              value={searchKey}
+              onChange={(e) => {
+                setPage(1);
+                setSearchKey(e.target.value);
+                if (!e.target.value) setSearchText(""); // 검색 조건 해제 시 검색어도 초기화
+              }}
+              label="검색 조건"
+            >
+              <MenuItem value="">선택</MenuItem>
+              {columns.filter((c) => c.searchable).map((col) => (
+                <MenuItem key={col.key} value={col.key}>
+                  {col.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          {searchKey && (
+            <TextField
+              size="small"
+              placeholder="검색어를 입력하세요"
+              value={searchText}
+              onChange={(e) => {
+                setPage(1);
+                setSearchText(e.target.value);
+              }}
+              sx={{ width: '70%', minWidth: 200 }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') setPage(1);
+              }}
+            />
+          )}
+        </Box>
         <CustomButton variant="contained" onClick={() => setCreateOpen(true)}>
           새 글 작성
         </CustomButton>
@@ -106,7 +140,7 @@ export default function PostTable() {
         columns={columns}
         rows={posts}
         rowKey="id"
-        steps={steps}
+        steps={[]}
         selectedStep={selectedStepTitle}
         onStepChange={(stepId, stepTitle) => {
           setPage(1);
@@ -116,19 +150,6 @@ export default function PostTable() {
         onRowClick={handleRowClick}
         pagination={{ page, total: totalCount, onPageChange: setPage }}
         sx={{ width: "100%" }}
-        search={{
-          key: searchKey,
-          placeholder: "검색어를 입력하세요",
-          value: searchText,
-          onKeyChange: (newKey) => {
-            setPage(1);
-            setSearchKey(newKey);
-          },
-          onChange: (newText) => {
-            setPage(1);
-            setSearchText(newText);
-          },
-        }}
       />
 
       {/* 상세 드로어 */}

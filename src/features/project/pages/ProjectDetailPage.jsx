@@ -28,6 +28,9 @@ export default function ProjectDetailPage() {
   const projectState = useSelector((state) => state.project) || {};
   const { current: project, error, loading } = projectState;
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const steps = useSelector((state) => state.projectStep.items) || [];
+  const [selectedStepTitle, setSelectedStepTitle] = useState("전체");
+  const [selectedStepId, setSelectedStepId] = useState(null);
 
   const statusMap = {
     NOT_STARTED: { color: "neutral", label: "계획" },
@@ -178,6 +181,74 @@ export default function ProjectDetailPage() {
           />
         </Box>
 
+        {/* 스탭(단계) 카드형 UI - SummaryCard 아래, 검색 조건 위 */}
+        {tab === 0 && steps.length > 0 && (
+          <Box sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            width: '100%',
+            mb: 2,
+          }}>
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              bgcolor: '#fff',
+              borderRadius: 3,
+              boxShadow: '0 2px 12px 0 rgba(0,0,0,0.06)',
+              px: 4,
+              py: 3,
+              width: 'fit-content',
+              mx: 'auto',
+            }}>
+              {/* 전체 카드 */}
+              <Box
+                onClick={() => {
+                  setSelectedStepTitle("전체");
+                  setSelectedStepId(null);
+                }}
+                sx={{
+                  cursor: 'pointer',
+                  minWidth: 120,
+                  p: 2,
+                  borderRadius: 2,
+                  bgcolor: !selectedStepTitle || selectedStepTitle === "전체" ? '#e7f0fa' : '#fff',
+                  border: !selectedStepTitle || selectedStepTitle === "전체" ? '2px solid #b5d3f3' : '1px solid #eee',
+                  boxShadow: !selectedStepTitle || selectedStepTitle === "전체" ? '0 2px 8px 0 rgba(0,0,0,0.04)' : 'none',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  transition: 'all 0.2s',
+                }}
+              >
+                <Box sx={{ fontWeight: 700, fontSize: 18, mb: 0.5, mt: 1 }}>전체</Box>
+              </Box>
+              {/* 각 단계 카드 */}
+              {steps.map((step) => (
+                <Box
+                  key={step.projectStepId}
+                  onClick={() => {
+                    setSelectedStepTitle(step.title);
+                    setSelectedStepId(step.projectStepId);
+                  }}
+                  sx={{
+                    cursor: 'pointer',
+                    minWidth: 120,
+                    p: 2,
+                    borderRadius: 2,
+                    bgcolor: selectedStepTitle === step.title ? '#e7f0fa' : '#fff',
+                    border: selectedStepTitle === step.title ? '2px solid #b5d3f3' : '1px solid #eee',
+                    boxShadow: selectedStepTitle === step.title ? '0 2px 8px 0 rgba(0,0,0,0.04)' : 'none',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  <Box sx={{ fontWeight: 700, fontSize: 18, mb: 0.5, mt: 1 }}>{step.title}</Box>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        )}
+
         {/* Content */}
         <Box
           sx={{
@@ -189,7 +260,16 @@ export default function ProjectDetailPage() {
           }}
         >
           <ContentContainer>
-            {tab === 0 ? <PostTable /> : <ProgressOverview />}
+            {tab === 0 ? (
+              <PostTable
+                selectedStepTitle={selectedStepTitle}
+                selectedStepId={selectedStepId}
+                setSelectedStepTitle={setSelectedStepTitle}
+                setSelectedStepId={setSelectedStepId}
+              />
+            ) : (
+              <ProgressOverview />
+            )}
           </ContentContainer>
         </Box>
       </Box>
