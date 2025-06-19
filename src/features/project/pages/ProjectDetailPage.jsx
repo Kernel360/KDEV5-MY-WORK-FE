@@ -82,6 +82,10 @@ export default function ProjectDetailPage() {
     );
   }
 
+  const handleClickDetail = () => {
+    navigate(`/projects/${id}/detail`); // 원하는 경로로 수정
+  };
+
   return (
     <PageWrapper>
       <Box
@@ -166,6 +170,7 @@ export default function ProjectDetailPage() {
                 type: "text",
               },
             ]}
+            onClickDetail={handleClickDetail}
             data={{
               step: project.step,
               period: `${dayjs(project.startAt).format("YYYY.MM.DD")} ~ ${dayjs(project.endAt).format("YYYY.MM.DD")}`,
