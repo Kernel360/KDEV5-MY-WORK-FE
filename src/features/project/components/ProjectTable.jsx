@@ -100,7 +100,7 @@ export default function ProjectTable() {
         onPageChange: (newPage) => setPage(newPage),
         pageSize: 10,
       }}
-      onRowClick={(row) => navigate(`/projects/${row.id}`)}
+      onRowClick={(row) => navigate(`/projects/${row.id}/posts`)}
       search={{
         key: "name",
         placeholder: "프로젝트 제목을 입력하세요",

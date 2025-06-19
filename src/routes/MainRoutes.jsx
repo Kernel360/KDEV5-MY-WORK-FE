@@ -34,9 +34,7 @@ export default function MainRoutes() {
         <Route path="/projects" element={<ProjectPage />} />
         <Route path="/no-projects" element={<NoProjectsPage />} />
         <Route path="/projects/:id">
-          <Route index element={<Navigate to="tasks" replace />} />
-          <Route path="management" element={<ProjectDetailPage />} />
-          <Route path="tasks" element={<ProjectDetailPage />} />
+          <Route path="posts" element={<ProjectDetailPage />} />
           <Route path="progress" element={<ProjectDetailPage />} />
         </Route>
         <Route
@@ -51,7 +49,13 @@ export default function MainRoutes() {
         <Route
           path="/members"
           element={
-            <ProtectedRoute allowedRoles={["ROLE_SYSTEM_ADMIN", "ROLE_DEV_ADMIN", "ROLE_CLIENT_ADMIN"]}>
+            <ProtectedRoute
+              allowedRoles={[
+                "ROLE_SYSTEM_ADMIN",
+                "ROLE_DEV_ADMIN",
+                "ROLE_CLIENT_ADMIN",
+              ]}
+            >
               <MemberPage />
             </ProtectedRoute>
           }
@@ -59,7 +63,13 @@ export default function MainRoutes() {
         <Route
           path="/members/:id"
           element={
-            <ProtectedRoute allowedRoles={["ROLE_SYSTEM_ADMIN", "ROLE_DEV_ADMIN", "ROLE_CLIENT_ADMIN"]}>
+            <ProtectedRoute
+              allowedRoles={[
+                "ROLE_SYSTEM_ADMIN",
+                "ROLE_DEV_ADMIN",
+                "ROLE_CLIENT_ADMIN",
+              ]}
+            >
               <MemberDetailPage />
             </ProtectedRoute>
           }
@@ -75,7 +85,13 @@ export default function MainRoutes() {
         <Route
           path="/members/:id/edit"
           element={
-            <ProtectedRoute allowedRoles={["ROLE_SYSTEM_ADMIN", "ROLE_DEV_ADMIN", "ROLE_CLIENT_ADMIN"]}>
+            <ProtectedRoute
+              allowedRoles={[
+                "ROLE_SYSTEM_ADMIN",
+                "ROLE_DEV_ADMIN",
+                "ROLE_CLIENT_ADMIN",
+              ]}
+            >
               <MemberFormPage />
             </ProtectedRoute>
           }
