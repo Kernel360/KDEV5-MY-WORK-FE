@@ -85,7 +85,7 @@ const navItems = [
     text: "회원 관리",
     icon: PersonIcon,
     path: "/members",
-    roles: [ROLES.DEV_ADMIN, ROLES.CLIENT_ADMIN, ROLES.USER],
+    roles: [ROLES.DEV_ADMIN, ROLES.CLIENT_ADMIN],
   },
 ];
 

@@ -26,13 +26,7 @@ const columns = [
 export default function MemberTable() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  const {
-    list: members,
-    totalCount,
-    status,
-    error,
-  } = useSelector((state) => state.member);
+  const { list: members, totalCount, status, error } = useSelector((state) => state.member);
 
   const [page, setPage] = useState(1);
   const [keywordType, setKeywordType] = useState("");
