@@ -1,18 +1,19 @@
 import React from "react";
-import { Box, Typography, Avatar, Link } from "@mui/material";
+import { Box, Typography, Avatar, Link, IconButton } from "@mui/material";
 import {
   CardContainer,
   InfoRow,
   StatusChip,
   ProgressBar,
 } from "./SummaryCard.Styles";
-import CustomButton from "@/components/common/customButton/CustomButton"; // 경로는 실제 위치에 맞게 수정
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import CustomButton from "../customButton/CustomButton";
 
 export default function SummaryCard({
   schema = [],
   data = {},
   noMarginBottom = false,
-  onClickDetail, // 외부에서 클릭 핸들러 받기
+  onClickDetail,
 }) {
   const contents = schema.reduce(
     (arr, { key, label, type, colorMap, labelMap }) => {
@@ -135,24 +136,26 @@ export default function SummaryCard({
           ))}
         </Box>
 
-        {/* 오른쪽: 버튼 */}
         <CustomButton
-          kind="ghost"
+          kind="text"
           size="small"
+          onClick={onClickDetail}
           sx={{
-            fontSize: "0.75rem",
+            display: "flex",
+            alignItems: "center",
+            gap: 0.5,
             height: 28,
-            px: 1.5,
+            px: 1,
             py: 0,
-            whiteSpace: "nowrap",
+            fontSize: "0.75rem",
+            minWidth: 0,
             color: (theme) => theme.palette.text.secondary,
-            borderColor: (theme) => theme.palette.grey[300],
             "&:hover": {
               backgroundColor: (theme) => theme.palette.grey[100],
             },
           }}
-          onClick={onClickDetail}
         >
+          <ArrowForwardRoundedIcon sx={{ fontSize: 18 }} />
           상세 보기
         </CustomButton>
       </Box>
