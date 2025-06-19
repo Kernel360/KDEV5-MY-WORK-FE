@@ -82,3 +82,12 @@ export function findMembers(page, keyword, keywordType) {
 export function getMemberProjects(memberId) {
   return api.get(`/api/member/${memberId}/myProjects`);
 }
+
+/**
+ * 회사별 직원 목록 조회 (GET /api/companies/{companyId}/members)
+ * @param {string} companyId - 조회할 회사 UUID
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<MemberListWebResponse>
+ */
+export function getCompanyMembersByCompanyId(companyId) {
+  return api.get(`/api/companies/${companyId}/members`);
+}
