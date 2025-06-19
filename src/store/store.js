@@ -8,20 +8,20 @@ import projectStepReducer from "@/features/project/projectStepSlice";
 import postReducer from "@/features/project/post/postSlice";
 import projectMemberReducer from "@/features/project/projectMemberSlice";
 import reviewReducer from "@/features/project/post/reviewSlice";
-
+import DashboardReducer from "@/features/dashboard/DashboardSlice";
 
 const preloadedAuth = (() => {
   try {
-    const token       = localStorage.getItem("accessToken");
-    const userJson    = localStorage.getItem("user");
+    const token = localStorage.getItem("accessToken");
+    const userJson = localStorage.getItem("user");
     const companyJson = localStorage.getItem("company");
     if (token && userJson && companyJson) {
       return {
         accessToken: token,
-        user:        JSON.parse(userJson),
-        company:     JSON.parse(companyJson),
-        status:      "succeeded",
-        error:       null,
+        user: JSON.parse(userJson),
+        company: JSON.parse(companyJson),
+        status: "succeeded",
+        error: null,
       };
     }
   } catch {
@@ -29,23 +29,24 @@ const preloadedAuth = (() => {
   }
   return {
     accessToken: null,
-    user:        null,
-    company:     null,
-    status:      "idle",
-    error:       null,
+    user: null,
+    company: null,
+    status: "idle",
+    error: null,
   };
 })();
 
 export const store = configureStore({
   reducer: {
-    project:        projectReducer,
-    member:         memberReducer,
-    company:        companyReducer,
-    auth:           authReducer,
-    projectStep:    projectStepReducer,
-    post:           postReducer,
-    projectMember:  projectMemberReducer,
-    review: reviewReducer
+    project: projectReducer,
+    member: memberReducer,
+    company: companyReducer,
+    auth: authReducer,
+    projectStep: projectStepReducer,
+    post: postReducer,
+    projectMember: projectMemberReducer,
+    review: reviewReducer,
+    dashboard: DashboardReducer,
   },
   preloadedState: {
     auth: preloadedAuth,
