@@ -56,6 +56,12 @@ api.interceptors.response.use(
       }
     }
 
+    // 403 Forbidden 처리
+    if (error.response?.status === 403) {
+      window.location.replace("/forbidden");
+      return Promise.reject(error);
+    }
+
     return Promise.reject(error);
   }
 );
