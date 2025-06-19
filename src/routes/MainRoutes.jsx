@@ -80,7 +80,7 @@ export default function MainRoutes() {
         <Route
           path="/members/new"
           element={
-            <ProtectedRoute allowedRoles={["ROLE_SYSTEM_ADMIN", "ROLE_DEV_ADMIN", "ROLE_CLIENT_ADMIN"]}>
+            <ProtectedRoute allowedRoles={["ROLE_SYSTEM_ADMIN"]}>
               <MemberFormPage />
             </ProtectedRoute>
           }
