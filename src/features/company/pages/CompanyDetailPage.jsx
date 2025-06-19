@@ -24,7 +24,7 @@ import {
   fetchCompanyById,
   deleteCompany,
 } from "@/features/company/companySlice";
-import { getCompanyMembers } from "@/api/member";
+import { getCompanyMembersByCompanyId } from "@/api/member";
 import { useTheme } from "@mui/material/styles";
 
 export default function CompanyDetailPage() {
@@ -50,13 +50,13 @@ export default function CompanyDetailPage() {
   useEffect(() => {
     if (!company?.companyId) return;
     setLoadingMembers(true);
-    getCompanyMembers(company.companyId, page, searchText)
+    getCompanyMembersByCompanyId(company.companyId)
       .then((res) => {
         setMembers(res.data.data.members);
         setTotalCount(res.data.data.totalCount);
       })
       .finally(() => setLoadingMembers(false));
-  }, [company?.companyId, page, searchText]);
+  }, [company?.companyId]);
 
   const handleDelete = async () => {
     await dispatch(deleteCompany(id)).unwrap();
