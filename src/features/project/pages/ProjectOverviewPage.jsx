@@ -15,10 +15,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchProjectById } from "@/features/project/projectSlice";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
-import CustomButton from "@/components/common/customButton/CustomButton";
-import CreateRoundedIcon from "@mui/icons-material/CreateRounded";
-import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
-import ConfirmDialog from "@/components/common/confirmDialog/ConfirmDialog";
 import dayjs from "dayjs";
 
 export default function ProjectOverviewPage() {
@@ -49,10 +45,6 @@ export default function ProjectOverviewPage() {
     );
   }
 
-  const handleDelete = () => {
-    setConfirmOpen(false);
-  };
-
   return (
     <PageWrapper>
       <PageHeader
@@ -60,17 +52,6 @@ export default function ProjectOverviewPage() {
         subtitle={project.detail}
         noPaddingBottom
       />
-      <ConfirmDialog
-        open={confirmOpen}
-        title="프로젝트를 삭제하시겠습니까?"
-        description="삭제 후에는 복구할 수 없습니다."
-        cancelText="취소"
-        confirmText="삭제하기"
-        confirmColor="error"
-        onClose={() => setConfirmOpen(false)}
-        onConfirm={handleDelete}
-      />
-
       <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
         <Paper
           sx={{
