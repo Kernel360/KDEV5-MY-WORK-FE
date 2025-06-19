@@ -61,6 +61,18 @@ const StyledButton = styled(Button)(({ theme, kind }) => {
         opacity: 0.5,
       },
     },
+    text: {
+      backgroundColor: "transparent",
+      color: theme.palette.text.primary,
+      border: "none",
+      boxShadow: "none",
+      "&:hover": {
+        backgroundColor: theme.palette.grey[100],
+      },
+      "&.Mui-disabled": {
+        color: theme.palette.action.disabled,
+      },
+    },
   };
 
   return {
