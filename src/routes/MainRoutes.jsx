@@ -17,6 +17,7 @@ import CompanyDetailPage from "@/features/company/pages/CompanyDetailPage";
 import ProtectedRoute from "@/components/common/protectedRoute/ProtectedRoute";
 import ForbiddenPage from "@/components/common/errorPage/ForbiddenPage";
 import NotFoundPage from "@/components/common/errorPage/NotFoundPage";
+import ProjectOverviewPage from "@/features/project/pages/ProjectOverviewPage";
 
 export default function MainRoutes() {
   const isAuthenticated = useSelector((state) =>
@@ -36,6 +37,8 @@ export default function MainRoutes() {
         <Route path="/projects/:id">
           <Route path="posts" element={<ProjectDetailPage />} />
           <Route path="progress" element={<ProjectDetailPage />} />
+          <Route path="detail" element={<ProjectOverviewPage />} />
+          <Route path="edit" element={<ProjectFormPage />} />
         </Route>
         <Route
           path="/projects/new"
@@ -45,7 +48,7 @@ export default function MainRoutes() {
             </ProtectedRoute>
           }
         />
-        <Route path="/projects/:id/edit" element={<ProjectFormPage />} />
+
         <Route
           path="/members"
           element={
