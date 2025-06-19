@@ -14,7 +14,6 @@ import SummaryCard from "@/components/common/summaryCard/SummaryCard";
 import PostTable from "../post/components/PostTable";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import CreateRoundedIcon from "@mui/icons-material/CreateRounded";
-import ProjectManagement from "../management/pages/ProjectManagement";
 import dayjs from "dayjs";
 import ProgressOverview from "../checklist/pages/ProgressOverview";
 import ToggleButton from "@mui/material/ToggleButton";
@@ -27,7 +26,7 @@ export default function ProjectDetailPage() {
   const location = useLocation();
   const dispatch = useDispatch();
   const projectState = useSelector((state) => state.project) || {};
-  const { current: project } = projectState;
+  const { current: project, error, loading } = projectState;
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const statusMap = {
@@ -38,9 +37,9 @@ export default function ProjectDetailPage() {
   };
 
   const tabMap = {
-    management: 0,
-    tasks: 1,
-    progress: 2,
+    posts: 0,
+    progress: 1,
+    history: 2,
   };
 
   const segments = location.pathname.split("/");
@@ -48,14 +47,21 @@ export default function ProjectDetailPage() {
   const [tab, setTab] = useState(currentTab);
 
   const handleTabChange = (_, newIndex) => {
+    if (newIndex === null || newIndex === undefined) return;
     setTab(newIndex);
-    const routeKeys = ["management", "tasks", "progress"];
+    const routeKeys = ["posts", "progress", "history"];
     navigate(`/projects/${id}/${routeKeys[newIndex]}`);
   };
 
   useEffect(() => {
     dispatch(fetchProjectById(id));
   }, [dispatch, id]);
+
+  useEffect(() => {
+    if (!loading && !project && error) {
+      navigate("/not-found", { replace: true });
+    }
+  }, [loading, project, error, navigate]);
 
   const handleDelete = () => {
     dispatch(deleteProject({ id }))
@@ -103,9 +109,9 @@ export default function ProjectDetailPage() {
                   size="small"
                   color="primary"
                 >
-                  <ToggleButton value={0}>프로젝트 관리</ToggleButton>
-                  <ToggleButton value={1}>업무 관리</ToggleButton>
-                  <ToggleButton value={2}>결재 관리</ToggleButton>
+                  <ToggleButton value={0}>업무 관리</ToggleButton>
+                  <ToggleButton value={1}>결재 관리</ToggleButton>
+                  <ToggleButton value={2}>변경 이력</ToggleButton>
                 </ToggleButtonGroup>
               </Stack>
             }
@@ -183,13 +189,7 @@ export default function ProjectDetailPage() {
           }}
         >
           <ContentContainer>
-            {tab === 0 ? (
-              <ProjectManagement />
-            ) : tab === 1 ? (
-              <PostTable />
-            ) : (
-              <ProgressOverview />
-            )}
+            {tab === 0 ? <PostTable /> : <ProgressOverview />}
           </ContentContainer>
         </Box>
       </Box>

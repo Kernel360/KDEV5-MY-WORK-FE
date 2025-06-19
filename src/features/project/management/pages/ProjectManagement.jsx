@@ -1,4 +1,3 @@
-// src/features/projects/management/pages/ProjectManagement.jsx
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,8 +11,9 @@ export default function ProjectManagement() {
   const dispatch = useDispatch();
   const { id: projectId } = useParams();
   const userRole = useSelector((state) => state.auth.user.role);
-  const { items: projectSteps = [] } = useSelector((state) => state.projectStep);
-
+  const { items: projectSteps = [] } = useSelector(
+    (state) => state.projectStep
+  );
 
   const [isAddStepOpen, setIsAddStepOpen] = useState(false);
   const [newStepName, setNewStepName] = useState("");
@@ -29,7 +29,7 @@ export default function ProjectManagement() {
     dispatch(
       createProjectStages({
         projectId,
-       projectSteps: [
+        projectSteps: [
           {
             title: newStepName,
             orderNumber: nextOrder,
@@ -42,10 +42,9 @@ export default function ProjectManagement() {
   };
 
   const handleCloseAddStep = () => {
-  setIsAddStepOpen(false);  
-  setNewStepName("");    
-};
-
+    setIsAddStepOpen(false);
+    setNewStepName("");
+  };
 
   const sections = useProjectSections({ onAddStep: openAddStep });
   const visibleSections = sections.filter((sec) =>
@@ -55,7 +54,8 @@ export default function ProjectManagement() {
   return (
     <Box
       sx={{
-        width: "100%", mt: 2
+        width: "100%",
+        mt: 2,
       }}
     >
       {visibleSections.map((sec, idx) => (
@@ -71,7 +71,7 @@ export default function ProjectManagement() {
       ))}
 
       {/* 단계 추가 다이얼로그 */}
-     <TextInputDialog
+      <TextInputDialog
         open={isAddStepOpen}
         title="단계 추가"
         label="단계 이름"
