@@ -41,7 +41,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (accessToken) {
-      navigate("/projects", { replace: true });
+      navigate("/dashboard", { replace: true });
     }
   }, [accessToken, navigate]);
 
@@ -51,35 +51,7 @@ export default function LoginPage() {
 
     const result = await dispatch(login(form));
     if (login.fulfilled.match(result)) {
-      const { memberRole, memberId } = result.payload;
-
-      if (memberRole === "ROLE_USER") {
-        try {
-          const memberProjectResult = await dispatch(
-            fetchMemberProjects(memberId)
-          );
-
-          if (fetchMemberProjects.fulfilled.match(memberProjectResult)) {
-            const projects = memberProjectResult.payload.memberProjects || [];
-
-            if (projects.length > 0) {
-              navigate(`/projects/${projects[0].id}`);
-            } else {
-              navigate("/no-projects");
-            }
-          } else {
-            navigate("/no-projects");
-          }
-        } catch (err) {
-          navigate("/no-projects", {
-            state: { warningMessage: "프로젝트 조회 중 오류가 발생했습니다." },
-          });
-        }
-        return;
-      }
-
-      // ROLE_USER 외에는 그냥 /projects로 이동
-      navigate("/projects");
+      navigate("/dashboard");
     } else {
       console.error("로그인 실패:", result.payload || result.error);
     }

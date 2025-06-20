@@ -112,7 +112,7 @@ export default function MainRoutes() {
         path="/"
         element={
           isAuthenticated ? (
-            <Navigate to="/projects" replace />
+            <Navigate to="/dashboard" replace />
           ) : (
             <Navigate to="/login" replace />
           )
