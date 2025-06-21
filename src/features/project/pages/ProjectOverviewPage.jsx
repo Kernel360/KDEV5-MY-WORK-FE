@@ -1,21 +1,12 @@
 import React, { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  Box,
-  Paper,
-  Stack,
-  Typography,
-  Divider,
-  Grid,
-  Tooltip,
-  CircularProgress,
-} from "@mui/material";
-import { InfoOutlined } from "@mui/icons-material";
+import { Box, Paper, Stack, CircularProgress } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProjectById } from "@/features/project/projectSlice";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
 import dayjs from "dayjs";
+import Section from "@/components/layouts/section/Section"; // ✅ 새 Section 컴포넌트
 
 export default function ProjectOverviewPage() {
   const { id } = useParams();
@@ -23,7 +14,6 @@ export default function ProjectOverviewPage() {
   const dispatch = useDispatch();
   const projectState = useSelector((state) => state.project);
   const { current: project, loading, error } = projectState || {};
-  const [confirmOpen, setConfirmOpen] = React.useState(false);
 
   useEffect(() => {
     dispatch(fetchProjectById(id));
@@ -65,94 +55,48 @@ export default function ProjectOverviewPage() {
         >
           <Stack spacing={4}>
             {/* 1. 기본 정보 */}
-            <Box>
-              <SectionTitle
-                label="1. 기본 정보"
-                tooltip="프로젝트명, 기간, 상태를 확인합니다."
-              />
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={4}>
-                  <LabelValue label="프로젝트명" value={project.name} />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <LabelValue
-                    label="기간"
-                    value={`${dayjs(project.startAt).format("YYYY.MM.DD")} ~ ${dayjs(project.endAt).format("YYYY.MM.DD")}`}
-                  />
-                </Grid>
-              </Grid>
-            </Box>
+            <Section
+              index={1}
+              title="기본 정보"
+              tooltip="프로젝트명, 기간, 상태를 확인합니다."
+              items={[
+                {
+                  label: "프로젝트명",
+                  value: project.name,
+                  gridProps: { sm: 4 },
+                },
+                {
+                  label: "기간",
+                  value: `${dayjs(project.startAt).format("YYYY.MM.DD")} ~ ${dayjs(project.endAt).format("YYYY.MM.DD")}`,
+                  gridProps: { sm: 4 },
+                },
+              ]}
+            />
 
             {/* 2. 고객사 정보 */}
-            <Box>
-              <SectionTitle
-                label="2. 고객사 정보"
-                tooltip="고객사 관련 정보를 확인합니다."
-              />
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
-                  <LabelValue
-                    label="회사명"
-                    value={project.clientCompanyName}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <LabelValue
-                    label="연락처"
-                    value={project.clientContactPhoneNum}
-                  />
-                </Grid>
-              </Grid>
-            </Box>
+            <Section
+              index={2}
+              title="고객사 정보"
+              tooltip="고객사 관련 정보를 확인합니다."
+              items={[
+                { label: "회사명", value: project.clientCompanyName },
+                { label: "연락처", value: project.clientContactPhoneNum },
+              ]}
+            />
 
             {/* 3. 개발사 정보 */}
-            <Box>
-              <SectionTitle
-                label="3. 개발사 정보"
-                tooltip="개발사 관련 정보를 확인합니다."
-              />
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
-                  <LabelValue label="회사명" value={project.devCompanyName} />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <LabelValue
-                    label="연락처"
-                    value={project.devContactPhoneNum}
-                  />
-                </Grid>
-              </Grid>
-            </Box>
+            <Section
+              index={3}
+              title="개발사 정보"
+              tooltip="개발사 관련 정보를 확인합니다."
+              items={[
+                { label: "회사명", value: project.devCompanyName },
+                { label: "연락처", value: project.devContactPhoneNum },
+              ]}
+            />
           </Stack>
         </Paper>
       </Box>
     </PageWrapper>
-  );
-}
-
-function LabelValue({ label, value }) {
-  return (
-    <>
-      <Typography variant="body2" color="text.secondary">
-        {label}
-      </Typography>
-      <Typography variant="body1">{value || "-"}</Typography>
-    </>
-  );
-}
-
-function SectionTitle({ label, tooltip }) {
-  return (
-    <>
-      <Stack direction="row" alignItems="center" spacing={1}>
-        <Typography variant="subtitle1" fontWeight={600}>
-          {label}
-        </Typography>
-        <Tooltip title={tooltip}>
-          <InfoOutlined fontSize="small" color="action" />
-        </Tooltip>
-      </Stack>
-      <Divider sx={{ mt: 1, mb: 2 }} />
-    </>
   );
 }
