@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchDashboardSummary,
   fetchNearDeadlineProjects,
-} from "@/features/dashboard/dashboardSlice";
+} from "../DashboardSlice";
 
 export default function DashboardPage() {
   const dispatch = useDispatch();
