@@ -37,8 +37,10 @@ export default function CustomTable({
   onRowClick,
   search = null,
   filter = null,
+  secondaryFilter = null,
   onEdit, // (row) => void
   onDelete, // (row) => void
+  hideDeleteButton = false, // 삭제 버튼 숨김 옵션 추가
 }) {
   const { companyListOnlyIdName: companies = [] } = useSelector(
     (state) => state.company
@@ -85,8 +87,18 @@ export default function CustomTable({
         );
       }
     }
+    if (secondaryFilter && secondaryFilter.key) {
+      const { key, value } = secondaryFilter;
+      if (value !== "") {
+        result = result.filter(
+          (row) =>
+            row[key] ===
+            (value === "true" ? true : value === "false" ? false : value)
+        );
+      }
+    }
     return result;
-  }, [rows, searchKey, searchText, search, filter]);
+  }, [rows, searchKey, searchText, search, filter, secondaryFilter]);
 
   // 정렬 적용
   const sortedRows = useMemo(() => {
@@ -152,6 +164,29 @@ export default function CustomTable({
                   }
                 >
                   {filter.options.map((opt) => (
+                    <MenuItem key={String(opt.value)} value={opt.value}>
+                      {opt.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+
+            {secondaryFilter && secondaryFilter.key && (
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>
+                  {secondaryFilter.label ??
+                    columns.find((c) => c.key === secondaryFilter.key)?.label}
+                </InputLabel>
+                <Select
+                  value={secondaryFilter.value}
+                  onChange={(e) => secondaryFilter.onChange?.(e.target.value)}
+                  label={
+                    secondaryFilter.label ??
+                    columns.find((c) => c.key === secondaryFilter.key)?.label
+                  }
+                >
+                  {secondaryFilter.options.map((opt) => (
                     <MenuItem key={String(opt.value)} value={opt.value}>
                       {opt.label}
                     </MenuItem>
@@ -244,8 +279,8 @@ export default function CustomTable({
                     </TableCell>
                   ))}
                   {/* 액션 컬럼 */}
-                  <TableCell key="__actions__" align="center">
-                    {userRole === "ROLE_SYSTEM_ADMIN" && (
+                  {userRole === "ROLE_SYSTEM_ADMIN" && !hideDeleteButton && (
+                    <TableCell key="__actions__" align="center">
                       <CustomButton
                         kind="ghost-danger"
                         size="small"
@@ -256,8 +291,8 @@ export default function CustomTable({
                       >
                         삭제
                       </CustomButton>
-                    )}
-                  </TableCell>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
