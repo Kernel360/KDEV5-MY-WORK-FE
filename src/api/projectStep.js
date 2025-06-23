@@ -21,3 +21,12 @@ export const createProjectStages = (data) =>
  */
 export const updateProjectStages = (projectId, projectStepUpdateWebRequests) =>
   api.put(`/api/projects/${projectId}/steps`, projectStepUpdateWebRequests );
+
+/**
+ * 프로젝트 단계(스탭) + 각 단계별 게시글 카운트 조회
+ * @param {string} projectId - 프로젝트 UUID
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<ProjectStepsWithPostTotalCountWebResponse>
+ */
+export function getProjectStepsWithCount(projectId) {
+  return api.get(`/api/projects/${projectId}/steps-with-count`);
+}

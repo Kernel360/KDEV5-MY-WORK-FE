@@ -7,8 +7,8 @@ export const fetchProjectStages = createAsyncThunk(
   "projectStep/fetchProjectStages",
   async (projectId, thunkAPI) => {
     try {
-      const response = await projectStepAPI.getProjectStages(projectId);
-      return response.data.data; 
+      const response = await projectStepAPI.getProjectStepsWithCount(projectId);
+      return response.data.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(err.response?.data || "Failed to fetch stages");
     }
@@ -25,7 +25,7 @@ export const createProjectStages = createAsyncThunk(
        projectSteps},
       );
       // 2) 생성 직후, 다시 목록을 조회
-      const fresh = await projectStepAPI.getProjectStages(projectId);
+      const fresh = await projectStepAPI.getProjectStepsWithCount(projectId);
       return fresh.data.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(err.response?.data || "Failed to create stages");
