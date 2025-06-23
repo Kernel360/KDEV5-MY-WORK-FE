@@ -7,7 +7,7 @@ import {
   addMemberToProject,
   removeMemberFromProject,
   fetchCompanyMembersInProject,
-} from "@/features/project/projectMemberSlice";
+} from "@/features/project/slices/projectMemberSlice";
 import {
   Autocomplete,
   Box,
@@ -15,17 +15,19 @@ import {
   Typography,
   TextField,
   CircularProgress,
-  IconButton,        // ← 추가
+  IconButton, // ← 추가
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";  // ← 추가
+import CloseIcon from "@mui/icons-material/Close"; // ← 추가
 import { useTheme as useMuiTheme } from "@mui/material/styles";
-import ClientMemberList from "../ClientMemberManager/ClientMemberList";
+import ClientMemberList from "./ClientMemberList";
 
 export default function ClientMemberSelector() {
   const theme = useMuiTheme();
   const dispatch = useDispatch();
   const { id: projectId } = useParams();
-  const companyId = useSelector((state) => state.project.current.clientCompanyId);
+  const companyId = useSelector(
+    (state) => state.project.current.clientCompanyId
+  );
 
   const options = useSelector((state) => state.projectMember.list ?? []);
   const loadingOptions = useSelector((state) => state.projectMember.loading);
@@ -36,12 +38,13 @@ export default function ClientMemberSelector() {
 
   useEffect(() => {
     if (companyId && projectId) {
-      dispatch(fetchCompanyMembersInProject({ projectId, companyId }))
-        .then((action) => {
+      dispatch(fetchCompanyMembersInProject({ projectId, companyId })).then(
+        (action) => {
           if (action.payload?.members) {
             setAssigned(action.payload.members);
           }
-        });
+        }
+      );
     }
   }, [companyId, projectId, dispatch]);
 
@@ -69,9 +72,7 @@ export default function ClientMemberSelector() {
 
   const handleRemove = (memberId) => {
     dispatch(removeMemberFromProject({ projectId, memberId }));
-    setAssigned((prev) =>
-      prev.filter((emp) => emp.memberId !== memberId)
-    );
+    setAssigned((prev) => prev.filter((emp) => emp.memberId !== memberId));
   };
 
   const getInitial = (name) => (name && name.length ? name[0] : "?");
@@ -83,22 +84,18 @@ export default function ClientMemberSelector() {
         open={open}
         onOpen={handleOpen}
         onClose={handleClose}
-
         // 기본 clear 아이콘 제거
         disableClearable
         clearIcon={null}
-
         options={options}
         loading={loadingOptions}
         getOptionLabel={(opt) => opt.memberName}
         isOptionEqualToValue={(opt, val) => opt.memberId === val.memberId}
         value={assigned}
         onChange={handleChange}
-
         // ★ 입력창값 제어
         inputValue={inputValue}
         onInputChange={(_e, newInput) => setInputValue(newInput)}
-
         renderOption={(props, option, { selected }) => (
           <Box
             component="li"
@@ -108,9 +105,7 @@ export default function ClientMemberSelector() {
             <Avatar sx={{ width: 30, height: 30, mr: 1 }}>
               {getInitial(option.memberName)}
             </Avatar>
-            <Typography sx={{ flexGrow: 1 }}>
-              {option.memberName}
-            </Typography>
+            <Typography sx={{ flexGrow: 1 }}>{option.memberName}</Typography>
             {selected && (
               <Typography variant="caption" color="primary">
                 선택됨
@@ -119,7 +114,6 @@ export default function ClientMemberSelector() {
           </Box>
         )}
         renderTags={() => null}
-
         renderInput={(params) => (
           <TextField
             {...params}
@@ -132,10 +126,7 @@ export default function ClientMemberSelector() {
                   {loadingOptions && <CircularProgress size={20} />}
                   {/* ★ 직접 넣은 X 버튼 */}
                   {inputValue && (
-                    <IconButton
-                      size="small"
-                      onClick={() => setInputValue("")}
-                    >
+                    <IconButton size="small" onClick={() => setInputValue("")}>
                       <CloseIcon fontSize="small" />
                     </IconButton>
                   )}

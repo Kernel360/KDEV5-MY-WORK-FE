@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Box, Paper, Stack, CircularProgress } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProjectById } from "@/features/project/projectSlice";
+import { fetchProjectById } from "@/features/project/slices/projectSlice";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
 import dayjs from "dayjs";

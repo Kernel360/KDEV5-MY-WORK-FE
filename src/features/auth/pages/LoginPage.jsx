@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootBox, LoginPaper, LoginButton } from "./LoginPage.styles";
 import { login } from "@/features/auth/authSlice";
-import { fetchProjects } from "@/features/project/projectSlice";
+import { fetchProjects } from "@/features/project/slices/projectSlice";
 
 export default function LoginPage() {
   const dispatch = useDispatch();

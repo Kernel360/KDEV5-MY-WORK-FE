@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Box } from "@mui/material";
-import Section from "../components/Section";
+import Section from "../../../../components/layouts/section/Section";
 import useProjectSections from "../hooks/useProjectSections";
 import TextInputDialog from "@/components/common/textInputDialog/TextInputDialog";
-import { createProjectStages } from "@/features/project/projectStepSlice";
+import { createProjectStages } from "@/features/project/slices/projectStepSlice";
 
 export default function ProjectManagement() {
   const dispatch = useDispatch();

@@ -7,15 +7,15 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchProjectById,
   deleteProject,
-} from "@/features/project/projectSlice";
+} from "@/features/project/slices/projectSlice";
 import ConfirmDialog from "@/components/common/confirmDialog/ConfirmDialog";
 import CustomButton from "@/components/common/customButton/CustomButton";
 import SummaryCard from "@/components/common/summaryCard/SummaryCard";
-import PostTable from "../post/components/PostTable";
+import PostTable from "../../post/components/PostTable";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import CreateRoundedIcon from "@mui/icons-material/CreateRounded";
 import dayjs from "dayjs";
-import ProgressOverview from "../checklist/pages/ProgressOverview";
+import ProgressOverview from "../../checklist/pages/ProgressOverview";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import ContentContainer from "@/components/layouts/contentContainer/ContentContainer";

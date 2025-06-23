@@ -9,7 +9,7 @@ import PostDetailDrawer from "../components/PostDetailDrawer";
 import CreatePostDrawer from "./CreatePostDrawer";
 import CustomButton from "@/components/common/customButton/CustomButton";
 import { fetchPosts, fetchPostById, createPost } from "../postSlice";
-import { fetchProjectStages } from "../../projectStepSlice";
+import { fetchProjectStages } from "../../slices/projectStepSlice";
 
 export default function PostTable() {
   const dispatch = useDispatch();
