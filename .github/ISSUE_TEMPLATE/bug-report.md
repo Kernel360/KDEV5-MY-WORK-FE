@@ -1,7 +1,7 @@
 ---
 name: 🐞 Bug Report
 about: 버그 발생 시 작성하는 이슈입니다.
-title: "[Bug] "
+title: "[bug] "
 ---
 
 # 🪜 1. Title
