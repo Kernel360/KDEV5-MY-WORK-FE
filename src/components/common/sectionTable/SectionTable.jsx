@@ -26,6 +26,16 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import LinearProgress from "@mui/material/LinearProgress";
 import { Stack, Typography } from "@mui/material";
 import CustomButton from "@/components/common/customButton/CustomButton";
+import FolderIcon from '@mui/icons-material/Folder';
+import BuildIcon from '@mui/icons-material/Build';
+import SearchIcon from '@mui/icons-material/Search';
+import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import DesignServicesIcon from '@mui/icons-material/DesignServices';
+import CodeIcon from '@mui/icons-material/Code';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
 
 export default function SectionTable({
   columns,
@@ -132,32 +142,115 @@ export default function SectionTable({
     <Box sx={sx}>
       {/* 단계(스탭) 카드형 UI - 번호/이름만, 연필 등 아이콘 없이, 가로 스크롤 */}
       {steps.length > 0 && onStepChange && (
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, overflowX: 'auto', gap: 2, pb: 1, justifyContent: 'center' }}>
-          {steps.map((step, idx) => (
-            <Box
-              key={step.projectStepId || step.title || idx}
-              onClick={() => onStepChange(step.projectStepId, step.title)}
-              sx={{
-                cursor: 'pointer',
-                minWidth: 140,
-                maxWidth: 180,
-                p: 2,
-                borderRadius: 2,
-                bgcolor: selectedStep === step.title ? '#e7f0fa' : '#fff',
-                border: selectedStep === step.title ? '2px solid #b5d3f3' : '1px solid #eee',
-                boxShadow: selectedStep === step.title ? '0 2px 8px 0 rgba(0,0,0,0.04)' : 'none',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                transition: 'all 0.2s',
-                mr: 1,
-              }}
-            >
-              <Box sx={{
-                width: 32, height: 32, borderRadius: '50%', bgcolor: '#222', color: '#fff',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 18, mb: 1
-              }}>{idx + 1}</Box>
-              <Box sx={{ fontWeight: 600, fontSize: 16, textAlign: 'center', wordBreak: 'keep-all' }}>{step.title}</Box>
-            </Box>
-          ))}
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, overflowX: 'auto', gap: 3, pb: 1, justifyContent: 'center' }}>
+          {/* 전체보기 카드 */}
+          {(() => {
+            const icons = [
+              <FolderIcon sx={{ fontSize: 32, color: '#1976d2' }} />,
+              <BuildIcon sx={{ fontSize: 32, color: '#6d4c41' }} />,
+              <SearchIcon sx={{ fontSize: 32, color: '#0288d1' }} />,
+              <RocketLaunchIcon sx={{ fontSize: 32, color: '#ff9800' }} />,
+              <CheckCircleIcon sx={{ fontSize: 32, color: '#43a047' }} />,
+              <AssignmentIcon sx={{ fontSize: 32, color: '#607d8b' }} />,
+              <TimelineIcon sx={{ fontSize: 32, color: '#8d6e63' }} />,
+              <DesignServicesIcon sx={{ fontSize: 32, color: '#512da8' }} />,
+              <CodeIcon sx={{ fontSize: 32, color: '#0097a7' }} />,
+              <DoneAllIcon sx={{ fontSize: 32, color: '#c62828' }} />,
+            ];
+            const total = steps.reduce((sum, s) => sum + (s.totalCount ?? 0), 0);
+            return (
+              <Box
+                key="all"
+                onClick={() => onStepChange(null, '전체')}
+                sx={{
+                  cursor: 'pointer',
+                  minWidth: 120,
+                  maxWidth: 140,
+                  p: 2.5,
+                  borderRadius: 3,
+                  bgcolor: selectedStep === '전체' ? '#e7f0fa' : '#fff',
+                  border: selectedStep === '전체' ? '2px solid #b5d3f3' : '1px solid #eee',
+                  boxShadow: selectedStep === '전체' ? '0 4px 16px 0 rgba(0,0,0,0.10)' : '0 2px 8px 0 rgba(0,0,0,0.04)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  transition: 'all 0.2s',
+                  mr: 1,
+                  m: 1.5,
+                  position: 'relative',
+                  '&:hover': {
+                    boxShadow: '0 6px 24px 0 rgba(60,60,60,0.18)',
+                    border: `1.5px solid #1976d2`,
+                  },
+                }}
+              >
+                {/* 좌측 상단 순서 없음 */}
+                {/* 중앙 아이콘 + 숫자/스탭명 row 정렬 */}
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', mt: 2, mb: 1 }}>
+                  <Box sx={{ mr: 1 }}>{icons[0]}</Box>
+                  <Box>
+                    {/* 토탈 카운트 */}
+                    <Box sx={{ fontWeight: 700, fontSize: 22, color: '#222', mb: 0.5 }}>{total}</Box>
+                    {/* 전체보기 텍스트 */}
+                    <Box sx={{ fontWeight: 600, fontSize: 15, textAlign: 'left', color: '#1976d2', wordBreak: 'keep-all', mb: 1 }}>전체보기</Box>
+                  </Box>
+                </Box>
+              </Box>
+            );
+          })()}
+          {/* 10개 아이콘 순환 배열 */}
+          {steps.map((step, idx) => {
+            const icons = [
+              <FolderIcon sx={{ fontSize: 32, color: '#1976d2' }} />,
+              <BuildIcon sx={{ fontSize: 32, color: '#6d4c41' }} />,
+              <SearchIcon sx={{ fontSize: 32, color: '#0288d1' }} />,
+              <RocketLaunchIcon sx={{ fontSize: 32, color: '#ff9800' }} />,
+              <CheckCircleIcon sx={{ fontSize: 32, color: '#43a047' }} />,
+              <AssignmentIcon sx={{ fontSize: 32, color: '#607d8b' }} />,
+              <TimelineIcon sx={{ fontSize: 32, color: '#8d6e63' }} />,
+              <DesignServicesIcon sx={{ fontSize: 32, color: '#512da8' }} />,
+              <CodeIcon sx={{ fontSize: 32, color: '#0097a7' }} />,
+              <DoneAllIcon sx={{ fontSize: 32, color: '#c62828' }} />,
+            ];
+            // step.totalCount가 없으면 0으로 표시
+            const count = step.totalCount ?? 0;
+            return (
+              <Box
+                key={step.projectStepId || step.title || idx}
+                onClick={() => onStepChange(step.projectStepId, step.title)}
+                sx={{
+                  cursor: 'pointer',
+                  minWidth: 120,
+                  maxWidth: 140,
+                  p: 2.5,
+                  borderRadius: 3,
+                  bgcolor: selectedStep === step.title ? '#e7f0fa' : '#fff',
+                  border: selectedStep === step.title ? '2px solid #b5d3f3' : '1px solid #eee',
+                  boxShadow: selectedStep === step.title ? '0 4px 16px 0 rgba(0,0,0,0.10)' : '0 2px 8px 0 rgba(0,0,0,0.04)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  transition: 'all 0.2s',
+                  mr: 1,
+                  m: 1.5,
+                  position: 'relative',
+                  '&:hover': {
+                    boxShadow: '0 6px 24px 0 rgba(60,60,60,0.18)',
+                    border: `1.5px solid #1976d2`,
+                  },
+                }}
+              >
+                {/* 좌측 상단 순서 */}
+                <Box sx={{ position: 'absolute', top: 10, left: 12, fontWeight: 700, color: '#bdbdbd', fontSize: 16 }}>{idx + 1}</Box>
+                {/* 중앙 아이콘 + 숫자/스탭명 row 정렬 */}
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', mt: 2, mb: 1 }}>
+                  <Box sx={{ mr: 1 }}>{icons[idx % icons.length]}</Box>
+                  <Box>
+                    {/* 토탈 카운트 */}
+                    <Box sx={{ fontWeight: 700, fontSize: 22, color: '#222', mb: 0.5 }}>{count}</Box>
+                    {/* 스탭 네임 */}
+                    <Box sx={{ fontWeight: 600, fontSize: 15, textAlign: 'left', color: '#1976d2', wordBreak: 'keep-all', mb: 1 }}>{step.title}</Box>
+                  </Box>
+                </Box>
+              </Box>
+            );
+          })}
         </Box>
       )}
 
@@ -207,7 +300,13 @@ export default function SectionTable({
 
       {/* 테이블 */}
       <TableContainer
-        sx={{ border: 0.5, borderColor: "grey.100", borderRadius: 2 }}
+        sx={{
+          border: 0.5,
+          borderColor: "grey.100",
+          borderRadius: 2,
+          maxHeight: '60vh',
+          overflowY: 'auto',
+        }}
       >
         <Table size="small">
           <TableHead>

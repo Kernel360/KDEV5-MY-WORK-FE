@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Box } from "@mui/material";
@@ -6,6 +6,7 @@ import Section from "../../../../components/layouts/section/Section";
 import useProjectSections from "../hooks/useProjectDetailSections";
 import TextInputDialog from "@/components/common/textInputDialog/TextInputDialog";
 import { createProjectStages } from "@/features/project/slices/projectStepSlice";
+import { getProjectStepsWithCount } from "@/api/projectStep";
 
 export default function ProjectManagement() {
   const dispatch = useDispatch();
@@ -17,6 +18,7 @@ export default function ProjectManagement() {
 
   const [isAddStepOpen, setIsAddStepOpen] = useState(false);
   const [newStepName, setNewStepName] = useState("");
+  const [stepsWithCount, setStepsWithCount] = useState([]);
 
   const openAddStep = () => setIsAddStepOpen(true);
 
@@ -50,6 +52,16 @@ export default function ProjectManagement() {
   const visibleSections = sections.filter((sec) =>
     sec.roles.includes(userRole)
   );
+
+  useEffect(() => {
+    if (projectId) {
+      getProjectStepsWithCount(projectId)
+        .then(res => {
+          setStepsWithCount(res.data.data.steps || []);
+        })
+        .catch(() => setStepsWithCount([]));
+    }
+  }, [projectId]);
 
   return (
     <Box
