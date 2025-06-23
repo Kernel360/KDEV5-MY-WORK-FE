@@ -4,6 +4,7 @@ import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
 import PersonIcon from "@mui/icons-material/Person";
 import AddBoxRoundedIcon from "@mui/icons-material/AddBoxRounded";
 import ListRoundedIcon from "@mui/icons-material/ListRounded";
+import HistoryIcon from "@mui/icons-material/History";
 import { ROLES } from "@/constants/roles";
 
 const navItems = [
@@ -86,6 +87,12 @@ const navItems = [
     icon: PersonIcon,
     path: "/members",
     roles: [ROLES.DEV_ADMIN, ROLES.CLIENT_ADMIN],
+  },
+  {
+    text: "로그 기록",
+    icon: HistoryIcon,
+    path: "/logs",
+    roles: [ROLES.SYSTEM_ADMIN, ROLES.DEV_ADMIN],
   },
 ];
 
