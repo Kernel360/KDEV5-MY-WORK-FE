@@ -246,33 +246,16 @@ export default function CustomTable({
                   {/* 액션 컬럼 */}
                   <TableCell key="__actions__" align="center">
                     {userRole === "ROLE_SYSTEM_ADMIN" && (
-                      <Stack
-                        direction="row"
-                        spacing={1}
-                        justifyContent="center"
+                      <CustomButton
+                        kind="ghost-danger"
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete?.(row);
+                        }}
                       >
-                        <CustomButton
-                          kind="ghost"
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onEdit?.(row);
-                          }}
-                        >
-                          수정
-                        </CustomButton>
-
-                        <CustomButton
-                          kind="ghost-danger"
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDelete?.(row);
-                          }}
-                        >
-                          삭제
-                        </CustomButton>
-                      </Stack>
+                        삭제
+                      </CustomButton>
                     )}
                   </TableCell>
                 </TableRow>
