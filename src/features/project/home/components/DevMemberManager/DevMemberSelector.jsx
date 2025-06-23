@@ -7,7 +7,7 @@ import {
   addMemberToProject,
   removeMemberFromProject,
   fetchCompanyMembersInProject,
-} from "@/features/project/projectMemberSlice";
+} from "@/features/project/slices/projectMemberSlice";
 import {
   Autocomplete,
   Box,
@@ -17,9 +17,9 @@ import {
   CircularProgress,
   IconButton,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";  // ← 추가
+import CloseIcon from "@mui/icons-material/Close"; // ← 추가
 import { useTheme as useMuiTheme } from "@mui/material/styles";
-import DevMemberList from "../DevMemberManager/DevMemberList";
+import DevMemberList from "./DevMemberList";
 
 export default function DevMemberSelector() {
   const theme = useMuiTheme();
@@ -36,12 +36,13 @@ export default function DevMemberSelector() {
 
   useEffect(() => {
     if (companyId && projectId) {
-      dispatch(fetchCompanyMembersInProject({ projectId, companyId }))
-        .then((action) => {
+      dispatch(fetchCompanyMembersInProject({ projectId, companyId })).then(
+        (action) => {
           if (action.payload?.members) {
             setAssigned(action.payload.members);
           }
-        });
+        }
+      );
     }
   }, [companyId, projectId, dispatch]);
 
@@ -69,9 +70,7 @@ export default function DevMemberSelector() {
 
   const handleRemove = (memberId) => {
     dispatch(removeMemberFromProject({ projectId, memberId }));
-    setAssigned((prev) =>
-      prev.filter((emp) => emp.memberId !== memberId)
-    );
+    setAssigned((prev) => prev.filter((emp) => emp.memberId !== memberId));
   };
 
   const getInitial = (name) => (name && name.length ? name[0] : "?");
@@ -82,22 +81,18 @@ export default function DevMemberSelector() {
         multiple
         open={open}
         onOpen={handleOpen}
-          disableClearable
- clearIcon={null}
+        disableClearable
+        clearIcon={null}
         onClose={handleClose}
         options={options}
         loading={loadingOptions}
         getOptionLabel={(opt) => opt.memberName}
-        isOptionEqualToValue={(opt, val) =>
-          opt.memberId === val.memberId
-        }
+        isOptionEqualToValue={(opt, val) => opt.memberId === val.memberId}
         value={assigned}
         onChange={handleChange}
-
         // ★ 추가된 부분: 입력창값 제어
         inputValue={inputValue}
         onInputChange={(_e, newInput) => setInputValue(newInput)}
-
         renderOption={(props, option, { selected }) => (
           <Box
             component="li"
@@ -107,9 +102,7 @@ export default function DevMemberSelector() {
             <Avatar sx={{ width: 30, height: 30, mr: 1 }}>
               {getInitial(option.memberName)}
             </Avatar>
-            <Typography sx={{ flexGrow: 1 }}>
-              {option.memberName}
-            </Typography>
+            <Typography sx={{ flexGrow: 1 }}>{option.memberName}</Typography>
             {selected && (
               <Typography variant="caption" color="primary">
                 선택됨
@@ -118,7 +111,6 @@ export default function DevMemberSelector() {
           </Box>
         )}
         renderTags={() => null}
-
         renderInput={(params) => (
           <TextField
             {...params}
@@ -131,10 +123,7 @@ export default function DevMemberSelector() {
                   {loadingOptions && <CircularProgress size={20} />}
                   {/* ★ X 버튼: inputValue가 있을 때만 보여줌 */}
                   {inputValue && (
-                    <IconButton
-                      size="small"
-                      onClick={() => setInputValue("")}
-                    >
+                    <IconButton size="small" onClick={() => setInputValue("")}>
                       <CloseIcon fontSize="small" />
                     </IconButton>
                   )}

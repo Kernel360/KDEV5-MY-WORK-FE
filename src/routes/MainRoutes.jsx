@@ -1,15 +1,15 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { Routes, Route, Navigate } from "react-router-dom";
-import ProjectPage from "@/features/project/pages/ProjectPage";
-import ProjectDetailPage from "@/features/project/pages/ProjectDetailPage";
-import ProjectFormPage from "@/features/project/pages/ProjectFormPage";
+import ProjectPage from "@/features/project/home/pages/ProjectPage";
+import ProjectDetailPage from "@/features/project/home/pages/ProjectDetailPage";
+import ProjectFormPage from "@/features/project/home/pages/ProjectFormPage";
 import MainLayout from "@/layouts/MainLayout";
 import LoginPage from "@/features/auth/pages/LoginPage";
 import MemberPage from "@/features/member/pages/MemberPage";
 import MemberFormPage from "@/features/member/pages/MemberFormPage";
 import MemberDetailPage from "@/features/member/pages/MemberDetailPage";
-import NoProjectsPage from "@/features/project/pages/NoProjectsPage";
+import NoProjectsPage from "@/features/project/home/pages/NoProjectsPage";
 import DashboardPage from "@/features/dashboard/pages/DashboardPage";
 import CompanyPage from "@/features/company/pages/CompanyPage";
 import CompanyFormPage from "@/features/company/pages/CompanyFormPage";
@@ -17,7 +17,7 @@ import CompanyDetailPage from "@/features/company/pages/CompanyDetailPage";
 import ProtectedRoute from "@/components/common/protectedRoute/ProtectedRoute";
 import ForbiddenPage from "@/components/common/errorPage/ForbiddenPage";
 import NotFoundPage from "@/components/common/errorPage/NotFoundPage";
-import ProjectOverviewPage from "@/features/project/pages/ProjectOverviewPage";
+import ProjectOverviewPage from "@/features/project/home/pages/ProjectOverviewPage";
 
 export default function MainRoutes() {
   const isAuthenticated = useSelector((state) =>

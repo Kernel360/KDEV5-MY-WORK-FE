@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
-import ProjectTable from "@/features/project/components/ProjectTable";
+import ProjectTable from "@/features/project/home/components/ProjectTable";
 import CustomButton from "@/components/common/customButton/CustomButton";
 import { useNavigate } from "react-router-dom";
 import { Add } from "@mui/icons-material";

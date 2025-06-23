@@ -5,7 +5,7 @@ import CustomTable from "@/components/common/customTable/CustomTable";
 import {
   fetchProjects,
   deleteProject, // 단건 삭제로 바꿔주세요!
-} from "@/features/project/projectSlice";
+} from "@/features/project/slices/projectSlice";
 import { Box } from "@mui/material";
 
 // 컬럼 정의

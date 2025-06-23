@@ -1,12 +1,12 @@
 // src/store/store.js
 import { configureStore } from "@reduxjs/toolkit";
-import projectReducer from "@/features/project/projectSlice";
+import projectReducer from "@/features/project/slices/projectSlice";
 import memberReducer from "@/features/member/memberSlice";
 import companyReducer from "@/features/company/companySlice";
 import authReducer from "@/features/auth/authSlice";
-import projectStepReducer from "@/features/project/projectStepSlice";
+import projectStepReducer from "@/features/project/slices/projectStepSlice";
 import postReducer from "@/features/project/post/postSlice";
-import projectMemberReducer from "@/features/project/projectMemberSlice";
+import projectMemberReducer from "@/features/project/slices/projectMemberSlice";
 import reviewReducer from "@/features/project/post/reviewSlice";
 import DashboardReducer from "@/features/dashboard/DashboardSlice";
 

@@ -5,7 +5,7 @@ import {
   fetchProjectById,
   createProject,
   updateProject,
-} from "@/features/project/projectSlice";
+} from "@/features/project/slices/projectSlice";
 import { fetchCompanyNamesByType } from "@/features/company/companySlice";
 import { Button, Stack } from "@mui/material";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
