@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchDashboardSummary,
   fetchNearDeadlineProjects,
+  fetchPopularProjects,
 } from "../DashboardSlice";
 
 export default function DashboardPage() {
@@ -24,6 +25,7 @@ export default function DashboardPage() {
     nearDeadline = [],
     nearDeadlineTotalCount = 0,
     loading = false,
+    popularProjects = [],
   } = dashboard;
 
   const safeSummary = summary || {
@@ -43,6 +45,10 @@ export default function DashboardPage() {
     dispatch(fetchNearDeadlineProjects({ page: duePage }));
   }, [dispatch, duePage]);
 
+  useEffect(() => {
+    dispatch(fetchPopularProjects());
+  }, [dispatch]);
+
   return (
     <PageWrapper>
       <PageHeader
@@ -56,17 +62,37 @@ export default function DashboardPage() {
         <InfoCard label="완료됨" value={safeSummary.completedCount} />
       </Box>
 
-      <SectionBox title="마감임박 프로젝트 (5일 이내)">
-        {nearDeadline.map((p) => (
-          <RowItem key={p.id} title={p.name} endAt={p.endAt} dday={p.dday} />
-        ))}
-        <Pagination
-          count={Math.ceil(nearDeadlineTotalCount / pageSize)}
-          page={duePage}
-          onChange={(_, val) => setDuePage(val)}
-          sx={{ mt: 2 }}
-        />
-      </SectionBox>
+      {/* 마감임박 + 인기많은 프로젝트 2단 컬럼 */}
+      <Box display="flex" justifyContent="space-between" mb={4} gap={2}>
+        <Box flex={1} mx={1}>
+          <SectionBox title="마감임박 프로젝트 (5일 이내)">
+            {nearDeadline.length === 0 ? (
+              <Typography color="text.secondary" align="center" sx={{ py: 4 }}>
+                마감임박 프로젝트가 없습니다.
+              </Typography>
+            ) : (
+              <>
+                {nearDeadline.map((p) => (
+                  <RowItem key={p.id} title={p.name} endAt={p.endAt} dday={p.dday} />
+                ))}
+                <Pagination
+                  count={Math.ceil(nearDeadlineTotalCount / pageSize)}
+                  page={duePage}
+                  onChange={(_, val) => setDuePage(val)}
+                  sx={{ mt: 2 }}
+                />
+              </>
+            )}
+          </SectionBox>
+        </Box>
+        <Box flex={1} mx={1}>
+          <SectionBox title="인기많은 프로젝트 TOP5">
+            {popularProjects.map((p, idx) => (
+              <PopularRowItem key={p.projectId} rank={idx + 1} title={p.projectName} />
+            ))}
+          </SectionBox>
+        </Box>
+      </Box>
     </PageWrapper>
   );
 }
@@ -130,6 +156,34 @@ function RowItem({ title, endAt, dday }) {
           color={dday <= 1 ? "error" : dday <= 3 ? "warning" : "default"}
           variant="outlined"
         />
+      </Stack>
+      <Divider sx={{ mb: 1 }} />
+    </Box>
+  );
+}
+
+// 인기많은 프로젝트 RowItem
+function PopularRowItem({ rank, title }) {
+  return (
+    <Box>
+      <Stack direction="row" alignItems="center" gap={2} mb={1}>
+        <Box
+          sx={{
+            width: 32,
+            height: 32,
+            borderRadius: "50%",
+            bgcolor: rank === 1 ? "#FFD700" : rank === 2 ? "#C0C0C0" : rank === 3 ? "#CD7F32" : "#E0E0E0",
+            color: "#222",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontWeight: 700,
+            fontSize: 18,
+          }}
+        >
+          {rank}
+        </Box>
+        <Typography fontWeight={500}>{title}</Typography>
       </Stack>
       <Divider sx={{ mb: 1 }} />
     </Box>
