@@ -199,14 +199,6 @@ const projectSlice = createSlice({
       })
       .addCase(updateProject.fulfilled, (state, action) => {
         state.loading = false;
-        // 수정된 프로젝트를 목록에서 찾아 업데이트
-        const index = state.list.findIndex(
-          (project) => project.id === action.payload.id
-        );
-        if (index !== -1) {
-          state.list[index] = action.payload;
-        }
-        state.current = action.payload; // 현재 선택된 프로젝트도 업데이트
       })
       .addCase(updateProject.rejected, (state, action) => {
         state.loading = false;

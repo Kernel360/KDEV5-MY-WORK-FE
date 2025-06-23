@@ -19,9 +19,9 @@ const StyledButton = styled(Button)(({ theme, kind }) => {
         backgroundColor: theme.palette.primary.dark,
       },
       "&.Mui-disabled": {
-        backgroundColor: theme.palette.primary.main,
-        color: theme.palette.primary.contrastText,
-        opacity: 0.5,
+        backgroundColor: "#eaeaea",
+        color: theme.palette.text.disabled,
+        opacity: 1,
       },
     },
     ghost: {
@@ -32,8 +32,10 @@ const StyledButton = styled(Button)(({ theme, kind }) => {
         backgroundColor: theme.palette.grey[100],
       },
       "&.Mui-disabled": {
-        color: theme.palette.action.disabled,
-        borderColor: theme.palette.action.disabledBackground,
+        color: theme.palette.text.disabled,
+        borderColor: "#d5d5d5",
+        backgroundColor: "#f9f9f9",
+        opacity: 1,
       },
     },
     danger: {
@@ -43,9 +45,9 @@ const StyledButton = styled(Button)(({ theme, kind }) => {
         backgroundColor: theme.palette.error.dark,
       },
       "&.Mui-disabled": {
-        backgroundColor: theme.palette.error.main,
+        backgroundColor: "#f0c8c8",
         color: "#fff",
-        opacity: 0.5,
+        opacity: 1,
       },
     },
     "ghost-danger": {
@@ -56,9 +58,10 @@ const StyledButton = styled(Button)(({ theme, kind }) => {
         backgroundColor: theme.palette.error.light,
       },
       "&.Mui-disabled": {
-        color: theme.palette.error.main,
-        borderColor: theme.palette.error.main,
-        opacity: 0.5,
+        color: "#d44c4c",
+        borderColor: "#f3bcbc",
+        backgroundColor: "#fdf3f3",
+        opacity: 1,
       },
     },
     text: {
@@ -70,7 +73,9 @@ const StyledButton = styled(Button)(({ theme, kind }) => {
         backgroundColor: theme.palette.grey[100],
       },
       "&.Mui-disabled": {
-        color: theme.palette.action.disabled,
+        color: theme.palette.text.disabled,
+        backgroundColor: "transparent",
+        opacity: 1,
       },
     },
   };
