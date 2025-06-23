@@ -1,4 +1,5 @@
-// src/features/project/progress/ProgressOverview.jsx
+// src/features/project/approval/pages/ProjectApprovalsPage.jsx
+
 import React, { useState } from "react";
 import {
   Box,
@@ -39,18 +40,16 @@ const dummyChecklists = [
   { task: "QA 완료", step: "검수", status: "승인" },
 ];
 
-export default function ProgressOverview() {
+export default function ProjectApprovalsPage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [selected, setSelected] = useState("전체");
 
-  // 단계 필터링
   const filteredTasks =
     selected === "전체"
       ? dummyChecklists
       : dummyChecklists.filter((task) => task.step === selected);
 
-  // 상태별 그룹
   const grouped = {
     대기: filteredTasks.filter((t) => t.status === "대기"),
     승인: filteredTasks.filter((t) => t.status === "승인"),

@@ -2,7 +2,9 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { Routes, Route, Navigate } from "react-router-dom";
 import ProjectPage from "@/features/project/home/pages/ProjectPage";
-import ProjectDetailPage from "@/features/project/home/pages/ProjectDetailPage";
+import ProjectLayout from "@/features/project/home/pages/ProjectLayout";
+import ProjectPostsPage from "@/features/project/post/pages/ProjectPostsPage";
+import ProjectApprovalsPage from "@/features/project/approval/pages/ProjectApprovalsPage";
 import ProjectFormPage from "@/features/project/home/pages/ProjectFormPage";
 import MainLayout from "@/layouts/MainLayout";
 import LoginPage from "@/features/auth/pages/LoginPage";
@@ -17,7 +19,8 @@ import CompanyDetailPage from "@/features/company/pages/CompanyDetailPage";
 import ProtectedRoute from "@/components/common/protectedRoute/ProtectedRoute";
 import ForbiddenPage from "@/components/common/errorPage/ForbiddenPage";
 import NotFoundPage from "@/components/common/errorPage/NotFoundPage";
-import ProjectOverviewPage from "@/features/project/home/pages/ProjectOverviewPage";
+import ProjectOverviewPage from "@/features/project/home/pages/ProjectDetailPage";
+import ProjectDetailPage from "@/features/project/home/pages/ProjectDetailPage";
 
 export default function MainRoutes() {
   const isAuthenticated = useSelector((state) =>
@@ -34,12 +37,11 @@ export default function MainRoutes() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/projects" element={<ProjectPage />} />
         <Route path="/no-projects" element={<NoProjectsPage />} />
-        <Route path="/projects/:id">
-          <Route path="posts" element={<ProjectDetailPage />} />
-          <Route path="progress" element={<ProjectDetailPage />} />
-          <Route path="detail" element={<ProjectOverviewPage />} />
-          <Route path="edit" element={<ProjectFormPage />} />
+        <Route path="/projects/:id" element={<ProjectLayout />}>
+          <Route path="posts" element={<ProjectPostsPage />} />
+          <Route path="approvals" element={<ProjectApprovalsPage />} />
         </Route>
+        <Route path="/projects/:id/detail" element={<ProjectDetailPage />} />
         <Route
           path="/projects/new"
           element={

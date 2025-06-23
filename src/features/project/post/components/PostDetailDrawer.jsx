@@ -1,4 +1,3 @@
-// src/components/common/postTable/PostDetailDrawer.jsx
 import React, { useEffect } from "react";
 import {
   Drawer,

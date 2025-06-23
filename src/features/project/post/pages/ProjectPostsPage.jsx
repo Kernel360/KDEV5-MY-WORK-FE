@@ -1,17 +1,14 @@
-// src/components/common/postTable/PostTable.jsx
-
 import React, { useState, useEffect } from "react";
-import { Box, Pagination } from "@mui/material";
+import { Box } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import SectionTable from "@/components/common/sectionTable/SectionTable";
 import PostDetailDrawer from "../components/PostDetailDrawer";
-import CreatePostDrawer from "./CreatePostDrawer";
-import CustomButton from "@/components/common/customButton/CustomButton";
+import CreatePostDrawer from "../components/CreatePostDrawer";
 import { fetchPosts, fetchPostById, createPost } from "../postSlice";
 import { fetchProjectStages } from "../../slices/projectStepSlice";
 
-export default function PostTable() {
+export default function ProjectPostsPage() {
   const dispatch = useDispatch();
   const { id: projectId } = useParams();
 
@@ -27,12 +24,10 @@ export default function PostTable() {
   const [searchText, setSearchText] = useState("");
   const [selectedPost, setSelectedPost] = useState(null);
 
-  // 1) 스텝 목록 로드
   useEffect(() => {
     if (projectId) dispatch(fetchProjectStages(projectId));
   }, [dispatch, projectId]);
 
-  // 2) 포스트 목록 로드 (필터/페이지 변경 시마다)
   useEffect(() => {
     dispatch(
       fetchPosts({
@@ -46,7 +41,6 @@ export default function PostTable() {
     );
   }, [dispatch, projectId, page, selectedStepId, searchKey, searchText]);
 
-  // 행 클릭 → 상세 조회
   const handleRowClick = (row) => {
     dispatch(fetchPostById(row.postId))
       .unwrap()
@@ -54,7 +48,6 @@ export default function PostTable() {
       .catch(console.error);
   };
 
-  // 컬럼 정의
   const columns = [
     {
       key: "title",
@@ -94,7 +87,6 @@ export default function PostTable() {
 
   return (
     <Box sx={{ width: "100%", mt: 2 }}>
-      {/* 테이블 */}
       <SectionTable
         columns={columns}
         rows={posts}
@@ -116,7 +108,7 @@ export default function PostTable() {
           onKeyChange: (newKey) => {
             setPage(1);
             setSearchKey(newKey);
-            if (!newKey) setSearchText(""); // 검색 조건 해제 시 검색어 초기화
+            if (!newKey) setSearchText("");
           },
           onChange: (newText) => {
             setPage(1);
@@ -129,14 +121,12 @@ export default function PostTable() {
         }}
       />
 
-      {/* 상세 드로어 */}
       <PostDetailDrawer
         open={Boolean(selectedPost)}
         post={selectedPost}
         onClose={() => setSelectedPost(null)}
       />
 
-      {/* 생성 드로어 */}
       <CreatePostDrawer
         open={isCreateOpen}
         onClose={() => setCreateOpen(false)}
@@ -145,9 +135,7 @@ export default function PostTable() {
             .unwrap()
             .then(() => {
               setCreateOpen(false);
-              // 1) 페이지 1 고정
               setPage(1);
-              // 2) 강제 새로고침: 새 글이 추가된 최신 목록 조회
               dispatch(
                 fetchPosts({
                   projectId,

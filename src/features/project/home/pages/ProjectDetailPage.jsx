@@ -1,57 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { Stack, Box, CircularProgress } from "@mui/material";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Box, Paper, Stack, CircularProgress } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProjectById } from "@/features/project/slices/projectSlice";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchProjectById,
-  deleteProject,
-} from "@/features/project/slices/projectSlice";
-import ConfirmDialog from "@/components/common/confirmDialog/ConfirmDialog";
-import CustomButton from "@/components/common/customButton/CustomButton";
-import SummaryCard from "@/components/common/summaryCard/SummaryCard";
-import PostTable from "../../post/components/PostTable";
-import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
-import CreateRoundedIcon from "@mui/icons-material/CreateRounded";
 import dayjs from "dayjs";
-import ProgressOverview from "../../checklist/pages/ProgressOverview";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import ContentContainer from "@/components/layouts/contentContainer/ContentContainer";
+import Section from "@/components/layouts/section/Section";
 
 export default function ProjectDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const dispatch = useDispatch();
-  const projectState = useSelector((state) => state.project) || {};
-  const { current: project, error, loading } = projectState;
-  const [confirmOpen, setConfirmOpen] = useState(false);
-
-  const statusMap = {
-    NOT_STARTED: { color: "neutral", label: "계획" },
-    IN_PROGRESS: { color: "info", label: "진행" },
-    PAUSED: { color: "warning", label: "중단" },
-    COMPLETED: { color: "success", label: "완료" },
-  };
-
-  const tabMap = {
-    posts: 0,
-    progress: 1,
-    history: 2,
-  };
-
-  const segments = location.pathname.split("/");
-  const currentTab = tabMap[segments[segments.length - 1]] ?? 0;
-  const [tab, setTab] = useState(currentTab);
-
-  const handleTabChange = (_, newIndex) => {
-    if (newIndex === null || newIndex === undefined) return;
-    setTab(newIndex);
-    const routeKeys = ["posts", "progress", "history"];
-    navigate(`/projects/${id}/${routeKeys[newIndex]}`);
-  };
+  const projectState = useSelector((state) => state.project);
+  const { current: project, loading, error } = projectState || {};
 
   useEffect(() => {
     dispatch(fetchProjectById(id));
@@ -63,140 +25,77 @@ export default function ProjectDetailPage() {
     }
   }, [loading, project, error, navigate]);
 
-  const handleDelete = () => {
-    dispatch(deleteProject({ id }))
-      .unwrap()
-      .then(() => {
-        navigate("/projects");
-      });
-    setConfirmOpen(false);
-  };
-
-  if (!project) {
+  if (loading || !project) {
     return (
       <PageWrapper>
-        <Box>
+        <Box display="flex" justifyContent="center" alignItems="center" mt={10}>
           <CircularProgress />
         </Box>
       </PageWrapper>
     );
   }
 
-  const handleClickDetail = () => {
-    navigate(`/projects/${id}/detail`); // 원하는 경로로 수정
-  };
-
   return (
     <PageWrapper>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          height: "100vh",
-          width: "100%",
-          maxWidth: "100%",
-          boxSizing: "border-box",
-          overflowX: "hidden",
-        }}
-      >
-        {/* Header */}
-        <Box sx={{ flexShrink: 0, width: "100%" }}>
-          <PageHeader
-            title={project.name}
-            subtitle={project.detail}
-            action={
-              <Stack direction="row" spacing={2}>
-                <ToggleButtonGroup
-                  value={tab}
-                  exclusive
-                  onChange={handleTabChange}
-                  size="small"
-                  color="primary"
-                >
-                  <ToggleButton value={0}>업무 관리</ToggleButton>
-                  <ToggleButton value={1}>결재 관리</ToggleButton>
-                  <ToggleButton value={2}>변경 이력</ToggleButton>
-                </ToggleButtonGroup>
-              </Stack>
-            }
-            noPaddingBottom
-          />
-        </Box>
-
-        {/* 삭제 다이얼로그 */}
-        <ConfirmDialog
-          open={confirmOpen}
-          title="프로젝트를 삭제하시겠습니까?"
-          description="삭제 후에는 복구할 수 없습니다."
-          cancelText="취소"
-          confirmText="삭제하기"
-          confirmColor="error"
-          onClose={() => setConfirmOpen(false)}
-          onConfirm={handleDelete}
-        />
-
-        {/* Summary */}
-        <Box sx={{ flexShrink: 0, width: "100%" }}>
-          <SummaryCard
-            schema={[
-              {
-                key: "step",
-                label: "상태",
-                type: "status",
-                colorMap: {
-                  NOT_STARTED: statusMap.NOT_STARTED.color,
-                  IN_PROGRESS: statusMap.IN_PROGRESS.color,
-                  PAUSED: statusMap.PAUSED.color,
-                  COMPLETED: statusMap.COMPLETED.color,
-                },
-                labelMap: {
-                  NOT_STARTED: statusMap.NOT_STARTED.label,
-                  IN_PROGRESS: statusMap.IN_PROGRESS.label,
-                  PAUSED: statusMap.PAUSED.label,
-                  COMPLETED: statusMap.COMPLETED.label,
-                },
-              },
-              { key: "period", label: "기간", type: "text" },
-              { key: "clientCompanyName", label: "고객사", type: "text" },
-              {
-                key: "clientContactPhoneNum",
-                label: "고객사 연락처",
-                type: "text",
-              },
-              { key: "devCompanyName", label: "개발사", type: "text" },
-              {
-                key: "devContactPhoneNum",
-                label: "개발사 연락처",
-                type: "text",
-              },
-            ]}
-            onClickDetail={handleClickDetail}
-            data={{
-              step: project.step,
-              period: `${dayjs(project.startAt).format("YYYY.MM.DD")} ~ ${dayjs(project.endAt).format("YYYY.MM.DD")}`,
-              clientCompanyName: project.clientCompanyName,
-              clientContactPhoneNum: project.clientContactPhoneNum,
-              devCompanyName: project.devCompanyName,
-              devContactPhoneNum: project.devContactPhoneNum,
-            }}
-            noMarginBottom
-          />
-        </Box>
-
-        {/* Content */}
-        <Box
+      <PageHeader
+        title={project.name}
+        subtitle={project.detail}
+        noPaddingBottom
+      />
+      <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
+        <Paper
           sx={{
-            flexGrow: 1,
-            display: "flex",
-            flexDirection: "column",
-            mx: 3,
-            minWidth: 0,
+            p: 4,
+            m: 3,
+            borderRadius: 2,
+            boxShadow: 2,
+            flex: 1,
+            overflowY: "auto",
           }}
         >
-          <ContentContainer>
-            {tab === 0 ? <PostTable /> : <ProgressOverview />}
-          </ContentContainer>
-        </Box>
+          <Stack spacing={4}>
+            {/* 1. 기본 정보 */}
+            <Section
+              index={1}
+              title="기본 정보"
+              tooltip="프로젝트명, 기간, 상태를 확인합니다."
+              items={[
+                {
+                  label: "프로젝트명",
+                  value: project.name,
+                  gridProps: { sm: 4 },
+                },
+                {
+                  label: "기간",
+                  value: `${dayjs(project.startAt).format("YYYY.MM.DD")} ~ ${dayjs(project.endAt).format("YYYY.MM.DD")}`,
+                  gridProps: { sm: 4 },
+                },
+              ]}
+            />
+
+            {/* 2. 고객사 정보 */}
+            <Section
+              index={2}
+              title="고객사 정보"
+              tooltip="고객사 관련 정보를 확인합니다."
+              items={[
+                { label: "회사명", value: project.clientCompanyName },
+                { label: "연락처", value: project.clientContactPhoneNum },
+              ]}
+            />
+
+            {/* 3. 개발사 정보 */}
+            <Section
+              index={3}
+              title="개발사 정보"
+              tooltip="개발사 관련 정보를 확인합니다."
+              items={[
+                { label: "회사명", value: project.devCompanyName },
+                { label: "연락처", value: project.devContactPhoneNum },
+              ]}
+            />
+          </Stack>
+        </Paper>
       </Box>
     </PageWrapper>
   );
