@@ -18,3 +18,12 @@ export function getNearDeadlineProjects(params) {
     params,
   });
 }
+
+/**
+ * 인기많은 프로젝트 TOP5 조회
+ * GET /api/dashboard/popular-projects
+ * 반환: { projects: [{ projectId, projectName }] }
+ */
+export function getPopularProjects() {
+  return api.get("/api/dashboard/popular-projects");
+}

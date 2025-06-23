@@ -32,6 +32,22 @@ export const fetchNearDeadlineProjects = createAsyncThunk(
   }
 );
 
+// 인기많은 프로젝트 TOP5 조회
+export const fetchPopularProjects = createAsyncThunk(
+  "dashboard/fetchPopularProjects",
+  async (_, thunkAPI) => {
+    try {
+      const response = await dashboardAPI.getPopularProjects();
+      const { projects } = response.data.data;
+      return projects;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data || "인기많은 프로젝트 목록 조회 실패"
+      );
+    }
+  }
+);
+
 const dashboardSlice = createSlice({
   name: "dashboard",
   initialState: {
@@ -44,6 +60,10 @@ const dashboardSlice = createSlice({
     nearDeadlineCurrentPage: 1,
     nearDeadlineLoading: false,
     nearDeadlineError: null,
+
+    popularProjects: [],
+    popularProjectsLoading: false,
+    popularProjectsError: null,
   },
   reducers: {
     clearDashboardState(state) {
@@ -54,6 +74,9 @@ const dashboardSlice = createSlice({
       state.nearDeadlineError = null;
       state.nearDeadlineTotalCount = 0;
       state.nearDeadlineCurrentPage = 1;
+
+      state.popularProjects = [];
+      state.popularProjectsError = null;
     },
   },
   extraReducers: (builder) => {
@@ -86,6 +109,20 @@ const dashboardSlice = createSlice({
       .addCase(fetchNearDeadlineProjects.rejected, (state, action) => {
         state.nearDeadlineLoading = false;
         state.nearDeadlineError = action.payload;
+      })
+
+      // 인기많은 프로젝트
+      .addCase(fetchPopularProjects.pending, (state) => {
+        state.popularProjectsLoading = true;
+        state.popularProjectsError = null;
+      })
+      .addCase(fetchPopularProjects.fulfilled, (state, action) => {
+        state.popularProjectsLoading = false;
+        state.popularProjects = action.payload;
+      })
+      .addCase(fetchPopularProjects.rejected, (state, action) => {
+        state.popularProjectsLoading = false;
+        state.popularProjectsError = action.payload;
       });
   },
 });
