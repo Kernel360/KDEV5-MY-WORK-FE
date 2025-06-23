@@ -16,6 +16,7 @@ import DashboardPage from "@/features/dashboard/pages/DashboardPage";
 import CompanyPage from "@/features/company/pages/CompanyPage";
 import CompanyFormPage from "@/features/company/pages/CompanyFormPage";
 import CompanyDetailPage from "@/features/company/pages/CompanyDetailPage";
+import LogsPage from "@/features/logs/LogsPage";
 import ProtectedRoute from "@/components/common/protectedRoute/ProtectedRoute";
 import ForbiddenPage from "@/components/common/errorPage/ForbiddenPage";
 import NotFoundPage from "@/components/common/errorPage/NotFoundPage";
@@ -108,6 +109,8 @@ export default function MainRoutes() {
         <Route path="/forbidden" element={<ForbiddenPage />} />
         <Route path="/not-found" element={<NotFoundPage />} />
         <Route path="*" element={<NotFoundPage />} />
+        
+        <Route path="/logs" element={<LogsPage />} />
       </Route>
       <Route path="/login" element={<LoginPage />} />
       <Route
