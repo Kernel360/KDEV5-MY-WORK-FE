@@ -1,4 +1,3 @@
-// src/components/common/postTable/CreatePostDrawer.jsx
 import React, { useState, useEffect } from "react";
 import {
   Drawer,

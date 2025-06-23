@@ -1,6 +1,5 @@
-// src/components/DevMemberSelector.jsx
 import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import {
   fetchProjectMemberList,
@@ -17,22 +16,26 @@ import {
   CircularProgress,
   IconButton,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close"; // ← 추가
+import CloseIcon from "@mui/icons-material/Close";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
-import DevMemberList from "./DevMemberList";
-
-export default function DevMemberSelector() {
+import CompanyMemberList from "./CompanyMemberList";
+/**
+ * @param {string} companyId
+ * @param {'고객사'|'개발사'} companyType
+ */
+export default function CompanyMemberSelector({
+  companyId,
+  companyType = "개발사",
+}) {
   const theme = useMuiTheme();
   const dispatch = useDispatch();
   const { id: projectId } = useParams();
-  const companyId = useSelector((state) => state.project.current.devCompanyId);
 
-  const options = useSelector((state) => state.projectMember.list ?? []);
-  const loadingOptions = useSelector((state) => state.projectMember.loading);
-
+  const [options, setOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [assigned, setAssigned] = useState([]);
-  // ★ 입력창에 쓰여진 텍스트만 관리할 state
   const [inputValue, setInputValue] = useState("");
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (companyId && projectId) {
@@ -46,15 +49,18 @@ export default function DevMemberSelector() {
     }
   }, [companyId, projectId, dispatch]);
 
-  const [open, setOpen] = useState(false);
   const handleOpen = () => {
     setOpen(true);
     if (companyId && projectId) {
-      dispatch(fetchProjectMemberList({ companyId, projectId }));
+      setLoading(true);
+      dispatch(fetchProjectMemberList({ companyId, projectId }))
+        .then((action) => {
+          if (Array.isArray(action.payload)) {
+            setOptions(action.payload);
+          }
+        })
+        .finally(() => setLoading(false));
     }
-  };
-  const handleClose = () => {
-    setOpen(false);
   };
 
   const handleChange = (_e, newValue) => {
@@ -83,16 +89,15 @@ export default function DevMemberSelector() {
         onOpen={handleOpen}
         disableClearable
         clearIcon={null}
-        onClose={handleClose}
+        onClose={() => setOpen(false)}
         options={options}
-        loading={loadingOptions}
+        loading={loading}
         getOptionLabel={(opt) => opt.memberName}
         isOptionEqualToValue={(opt, val) => opt.memberId === val.memberId}
         value={assigned}
         onChange={handleChange}
-        // ★ 추가된 부분: 입력창값 제어
         inputValue={inputValue}
-        onInputChange={(_e, newInput) => setInputValue(newInput)}
+        onInputChange={(_, newInput) => setInputValue(newInput)}
         renderOption={(props, option, { selected }) => (
           <Box
             component="li"
@@ -114,14 +119,13 @@ export default function DevMemberSelector() {
         renderInput={(params) => (
           <TextField
             {...params}
-            placeholder="직원 이름을 검색하세요"
+            placeholder={`${companyType} 직원 이름 검색`}
             size="small"
             InputProps={{
               ...params.InputProps,
               endAdornment: (
                 <>
-                  {loadingOptions && <CircularProgress size={20} />}
-                  {/* ★ X 버튼: inputValue가 있을 때만 보여줌 */}
+                  {loading && <CircularProgress size={20} />}
                   {inputValue && (
                     <IconButton size="small" onClick={() => setInputValue("")}>
                       <CloseIcon fontSize="small" />
@@ -142,7 +146,7 @@ export default function DevMemberSelector() {
       />
 
       <Box sx={{ mt: 2 }}>
-        <DevMemberList
+        <CompanyMemberList
           selectedEmployees={assigned.map((emp) => ({
             id: emp.memberId,
             name: emp.memberName,

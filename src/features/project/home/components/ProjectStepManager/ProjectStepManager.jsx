@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { Box } from "@mui/material";
@@ -15,83 +15,107 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import StepCard from "./StepCard";
-import StepNameEditDialog from "../../../management/components/StepNameEditDialog";
+import StepNameEditDialog from "../StepNameEditDialog";
 import {
   fetchProjectStages,
   updateProjectStages,
 } from "@/features/project/slices/projectStepSlice";
 
-export default function ProjectStepManager({ projectId }) {
+export default function ProjectStepManager({ onEditedChange, onSaveChange }) {
   const dispatch = useDispatch();
+  const { id: projectId } = useParams();
   const steps = useSelector((state) => state.projectStep.items) || [];
-  const { id } = useParams();
 
   const [orderedSteps, setOrderedSteps] = useState([]);
+  const [originalSteps, setOriginalSteps] = useState([]);
   const [editingStep, setEditingStep] = useState({
     projectStepId: null,
     title: "",
   });
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  // 1) 프로젝트 단계 불러오기
   useEffect(() => {
-    if (id) dispatch(fetchProjectStages(id));
-  }, [dispatch, id]);
+    if (projectId) dispatch(fetchProjectStages(projectId));
+  }, [dispatch, projectId]);
 
-  // 2) Redux 단계를 local state로 정렬 복사
   useEffect(() => {
     const normalized = steps.map((s) => ({
       ...s,
       orderNumber: s.orderNumber ?? s.orderNum,
     }));
-
-    setOrderedSteps(normalized.sort((a, b) => a.orderNumber - b.orderNumber));
+    const sorted = normalized.sort((a, b) => a.orderNumber - b.orderNumber);
+    setOrderedSteps(sorted);
+    setOriginalSteps(sorted);
   }, [steps]);
 
-  // 3) 드래그 앤 드롭 핸들러
-  const sensors = useSensors(useSensor(PointerSensor));
-  const handleDragEnd = (event) => {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
+  const isStepEdited = useMemo(() => {
+    const serialize = (arr) =>
+      arr.map(
+        ({ projectStepId, title, orderNumber }) =>
+          `${projectStepId}-${title}-${orderNumber}`
+      );
+    return (
+      JSON.stringify(serialize(originalSteps)) !==
+      JSON.stringify(serialize(orderedSteps))
+    );
+  }, [originalSteps, orderedSteps]);
 
+  useEffect(() => {
+    if (typeof onEditedChange === "function") {
+      onEditedChange(isStepEdited);
+    }
+
+    if (typeof onSaveChange === "function") {
+      onSaveChange(() => async () => {
+        const payload = orderedSteps.map(
+          ({ projectStepId, title, orderNumber }) => ({
+            projectStepId,
+            title,
+            orderNumber,
+          })
+        );
+        await dispatch(
+          updateProjectStages({
+            projectId,
+            projectStepUpdateWebRequests: payload,
+          })
+        );
+        setOriginalSteps(orderedSteps);
+      });
+    }
+  }, [
+    isStepEdited,
+    orderedSteps,
+    dispatch,
+    projectId,
+    onEditedChange,
+    onSaveChange,
+  ]);
+
+  const sensors = useSensors(useSensor(PointerSensor));
+  const handleDragEnd = ({ active, over }) => {
+    if (!over || active.id === over.id) return;
     const oldIdx = orderedSteps.findIndex((s) => s.projectStepId === active.id);
     const newIdx = orderedSteps.findIndex((s) => s.projectStepId === over.id);
-    // 1-based index 보장하며 재배치
     const newList = arrayMove(orderedSteps, oldIdx, newIdx).map((s, idx) => ({
       ...s,
-      orderNumber: idx + 1, // 1부터 시작
+      orderNumber: idx + 1,
     }));
-    // 즉시 UI 반영
     setOrderedSteps(newList);
-
-    // API가 기대하는 payload
-    const payloadList = newList.map(
-      ({ projectStepId, title, orderNumber }) => ({
-        projectStepId,
-        title,
-        orderNumber,
-      })
-    );
-    dispatch(
-      updateProjectStages({
-        projectId: id,
-        projectStepUpdateWebRequests: payloadList,
-      })
-    );
   };
 
-  // Edit 아이콘 클릭 -> 다이얼로그 열기
   const handleEditStepClick = (stepId) => {
     const step = orderedSteps.find((s) => s.projectStepId === stepId);
-    if (!step) return;
-    setEditingStep({ projectStepId: stepId, title: step.title });
-    setIsEditDialogOpen(true);
+    if (step) {
+      setEditingStep({ projectStepId: stepId, title: step.title });
+      setIsEditDialogOpen(true);
+    }
   };
+
   const handleDialogClose = () => setIsEditDialogOpen(false);
   const handleEditTitleChange = (e) =>
-    setEditingStep((p) => ({ ...p, title: e.target.value }));
+    setEditingStep((prev) => ({ ...prev, title: e.target.value }));
 
-  // 다이얼로그에서 “변경” 누르면
   const handleDialogConfirm = () => {
     const updated = orderedSteps.map((s, idx) => ({
       ...s,
@@ -102,17 +126,6 @@ export default function ProjectStepManager({ projectId }) {
       orderNumber: idx + 1,
     }));
     setOrderedSteps(updated);
-    const payload = updated.map(({ projectStepId, title, orderNumber }) => ({
-      projectStepId,
-      title,
-      orderNumber,
-    }));
-    dispatch(
-      updateProjectStages({
-        projectId: id,
-        projectStepUpdateWebRequests: payload,
-      })
-    );
     setIsEditDialogOpen(false);
   };
 
@@ -128,14 +141,13 @@ export default function ProjectStepManager({ projectId }) {
           strategy={horizontalListSortingStrategy}
         >
           <Box
-            component="div"
             sx={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(160px, 180px))",
+              display: "flex",
+              flexWrap: "wrap",
               gap: 1,
               py: 1,
-              overflowX: "auto",
-              justifyContent: "start",
+              alignItems: "flex-start",
+              overflow: "visible",
             }}
           >
             {orderedSteps.map((s) => (
@@ -150,6 +162,7 @@ export default function ProjectStepManager({ projectId }) {
           </Box>
         </SortableContext>
       </DndContext>
+
       <StepNameEditDialog
         open={isEditDialogOpen}
         value={editingStep.title}

@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Box } from "@mui/material";
 import Section from "../../../../components/layouts/section/Section";
-import useProjectSections from "../hooks/useProjectSections";
+import useProjectSections from "../hooks/useProjectDetailSections";
 import TextInputDialog from "@/components/common/textInputDialog/TextInputDialog";
 import { createProjectStages } from "@/features/project/slices/projectStepSlice";
 
