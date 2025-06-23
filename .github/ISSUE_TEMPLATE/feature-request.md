@@ -1,7 +1,7 @@
 ---
 name: ✨ Feature Request
 about: 신규 기능 개발 시 작성하는 이슈입니다.
-title: "[Feature] "
+title: "[feat] "
 ---
 
 # 🪜 1. Title
