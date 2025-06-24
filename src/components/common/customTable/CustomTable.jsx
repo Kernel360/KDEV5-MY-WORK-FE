@@ -96,6 +96,7 @@ export default function CustomTable({
             (value === "true" ? true : value === "false" ? false : value)
         );
       }
+      ㅁ;
     }
     return result;
   }, [rows, searchKey, searchText, search, filter, secondaryFilter]);
@@ -272,7 +273,12 @@ export default function CustomTable({
 
             <TableBody>
               {sortedRows.map((row, idx) => (
-                <TableRow key={idx} hover onClick={() => onRowClick?.(row)}>
+                <TableRow
+                  key={idx}
+                  hover
+                  onClick={() => onRowClick?.(row)}
+                  sx={{ cursor: "pointer" }}
+                >
                   {columns.map((col) => (
                     <TableCell key={col.key}>
                       {renderCell(col, row[col.key], row, theme, companies)}
