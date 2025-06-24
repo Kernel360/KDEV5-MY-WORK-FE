@@ -11,6 +11,7 @@ import {
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
   fetchDashboardSummary,
   fetchNearDeadlineProjects,
@@ -72,6 +73,7 @@ export default function DashboardPage() {
                 {nearDeadline.map((p) => (
                   <RowItem
                     key={p.id}
+                    id={p.id}
                     title={p.name}
                     endAt={p.endAt}
                     dday={p.dday}
@@ -93,6 +95,7 @@ export default function DashboardPage() {
             {popularProjects.map((p, idx) => (
               <PopularRowItem
                 key={p.projectId}
+                id={p.projectId}
                 rank={idx + 1}
                 title={p.projectName}
               />
@@ -139,19 +142,34 @@ function SectionBox({ title, children }) {
         mb: 4,
         bgcolor: "background.paper",
         boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+        minHeight: 350,
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       <Typography variant="h6" color="text.primary" mb={2}>
         {title}
       </Typography>
-      {children}
+      <Box sx={{ flex: 1 }}>{children}</Box>
     </Box>
   );
 }
 
-function RowItem({ title, endAt, dday }) {
+function RowItem({ title, endAt, dday, id }) {
+  const navigate = useNavigate();
+
   return (
-    <Box>
+    <Box
+      onClick={() => navigate(`/projects/${id}/posts`)}
+      sx={{
+        cursor: "pointer",
+        "&:hover": {
+          bgcolor: "grey.100",
+        },
+        borderRadius: 1,
+        p: 1,
+      }}
+    >
       <Stack
         direction="row"
         justifyContent="space-between"
@@ -193,35 +211,47 @@ function RowItem({ title, endAt, dday }) {
   );
 }
 
-function PopularRowItem({ rank, title }) {
+function PopularRowItem({ rank, title, id }) {
+  const navigate = useNavigate();
+
   const getColor = (rank) => {
     switch (rank) {
       case 1:
-        return "#fce7e7"; // error.bg
+        return "#fce7e7";
       case 2:
-        return "#fff3e0"; // warning.bg
+        return "#fff3e0";
       case 3:
-        return "#e5f6ee"; // success.bg
+        return "#e5f6ee";
       default:
-        return "#f5f5f5"; // neutral.bg
+        return "#f5f5f5";
     }
   };
 
   const getTextColor = (rank) => {
     switch (rank) {
       case 1:
-        return "#d44c4c"; // error.main
+        return "#d44c4c";
       case 2:
-        return "#f1a545"; // warning.main
+        return "#f1a545";
       case 3:
-        return "#3ba272"; // success.main
+        return "#3ba272";
       default:
-        return "#4a4a4a"; // neutral.main
+        return "#4a4a4a";
     }
   };
 
   return (
-    <Box>
+    <Box
+      onClick={() => navigate(`/projects/${id}/posts`)}
+      sx={{
+        cursor: "pointer",
+        borderRadius: 1,
+        p: 1,
+        "&:hover": {
+          bgcolor: "grey.100",
+        },
+      }}
+    >
       <Stack direction="row" alignItems="center" gap={1} mb={1.5}>
         <Box
           sx={{
