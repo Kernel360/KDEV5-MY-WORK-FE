@@ -10,6 +10,7 @@ import projectMemberReducer from "@/features/project/slices/projectMemberSlice";
 import reviewReducer from "@/features/project/post/reviewSlice";
 import DashboardReducer from "@/features/dashboard/DashboardSlice";
 import logsReducer from "@/features/logs/logsSlice";
+import checklistReducer from "@/features/project/approval/checklistSlice";
 
 const preloadedAuth = (() => {
   try {
@@ -49,6 +50,7 @@ export const store = configureStore({
     review: reviewReducer,
     dashboard: DashboardReducer,
     logs: logsReducer,
+    checklist: checklistReducer,
   },
   preloadedState: {
     auth: preloadedAuth,
