@@ -1,4 +1,3 @@
-// src/components/common/sectionTable/SectionTable.jsx
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   Table,
@@ -19,14 +18,16 @@ import {
   MenuItem,
   TextField,
   Avatar,
+  Button,
+  Link,
+  Checkbox,
+  Stack,
+  Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import LinearProgress from "@mui/material/LinearProgress";
-import { Stack, Typography } from "@mui/material";
 import CustomButton from "@/components/common/customButton/CustomButton";
-import { getStepIconByTitle } from "@/utils/stepIconUtils";
+import StepCardList from "@/components/common/stepCardList/StepCardList";
 
 export default function SectionTable({
   columns,
@@ -41,37 +42,7 @@ export default function SectionTable({
   sx,
 }) {
   const theme = useTheme();
-  const scrollRef = useRef(null);
-
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
-  const [canScrollPrev, setCanScrollPrev] = useState(false);
-  const [canScrollNext, setCanScrollNext] = useState(false);
-
-  // 스크롤버튼 활성화 상태
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const update = () => {
-      setCanScrollPrev(el.scrollLeft > 0);
-      setCanScrollNext(el.scrollLeft + el.clientWidth < el.scrollWidth);
-    };
-    update();
-    el.addEventListener("scroll", update);
-    window.addEventListener("resize", update);
-    return () => {
-      el.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-    };
-  }, [steps]);
-
-  const handlePrev = () => {
-    const el = scrollRef.current;
-    if (el) el.scrollBy({ left: -el.clientWidth * 0.8, behavior: "smooth" });
-  };
-  const handleNext = () => {
-    const el = scrollRef.current;
-    if (el) el.scrollBy({ left: el.clientWidth * 0.8, behavior: "smooth" });
-  };
 
   const handleSort = (key) => {
     setSortConfig((prev) => ({
@@ -80,7 +51,6 @@ export default function SectionTable({
     }));
   };
 
-  // 정렬된 행 목록
   const sortedRows = useMemo(() => {
     if (!sortConfig.key) return rows;
     return [...rows].sort((a, b) => {
@@ -98,31 +68,22 @@ export default function SectionTable({
     });
   }, [rows, sortConfig]);
 
-  // 단계 & 검색 필터 적용
   const filteredRows = useMemo(() => {
     let result = sortedRows;
-
     if (selectedStep && selectedStep !== "전체") {
-      // row.projectStepTitle 필드로 비교
       result = result.filter((row) => row.projectStepTitle === selectedStep);
     }
-
-    // 검색 필터
     if (search?.key) {
       const kw = search.value?.toLowerCase();
       result = result.filter((row) => {
         let cell = row[search.key];
         if (cell && typeof cell === "object") {
-          if ("name" in cell) {
-            cell = cell.name;
-          } else {
-            cell = JSON.stringify(cell);
-          }
+          if ("name" in cell) cell = cell.name;
+          else cell = JSON.stringify(cell);
         }
         return cell?.toString().toLowerCase().includes(kw);
       });
     }
-
     return result;
   }, [sortedRows, selectedStep, search]);
 
@@ -131,140 +92,15 @@ export default function SectionTable({
 
   return (
     <Box sx={sx}>
-      {/* 단계(스탭) 카드형 UI - 번호/이름만, 연필 등 아이콘 없이, 가로 스크롤 */}
+      {/* ✅ StepCardList 적용 */}
       {steps.length > 0 && onStepChange && (
-        <Box
-          sx={{
-            position: "relative",
-            display: "flex",
-            alignItems: "center",
-            mb: 3,
-            overflow: "hidden", // 스크롤 아예 안보이게
-          }}
-        >
-          {/* 좌측 이동 버튼 */}
-          <IconButton
-            onClick={handlePrev}
-            disabled={!canScrollPrev}
-            sx={{
-              zIndex: 1,
-              mx: 1,
-              backgroundColor: theme.palette.background.paper,
-              border: `1px solid ${theme.palette.divider}`,
-              "&:hover": {
-                backgroundColor: theme.palette.grey[100],
-              },
-            }}
-          >
-            <ChevronLeftIcon />
-          </IconButton>
-
-          {/* 카드 리스트 */}
-          <Box
-            ref={scrollRef}
-            sx={{
-              display: "flex",
-              flexGrow: 1,
-              gap: 2,
-              scrollBehavior: "smooth",
-              overflowX: "scroll",
-              scrollbarWidth: "none", // Firefox
-              msOverflowStyle: "none", // IE/Edge
-              "&::-webkit-scrollbar": {
-                display: "none", // Chrome, Safari
-              },
-            }}
-          >
-            {[
-              {
-                title: "전체",
-                totalCount: steps.reduce(
-                  (sum, s) => sum + (s.totalCount ?? 0),
-                  0
-                ),
-                projectStepId: null,
-              },
-              ...steps,
-            ].map((step) => {
-              const selected = selectedStep === step.title;
-              const Icon = getStepIconByTitle(step.title);
-
-              return (
-                <Box
-                  key={step.projectStepId ?? "all"}
-                  onClick={() => onStepChange(step.projectStepId, step.title)}
-                  sx={{
-                    cursor: "pointer",
-                    width: 180,
-                    height: 90,
-                    px: 2,
-                    py: 1.5,
-                    borderRadius: 2,
-                    bgcolor: selected
-                      ? theme.palette.grey[100]
-                      : theme.palette.background.paper,
-                    border: `1px solid ${
-                      selected
-                        ? theme.palette.text.primary
-                        : theme.palette.divider
-                    }`,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 2,
-                    transition: "all 0.2s ease-in-out",
-                    flexShrink: 0,
-                    "&:hover": {
-                      bgcolor: theme.palette.background.default,
-                    },
-                  }}
-                >
-                  <Box sx={{ color: theme.palette.text.primary }}>
-                    <Icon fontSize="medium" />
-                  </Box>
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        fontWeight: theme.typography.fontWeightBold,
-                        color: theme.palette.text.primary,
-                      }}
-                    >
-                      {step.totalCount ?? 0}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: theme.palette.text.secondary,
-                      }}
-                    >
-                      {step.title}
-                    </Typography>
-                  </Box>
-                </Box>
-              );
-            })}
-          </Box>
-
-          {/* 우측 이동 버튼 */}
-          <IconButton
-            onClick={handleNext}
-            disabled={!canScrollNext}
-            sx={{
-              zIndex: 1,
-              mx: 1,
-              backgroundColor: theme.palette.background.paper,
-              border: `1px solid ${theme.palette.divider}`,
-              "&:hover": {
-                backgroundColor: theme.palette.grey[100],
-              },
-            }}
-          >
-            <ChevronRightIcon />
-          </IconButton>
-        </Box>
+        <StepCardList
+          steps={steps}
+          selectedStep={selectedStep}
+          onStepChange={onStepChange}
+        />
       )}
 
-      {/* 검색 조건 + 새 글 작성 버튼 한 줄 */}
       {search && (
         <Box
           sx={{
@@ -281,9 +117,7 @@ export default function SectionTable({
               <InputLabel>검색 조건</InputLabel>
               <Select
                 value={search.key}
-                onChange={(e) => {
-                  search.onKeyChange?.(e.target.value);
-                }}
+                onChange={(e) => search.onKeyChange?.(e.target.value)}
                 label="검색 조건"
               >
                 <MenuItem value="">선택</MenuItem>
@@ -321,7 +155,6 @@ export default function SectionTable({
         </Box>
       )}
 
-      {/* 테이블 */}
       <TableContainer
         sx={{
           border: 0.5,
@@ -385,7 +218,6 @@ export default function SectionTable({
         </Table>
       </TableContainer>
 
-      {/* 페이지네이션 */}
       {pagination && (
         <Box sx={{ display: "flex", justifyContent: "end", mt: 2 }}>
           <Pagination
@@ -400,7 +232,6 @@ export default function SectionTable({
   );
 }
 
-// Helper to render cell based on type
 function renderCell(col, value, row, theme) {
   switch (col.type) {
     case "checkbox":
@@ -420,9 +251,8 @@ function renderCell(col, value, row, theme) {
       );
     case "logo":
       const displayName = value?.startsWith("주식회사 ")
-        ? value.slice(5) // '주식회사 ' (공백 포함 5글자 잘라냄)
+        ? value.slice(5)
         : value;
-
       return value ? (
         <Stack direction="row" spacing={1} alignItems="center">
           <Avatar sx={{ width: 28, height: 28 }}>
@@ -495,13 +325,7 @@ function renderCell(col, value, row, theme) {
             <LinearProgress
               variant="determinate"
               value={value ?? 0}
-              sx={{
-                height: 8,
-                borderRadius: 1,
-                "& .MuiLinearProgress-bar": {
-                  bgcolor: theme.palette.primary.main,
-                },
-              }}
+              sx={{ height: 8, borderRadius: 1 }}
             />
           </Box>
           <Typography variant="caption">{value ?? 0}%</Typography>
