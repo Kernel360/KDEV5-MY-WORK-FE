@@ -34,16 +34,6 @@ export default function ProjectPage() {
         <PageHeader
           title="프로젝트"
           subtitle={`총 ${totalCount ?? 0}개의 프로젝트가 있습니다.`}
-          action={
-            userRole === "ROLE_SYSTEM_ADMIN" && (
-              <CustomButton
-                startIcon={<Add />}
-                onClick={() => navigate("/projects/new")}
-              >
-                프로젝트 생성
-              </CustomButton>
-            )
-          }
         />
         <Box sx={{ flex: 1, overflow: "hidden", mb: 0.3 }}>
           <ProjectTable />

@@ -25,14 +25,6 @@ export default function CompanyPage() {
         <PageHeader
           title="개발사 관리"
           subtitle={`총 ${totalCount ?? 0}개의 프로젝트가 있습니다.`}
-          action={
-            <CustomButton
-              startIcon={<Add />}
-              onClick={() => navigate("/companies/new")}
-            >
-              회사 생성
-            </CustomButton>
-          }
         />
         <Box sx={{ flex: 1, overflow: "hidden", mb: 3 }}>
           <CompanyTable />
