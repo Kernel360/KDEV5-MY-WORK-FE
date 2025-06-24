@@ -26,16 +26,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import LinearProgress from "@mui/material/LinearProgress";
 import { Stack, Typography } from "@mui/material";
 import CustomButton from "@/components/common/customButton/CustomButton";
-import FolderIcon from "@mui/icons-material/Folder";
-import BuildIcon from "@mui/icons-material/Build";
-import SearchIcon from "@mui/icons-material/Search";
-import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import TimelineIcon from "@mui/icons-material/Timeline";
-import DesignServicesIcon from "@mui/icons-material/DesignServices";
-import CodeIcon from "@mui/icons-material/Code";
-import DoneAllIcon from "@mui/icons-material/DoneAll";
+import { getStepIconByTitle } from "@/utils/stepIconUtils";
 
 export default function SectionTable({
   columns,
@@ -194,21 +185,9 @@ export default function SectionTable({
                 projectStepId: null,
               },
               ...steps,
-            ].map((step, idx) => {
+            ].map((step) => {
               const selected = selectedStep === step.title;
-              const iconList = [
-                <FolderIcon />,
-                <BuildIcon />,
-                <SearchIcon />,
-                <RocketLaunchIcon />,
-                <CheckCircleIcon />,
-                <AssignmentIcon />,
-                <TimelineIcon />,
-                <DesignServicesIcon />,
-                <CodeIcon />,
-                <DoneAllIcon />,
-              ];
-              const icon = iconList[idx % iconList.length];
+              const Icon = getStepIconByTitle(step.title);
 
               return (
                 <Box
@@ -240,7 +219,7 @@ export default function SectionTable({
                   }}
                 >
                   <Box sx={{ color: theme.palette.text.primary }}>
-                    {React.cloneElement(icon, { fontSize: "medium" })}
+                    <Icon fontSize="medium" />
                   </Box>
                   <Box sx={{ flexGrow: 1 }}>
                     <Typography
