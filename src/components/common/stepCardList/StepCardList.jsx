@@ -128,13 +128,13 @@ export default function StepCardList({
                     color: theme.palette.text.primary,
                   }}
                 >
-                  {step.totalCount ?? 0}
+                  {step.title}
                 </Typography>
                 <Typography
                   variant="body2"
                   sx={{ color: theme.palette.text.secondary }}
                 >
-                  {step.title}
+                  {step.totalCount ?? 0}
                 </Typography>
               </Box>
             </Box>
