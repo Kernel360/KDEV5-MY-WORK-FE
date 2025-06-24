@@ -143,96 +143,145 @@ export default function SectionTable({
       {/* 단계(스탭) 카드형 UI - 번호/이름만, 연필 등 아이콘 없이, 가로 스크롤 */}
       {steps.length > 0 && onStepChange && (
         <Box
-          ref={scrollRef}
           sx={{
+            position: "relative",
             display: "flex",
             alignItems: "center",
-            overflowX: "auto",
-            gap: 2,
-            pb: 2,
-            px: 1,
             mb: 3,
+            overflow: "hidden", // 스크롤 아예 안보이게
           }}
         >
-          {[
-            {
-              title: "전체",
-              totalCount: steps.reduce(
-                (sum, s) => sum + (s.totalCount ?? 0),
-                0
-              ),
-              projectStepId: null,
-            },
-            ...steps,
-          ].map((step, idx) => {
-            const selected = selectedStep === step.title;
-            const iconList = [
-              <FolderIcon />,
-              <BuildIcon />,
-              <SearchIcon />,
-              <RocketLaunchIcon />,
-              <CheckCircleIcon />,
-              <AssignmentIcon />,
-              <TimelineIcon />,
-              <DesignServicesIcon />,
-              <CodeIcon />,
-              <DoneAllIcon />,
-            ];
-            const icon = iconList[idx % iconList.length];
+          {/* 좌측 이동 버튼 */}
+          <IconButton
+            onClick={handlePrev}
+            disabled={!canScrollPrev}
+            sx={{
+              zIndex: 1,
+              mx: 1,
+              backgroundColor: theme.palette.background.paper,
+              border: `1px solid ${theme.palette.divider}`,
+              "&:hover": {
+                backgroundColor: theme.palette.grey[100],
+              },
+            }}
+          >
+            <ChevronLeftIcon />
+          </IconButton>
 
-            return (
-              <Box
-                key={step.projectStepId ?? "all"}
-                onClick={() => onStepChange(step.projectStepId, step.title)}
-                sx={{
-                  cursor: "pointer",
-                  width: 180,
-                  height: 90,
-                  px: 2,
-                  py: 1.5,
-                  borderRadius: 2,
-                  bgcolor: selected
-                    ? theme.palette.grey[100]
-                    : theme.palette.background.paper,
-                  border: `1px solid ${
-                    selected
-                      ? theme.palette.text.primary
-                      : theme.palette.divider
-                  }`,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                  transition: "all 0.2s ease-in-out",
-                  "&:hover": {
-                    bgcolor: theme.palette.background.default,
-                  },
-                }}
-              >
-                <Box sx={{ color: theme.palette.text.primary }}>
-                  {React.cloneElement(icon, { fontSize: "medium" })}
+          {/* 카드 리스트 */}
+          <Box
+            ref={scrollRef}
+            sx={{
+              display: "flex",
+              flexGrow: 1,
+              gap: 2,
+              scrollBehavior: "smooth",
+              overflowX: "scroll",
+              scrollbarWidth: "none", // Firefox
+              msOverflowStyle: "none", // IE/Edge
+              "&::-webkit-scrollbar": {
+                display: "none", // Chrome, Safari
+              },
+            }}
+          >
+            {[
+              {
+                title: "전체",
+                totalCount: steps.reduce(
+                  (sum, s) => sum + (s.totalCount ?? 0),
+                  0
+                ),
+                projectStepId: null,
+              },
+              ...steps,
+            ].map((step, idx) => {
+              const selected = selectedStep === step.title;
+              const iconList = [
+                <FolderIcon />,
+                <BuildIcon />,
+                <SearchIcon />,
+                <RocketLaunchIcon />,
+                <CheckCircleIcon />,
+                <AssignmentIcon />,
+                <TimelineIcon />,
+                <DesignServicesIcon />,
+                <CodeIcon />,
+                <DoneAllIcon />,
+              ];
+              const icon = iconList[idx % iconList.length];
+
+              return (
+                <Box
+                  key={step.projectStepId ?? "all"}
+                  onClick={() => onStepChange(step.projectStepId, step.title)}
+                  sx={{
+                    cursor: "pointer",
+                    width: 180,
+                    height: 90,
+                    px: 2,
+                    py: 1.5,
+                    borderRadius: 2,
+                    bgcolor: selected
+                      ? theme.palette.grey[100]
+                      : theme.palette.background.paper,
+                    border: `1px solid ${
+                      selected
+                        ? theme.palette.text.primary
+                        : theme.palette.divider
+                    }`,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                    transition: "all 0.2s ease-in-out",
+                    flexShrink: 0,
+                    "&:hover": {
+                      bgcolor: theme.palette.background.default,
+                    },
+                  }}
+                >
+                  <Box sx={{ color: theme.palette.text.primary }}>
+                    {React.cloneElement(icon, { fontSize: "medium" })}
+                  </Box>
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        fontWeight: theme.typography.fontWeightBold,
+                        color: theme.palette.text.primary,
+                      }}
+                    >
+                      {step.totalCount ?? 0}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: theme.palette.text.secondary,
+                      }}
+                    >
+                      {step.title}
+                    </Typography>
+                  </Box>
                 </Box>
-                <Box sx={{ flexGrow: 1 }}>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      fontWeight: theme.typography.fontWeightBold,
-                      color: theme.palette.text.primary,
-                    }}
-                  >
-                    {step.totalCount ?? 0}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: theme.palette.text.secondary,
-                    }}
-                  >
-                    {step.title}
-                  </Typography>
-                </Box>
-              </Box>
-            );
-          })}
+              );
+            })}
+          </Box>
+
+          {/* 우측 이동 버튼 */}
+          <IconButton
+            onClick={handleNext}
+            disabled={!canScrollNext}
+            sx={{
+              zIndex: 1,
+              mx: 1,
+              backgroundColor: theme.palette.background.paper,
+              border: `1px solid ${theme.palette.divider}`,
+              "&:hover": {
+                backgroundColor: theme.palette.grey[100],
+              },
+            }}
+          >
+            <ChevronRightIcon />
+          </IconButton>
         </Box>
       )}
 
