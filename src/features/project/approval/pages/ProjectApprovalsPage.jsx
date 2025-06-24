@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchChecklistProgress, fetchChecklistItems } from "../checklistSlice";
 import StepCardList from "@/components/common/stepCardList/StepCardList";
 import { useParams } from "react-router-dom";
+import ProjectApprovalDetailDrawer from "../components/ProjectApprovalDetailDrawer";
 
 export default function ProjectApprovalsPage() {
   const { id: projectId } = useParams();
@@ -191,46 +192,11 @@ export default function ProjectApprovalsPage() {
         ))}
       </Box>
 
-      {/* ✅ Drawer 영역 */}
-      <Drawer
-        anchor="right"
+      <ProjectApprovalDetailDrawer
         open={drawerOpen}
+        item={selectedItem}
         onClose={handleDrawerClose}
-        PaperProps={{
-          sx: {
-            width: isMobile ? "100%" : 400,
-            p: 3,
-            borderTopLeftRadius: 12,
-            borderBottomLeftRadius: 12,
-          },
-        }}
-      >
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6" fontWeight={700}>
-            {selectedItem?.checkListName}
-          </Typography>
-          <IconButton onClick={handleDrawerClose}>
-            <CloseIcon />
-          </IconButton>
-        </Box>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ mt: 1, mb: 2 }}
-        >
-          {selectedItem?.projectStepName} · {selectedItem?.createdAt}
-        </Typography>
-        <Typography
-          fontSize={14}
-          sx={{
-            whiteSpace: "pre-wrap",
-            lineHeight: 1.7,
-            color: theme.palette.text.primary,
-          }}
-        >
-          {selectedItem?.checkListContent}
-        </Typography>
-      </Drawer>
+      />
     </Box>
   );
 }
