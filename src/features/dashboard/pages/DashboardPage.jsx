@@ -52,10 +52,9 @@ export default function DashboardPage() {
   return (
     <PageWrapper>
       <PageHeader
-        title="대시보드"
-        subtitle="전체 프로젝트 진행 현황과 주요 데이터를 한 눈에 확인하세요."
+        title="프로젝트 현황 대시보드"
+        subtitle="전체 프로젝트의 진행 상태와 주요 데이터를 한눈에 확인하세요."
       />
-
       <Box display="flex" justifyContent="space-between" mb={3} gap={1} mx={2}>
         <InfoCard label="전체 프로젝트" value={safeSummary.totalCount} />
         <InfoCard label="진행중" value={safeSummary.inProgressCount} />
@@ -63,7 +62,7 @@ export default function DashboardPage() {
       </Box>
       <Box display="flex" justifyContent="space-between" mb={4} gap={3} mx={3}>
         <Box flex={1}>
-          <SectionBox title="마감임박 프로젝트 (5일 이내)">
+          <SectionBox title="마감 임박 프로젝트 (D-5 이내)">
             {nearDeadline.length === 0 ? (
               <Typography color="text.secondary" align="center" sx={{ py: 4 }}>
                 마감임박 프로젝트가 없습니다.
@@ -90,7 +89,7 @@ export default function DashboardPage() {
         </Box>
 
         <Box flex={1}>
-          <SectionBox title="인기많은 프로젝트 TOP 5">
+          <SectionBox title="게시글 활동이 활발한 프로젝트 TOP 5">
             {popularProjects.map((p, idx) => (
               <PopularRowItem
                 key={p.projectId}
@@ -164,7 +163,7 @@ function RowItem({ title, endAt, dday }) {
             {title}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            마감일: {dayjs(endAt).format("YYYY-MM-DD")}
+            종료 예정일: {dayjs(endAt).format("YYYY-MM-DD")}
           </Typography>
         </Box>
         <Chip
