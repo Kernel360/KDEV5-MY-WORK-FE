@@ -1,5 +1,3 @@
-// src/features/project/approval/pages/ProjectApprovalsPage.jsx
-
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -9,7 +7,11 @@ import {
   Paper,
   Card,
   CardContent,
+  Drawer,
+  IconButton,
+  Stack,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchChecklistProgress, fetchChecklistItems } from "../checklistSlice";
 import StepCardList from "@/components/common/stepCardList/StepCardList";
@@ -21,6 +23,8 @@ export default function ProjectApprovalsPage() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const dispatch = useDispatch();
   const [selected, setSelected] = useState("전체");
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const { progressList = [], checklistItems = [] } = useSelector(
     (state) => state.checklist
@@ -36,6 +40,16 @@ export default function ProjectApprovalsPage() {
     dispatch(
       fetchChecklistItems({ projectId, projectStepId: id ?? undefined })
     );
+  };
+
+  const handleCardClick = (item) => {
+    setSelectedItem(item);
+    setDrawerOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setDrawerOpen(false);
+    setSelectedItem(null);
   };
 
   const filteredTasks = Array.isArray(checklistItems)
@@ -56,14 +70,6 @@ export default function ProjectApprovalsPage() {
     승인: theme.palette.status.success,
     반려: theme.palette.status.error,
     "수정 요청": theme.palette.status.info,
-  };
-
-  const stepColorMap = {
-    기획: theme.palette.status.error.bg,
-    분석: theme.palette.status.info.bg,
-    설계: theme.palette.status.success.bg,
-    구현: theme.palette.status.warning.bg,
-    테스트: theme.palette.status.neutral.bg,
   };
 
   return (
@@ -99,7 +105,6 @@ export default function ProjectApprovalsPage() {
               minHeight: 300,
               bgcolor: theme.palette.background.paper,
               border: `1px solid ${theme.palette.divider}`,
-              overflow: "visible",
             }}
           >
             <Typography
@@ -130,7 +135,9 @@ export default function ProjectApprovalsPage() {
                   <Card
                     key={idx}
                     variant="outlined"
+                    onClick={() => handleCardClick(item)}
                     sx={{
+                      cursor: "pointer",
                       borderRadius: 3,
                       boxShadow: "none",
                       backgroundColor: statusColors[status].bg,
@@ -183,6 +190,47 @@ export default function ProjectApprovalsPage() {
           </Paper>
         ))}
       </Box>
+
+      {/* ✅ Drawer 영역 */}
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={handleDrawerClose}
+        PaperProps={{
+          sx: {
+            width: isMobile ? "100%" : 400,
+            p: 3,
+            borderTopLeftRadius: 12,
+            borderBottomLeftRadius: 12,
+          },
+        }}
+      >
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="h6" fontWeight={700}>
+            {selectedItem?.checkListName}
+          </Typography>
+          <IconButton onClick={handleDrawerClose}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mt: 1, mb: 2 }}
+        >
+          {selectedItem?.projectStepName} · {selectedItem?.createdAt}
+        </Typography>
+        <Typography
+          fontSize={14}
+          sx={{
+            whiteSpace: "pre-wrap",
+            lineHeight: 1.7,
+            color: theme.palette.text.primary,
+          }}
+        >
+          {selectedItem?.checkListContent}
+        </Typography>
+      </Drawer>
     </Box>
   );
 }
