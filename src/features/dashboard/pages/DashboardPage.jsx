@@ -56,15 +56,13 @@ export default function DashboardPage() {
         subtitle="전체 프로젝트 진행 현황과 주요 데이터를 한 눈에 확인하세요."
       />
 
-      <Box display="flex" justifyContent="space-between" mb={4}>
+      <Box display="flex" justifyContent="space-between" mb={3} gap={1} mx={2}>
         <InfoCard label="전체 프로젝트" value={safeSummary.totalCount} />
         <InfoCard label="진행중" value={safeSummary.inProgressCount} />
         <InfoCard label="완료됨" value={safeSummary.completedCount} />
       </Box>
-
-      {/* 마감임박 + 인기많은 프로젝트 2단 컬럼 */}
-      <Box display="flex" justifyContent="space-between" mb={4} gap={2}>
-        <Box flex={1} mx={1}>
+      <Box display="flex" justifyContent="space-between" mb={4} gap={3} mx={3}>
+        <Box flex={1}>
           <SectionBox title="마감임박 프로젝트 (5일 이내)">
             {nearDeadline.length === 0 ? (
               <Typography color="text.secondary" align="center" sx={{ py: 4 }}>
@@ -73,7 +71,12 @@ export default function DashboardPage() {
             ) : (
               <>
                 {nearDeadline.map((p) => (
-                  <RowItem key={p.id} title={p.name} endAt={p.endAt} dday={p.dday} />
+                  <RowItem
+                    key={p.id}
+                    title={p.name}
+                    endAt={p.endAt}
+                    dday={p.dday}
+                  />
                 ))}
                 <Pagination
                   count={Math.ceil(nearDeadlineTotalCount / pageSize)}
@@ -85,10 +88,15 @@ export default function DashboardPage() {
             )}
           </SectionBox>
         </Box>
-        <Box flex={1} mx={1}>
-          <SectionBox title="인기많은 프로젝트 TOP5">
+
+        <Box flex={1}>
+          <SectionBox title="인기많은 프로젝트 TOP 5">
             {popularProjects.map((p, idx) => (
-              <PopularRowItem key={p.projectId} rank={idx + 1} title={p.projectName} />
+              <PopularRowItem
+                key={p.projectId}
+                rank={idx + 1}
+                title={p.projectName}
+              />
             ))}
           </SectionBox>
         </Box>
@@ -101,18 +109,22 @@ function InfoCard({ label, value }) {
   return (
     <Box
       sx={{
-        border: "1px solid #E0E0E0",
+        border: "1px solid",
+        borderColor: "divider",
         borderRadius: 2,
         p: 3,
         flex: 1,
         mx: 1,
         bgcolor: "background.paper",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
       }}
     >
-      <Typography variant="subtitle2" color="text.secondary" mb={1}>
+      <Typography variant="body2" color="text.secondary" mb={1}>
         {label}
       </Typography>
-      <Typography variant="h4">{value}</Typography>
+      <Typography variant="h4" color="primary.main">
+        {value}
+      </Typography>
     </Box>
   );
 }
@@ -121,14 +133,16 @@ function SectionBox({ title, children }) {
   return (
     <Box
       sx={{
-        border: "1px solid #E0E0E0",
+        border: "1px solid",
+        borderColor: "divider",
         borderRadius: 2,
         p: 3,
         mb: 4,
         bgcolor: "background.paper",
+        boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
       }}
     >
-      <Typography variant="h6" mb={2}>
+      <Typography variant="h6" color="text.primary" mb={2}>
         {title}
       </Typography>
       {children}
@@ -143,10 +157,12 @@ function RowItem({ title, endAt, dday }) {
         direction="row"
         justifyContent="space-between"
         alignItems="center"
-        mb={1}
+        mb={1.5}
       >
         <Box>
-          <Typography fontWeight={500}>{title}</Typography>
+          <Typography fontWeight={500} color="text.primary">
+            {title}
+          </Typography>
           <Typography variant="body2" color="text.secondary">
             마감일: {dayjs(endAt).format("YYYY-MM-DD")}
           </Typography>
@@ -155,6 +171,22 @@ function RowItem({ title, endAt, dday }) {
           label={`D-${dday}`}
           color={dday <= 1 ? "error" : dday <= 3 ? "warning" : "default"}
           variant="outlined"
+          sx={{
+            borderRadius: 1,
+            fontWeight: 500,
+            bgcolor:
+              dday <= 1
+                ? "status.error.bg"
+                : dday <= 3
+                  ? "status.warning.bg"
+                  : "background.default",
+            color:
+              dday <= 1
+                ? "status.error.main"
+                : dday <= 3
+                  ? "status.warning.main"
+                  : "text.secondary",
+          }}
         />
       </Stack>
       <Divider sx={{ mb: 1 }} />
@@ -162,18 +194,43 @@ function RowItem({ title, endAt, dday }) {
   );
 }
 
-// 인기많은 프로젝트 RowItem
 function PopularRowItem({ rank, title }) {
+  const getColor = (rank) => {
+    switch (rank) {
+      case 1:
+        return "#fce7e7"; // error.bg
+      case 2:
+        return "#fff3e0"; // warning.bg
+      case 3:
+        return "#e5f6ee"; // success.bg
+      default:
+        return "#f5f5f5"; // neutral.bg
+    }
+  };
+
+  const getTextColor = (rank) => {
+    switch (rank) {
+      case 1:
+        return "#d44c4c"; // error.main
+      case 2:
+        return "#f1a545"; // warning.main
+      case 3:
+        return "#3ba272"; // success.main
+      default:
+        return "#4a4a4a"; // neutral.main
+    }
+  };
+
   return (
     <Box>
-      <Stack direction="row" alignItems="center" gap={2} mb={1}>
+      <Stack direction="row" alignItems="center" gap={1} mb={1.5}>
         <Box
           sx={{
             width: 32,
             height: 32,
             borderRadius: "50%",
-            bgcolor: rank === 1 ? "#FFD700" : rank === 2 ? "#C0C0C0" : rank === 3 ? "#CD7F32" : "#E0E0E0",
-            color: "#222",
+            bgcolor: getColor(rank),
+            color: getTextColor(rank),
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -183,7 +240,9 @@ function PopularRowItem({ rank, title }) {
         >
           {rank}
         </Box>
-        <Typography fontWeight={500}>{title}</Typography>
+        <Typography fontWeight={500} color="text.primary">
+          {title}
+        </Typography>
       </Stack>
       <Divider sx={{ mb: 1 }} />
     </Box>
