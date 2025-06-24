@@ -11,17 +11,6 @@ import { Box } from "@mui/material";
 // 컬럼 정의
 const columns = [
   { key: "name", label: "제목", type: "text", searchable: true },
-  {
-    key: "step",
-    label: "상태",
-    type: "status",
-    statusMap: {
-      NOT_STARTED: { color: "neutral", label: "계획" },
-      IN_PROGRESS: { color: "info", label: "진행" },
-      PAUSED: { color: "warning", label: "중단" },
-      COMPLETED: { color: "success", label: "완료" },
-    },
-  },
   { key: "startAt", label: "시작일", type: "date" },
   { key: "endAt", label: "종료일", type: "date" },
   { key: "clientCompanyId", label: "고객사", type: "company" },
