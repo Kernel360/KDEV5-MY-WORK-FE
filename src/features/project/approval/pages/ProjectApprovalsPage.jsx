@@ -74,7 +74,7 @@ export default function ProjectApprovalsPage() {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box>
       <StepCardList
         steps={progressList.map((step) => ({
           title: step.projectStepName,
@@ -194,7 +194,7 @@ export default function ProjectApprovalsPage() {
 
       <ProjectApprovalDetailDrawer
         open={drawerOpen}
-        item={selectedItem}
+        checkListId={selectedItem?.checkListId}
         onClose={handleDrawerClose}
       />
     </Box>
