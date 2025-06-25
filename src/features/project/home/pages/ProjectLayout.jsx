@@ -73,9 +73,9 @@ export default function ProjectLayout() {
   }
 
   const statusMap = {
-    NOT_STARTED: { color: "neutral", label: "계획" },
+    CONTRACT: { color: "neutral", label: "결제" },
     IN_PROGRESS: { color: "info", label: "진행" },
-    PAUSED: { color: "warning", label: "중단" },
+    PAYMENT: { color: "warning", label: "검수" },
     COMPLETED: { color: "success", label: "완료" },
   };
 

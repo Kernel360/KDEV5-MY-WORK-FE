@@ -22,6 +22,7 @@ export default function ProjectBasicInfoSectionContent({
   setPeriodStart,
   periodEnd,
   setPeriodEnd,
+  project,
 }) {
   return (
     <>
@@ -110,6 +111,18 @@ export default function ProjectBasicInfoSectionContent({
                   종료일
                 </Typography>
                 <Typography variant="body1">{periodEnd || "-"}</Typography>
+              </>
+            )}
+          </Grid>
+
+          <Grid item xs={12} sm={isEditable ? 12 : 6}>
+            {/* 읽기모드에서만 프로젝트 금액 노출 */}
+            {!isEditable && (
+              <>
+                <Typography variant="body2" color="text.secondary">
+                  프로젝트 금액(만원)
+                </Typography>
+                <Typography variant="body1">{project?.projectAmount ?? "-"}</Typography>
               </>
             )}
           </Grid>
