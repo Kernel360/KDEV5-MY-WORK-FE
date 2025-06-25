@@ -1,26 +1,73 @@
-import React, { useEffect } from "react";
+// ProjectApprovalDetailDrawer.jsx
+import React, { useEffect, useState } from "react";
 import {
   Drawer,
+  Paper,
+  useTheme,
+  useMediaQuery,
+  CircularProgress,
   Box,
   Typography,
-  IconButton,
   Stack,
-  Paper,
-  Chip,
-  Avatar,
-  CircularProgress,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
-import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
-import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getCheckListByIdThunk,
   approveCheckListThunk,
 } from "../checklistSlice";
-import { useTheme, useMediaQuery } from "@mui/material";
 import CustomButton from "@/components/common/customButton/CustomButton";
+import ApprovalDetailHeader from "./ApprovalDetailHeader";
+import ApprovalDetailContent from "./ApprovalDetailContent";
+import ApprovalActionInput from "./ApprovalActionInput";
+import ApprovalHistoryList from "./ApprovalHistoryList";
+
+const dummyHistories = [
+  {
+    historyId: "0197a35a-a736-739b-84bb-6563d1073f4d",
+    companyName: "E회사",
+    memberName: "최지우",
+    content: "최종 승인",
+    approval: "APPROVED",
+    createdAt: "2025-06-25 05:30",
+  },
+  {
+    historyId: "0197a35a-7e51-783b-8143-a1c99099598a",
+    companyName: "D회사",
+    memberName: "박민수",
+    content: "내용 수정",
+    approval: "UPDATE_REQUEST",
+    createdAt: "2025-06-25 04:30",
+  },
+  {
+    historyId: "0197a35a-65bb-762c-b54d-1f419c94ba7a",
+    companyName: "C회사",
+    memberName: "이영희",
+    content: "반려 처리",
+    approval: "REJECTED",
+    createdAt: "2025-06-25 03:30",
+  },
+  {
+    historyId: "0197a35a-4daa-7fde-b9cf-260213a9f8e1",
+    companyName: "B회사",
+    memberName: "김철수",
+    content: "승인 요청",
+    approval: "APPROVED",
+    createdAt: "2025-06-25 02:30",
+  },
+  {
+    historyId: "0197a35a-297b-7f7c-a262-cb26581f8c6d",
+    companyName: "A회사",
+    memberName: "홍길동",
+    content: "최초 등록",
+    approval: "PENDING",
+    createdAt: "2025-06-25 01:30",
+  },
+];
+
+const formattedHistories = dummyHistories.map((h) => ({
+  ...h,
+  message: `${h.companyName}의 ${h.memberName}님께서 ${h.content}하였습니다.`,
+}));
 
 export default function ProjectApprovalDetailDrawer({
   open,
@@ -32,6 +79,9 @@ export default function ProjectApprovalDetailDrawer({
   const dispatch = useDispatch();
   const { current: checkList, error } = useSelector((state) => state.checklist);
 
+  const [approvalType, setApprovalType] = useState(null);
+  const [reasonText, setReasonText] = useState("");
+
   useEffect(() => {
     if (open && checkListId) {
       dispatch(getCheckListByIdThunk(checkListId)).catch((err) =>
@@ -40,26 +90,16 @@ export default function ProjectApprovalDetailDrawer({
     }
   }, [open, checkListId, dispatch]);
 
-  const approvalMap = {
-    APPROVED: { label: "승인됨", color: "success" },
-    PENDING: { label: "대기 중", color: "warning" },
-    REJECTED: { label: "반려됨", color: "error" },
-    UPDATE_REQUEST: { label: "수정 요청", color: "info" },
-  };
-
-  const status = approvalMap[checkList?.approval] || {
-    label: checkList?.approval ?? "-",
-    color: "default",
-  };
-
-  const handleApprove = async (approvalType) => {
+  const handleConfirm = async () => {
     try {
       await dispatch(
         approveCheckListThunk({
-          checklistId: checkList.checkListId,
-          data: { approval: approvalType },
+          checklistId: checkListId,
+          data: { id: checkListId, approval: approvalType, reason: reasonText },
         })
       ).unwrap();
+      setReasonText("");
+      setApprovalType(null);
       onClose();
     } catch (err) {
       console.error("결재 처리 실패", err);
@@ -93,132 +133,22 @@ export default function ProjectApprovalDetailDrawer({
       >
         {checkList ? (
           <Stack spacing={4}>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-              }}
-            >
-              <Stack direction="row" spacing={2} alignItems="center">
-                <Avatar sx={{ width: 40, height: 40 }}>
-                  {checkList.companyName?.[0] || "?"}
-                </Avatar>
-                <Box>
-                  <Stack
-                    direction="row"
-                    spacing={2}
-                    alignItems="center"
-                    flexWrap="wrap"
-                  >
-                    <Stack direction="row" spacing={1} alignItems="center">
-                      <AccountCircleRoundedIcon
-                        sx={{ fontSize: 16, color: "text.secondary" }}
-                      />
-                      <Typography fontWeight={600}>
-                        {checkList.authorName}
-                      </Typography>
-                    </Stack>
-
-                    <Stack direction="row" spacing={1} alignItems="center">
-                      <BusinessRoundedIcon
-                        sx={{ fontSize: 16, color: "text.secondary" }}
-                      />
-                      <Typography variant="body2" color="text.secondary">
-                        {checkList.companyName}
-                      </Typography>
-                    </Stack>
-                  </Stack>
-
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    alignItems="center"
-                    mt={0.5}
-                  >
-                    <AccessTimeRoundedIcon
-                      sx={{ fontSize: 16, color: "text.secondary" }}
-                    />
-                    <Typography variant="caption" color="text.secondary">
-                      {checkList.createdAt}
-                    </Typography>
-                  </Stack>
-                </Box>
-              </Stack>
-
-              <Stack direction="row" spacing={1} alignItems="center">
-                <IconButton onClick={onClose}>
-                  <CloseIcon />
-                </IconButton>
-              </Stack>
-            </Box>
-
-            {/* 제목 */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Typography variant="h5" fontWeight={700}>
-                {checkList.title}
-              </Typography>
-              <Chip
-                label={status.label}
-                size="medium"
-                sx={{
-                  bgcolor: theme.palette.status?.[status.color]?.bg,
-                  color: theme.palette.status?.[status.color]?.main,
-                  fontWeight: 600,
-                  py: 0.5,
-                  px: 1.5,
+            <ApprovalDetailHeader checkList={checkList} onClose={onClose} />
+            <ApprovalDetailContent checkList={checkList} />
+            {["PENDING", "UPDATE_REQUEST"].includes(checkList.approval) && (
+              <ApprovalActionInput
+                approvalType={approvalType}
+                setApprovalType={setApprovalType}
+                reasonText={reasonText}
+                setReasonText={setReasonText}
+                onCancel={() => {
+                  setApprovalType(null);
+                  setReasonText("");
                 }}
+                onConfirm={handleConfirm}
               />
-            </Box>
-
-            {/* 본문 */}
-            <Box
-              sx={{
-                p: 2,
-                bgcolor: theme.palette.grey[50],
-                borderRadius: 2,
-              }}
-            >
-              <Typography
-                variant="body1"
-                sx={{ whiteSpace: "pre-wrap", lineHeight: 1.8 }}
-              >
-                {checkList.content}
-              </Typography>
-            </Box>
-
-            {/* 버튼 (PENDING 상태일 때만 표시) */}
-            {checkList.approval === "PENDING" && (
-              <Stack direction="row" spacing={1} justifyContent="flex-end">
-                <CustomButton
-                  kind="ghost-success"
-                  size="small"
-                  onClick={() => handleApprove("APPROVED")}
-                >
-                  승인
-                </CustomButton>
-                <CustomButton
-                  kind="ghost-danger"
-                  size="small"
-                  onClick={() => handleApprove("REJECTED")}
-                >
-                  반려
-                </CustomButton>
-                <CustomButton
-                  kind="ghost-info"
-                  size="small"
-                  onClick={() => handleApprove("UPDATE_REQUEST")}
-                >
-                  수정 요청
-                </CustomButton>
-              </Stack>
             )}
+            <ApprovalHistoryList histories={formattedHistories} />
           </Stack>
         ) : error ? (
           <Box sx={{ textAlign: "center", mt: 10 }}>
