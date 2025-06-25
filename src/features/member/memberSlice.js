@@ -89,6 +89,18 @@ export const fetchMemberProjects = createAsyncThunk(
   }
 );
 
+export const deleteMember = createAsyncThunk(
+  "member/deleteMember",
+  async ({ memberId }, thunkAPI) => {
+    try {
+      const response = await memberAPI.deleteMember({ memberId });
+      return { memberId, ...response.data.data };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data || "Error");
+    }
+  }
+);
+
 const memberSlice = createSlice({
   name: "member",
   initialState: {
@@ -186,6 +198,21 @@ const memberSlice = createSlice({
         state.loading = false;
       })
       .addCase(fetchMemberProjects.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(deleteMember.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteMember.fulfilled, (state, action) => {
+        state.list = state.list.filter((m) => m.id !== action.payload.memberId);
+        if (state.current?.id === action.payload.memberId) {
+          state.current = null;
+        }
+        state.loading = false;
+      })
+      .addCase(deleteMember.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
