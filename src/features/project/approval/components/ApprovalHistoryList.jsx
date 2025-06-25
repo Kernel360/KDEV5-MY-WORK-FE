@@ -14,7 +14,7 @@ export default function ApprovalHistoryList({ histories }) {
         return theme.palette.success.main;
       case "REJECTED":
         return theme.palette.error.main;
-      case "UPDATE_REQUEST":
+      case "REQUEST_CHANGES":
         return theme.palette.info.main;
       default:
         return theme.palette.text.secondary;

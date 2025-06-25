@@ -21,7 +21,7 @@ export default function ApprovalDetailHeader({ checkList, onClose }) {
     APPROVED: { label: "승인됨", color: "success" },
     PENDING: { label: "대기 중", color: "warning" },
     REJECTED: { label: "반려됨", color: "error" },
-    UPDATE_REQUEST: { label: "수정 요청", color: "info" },
+    REQUEST_CHANGES: { label: "수정 요청", color: "info" },
   };
 
   const status = approvalMap[checkList?.approval] || {
