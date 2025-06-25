@@ -1,17 +1,9 @@
 import CustomTable from "@/components/common/customTable/CustomTable";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchMembers } from "@/features/member/memberSlice";
+import { fetchMembers, deleteMember } from "../memberSlice";
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-
-const SEARCH_TYPES = [
-  { value: "name", label: "이름" },
-  { value: "email", label: "이메일" },
-  { value: "company", label: "회사" },
-  { value: "position", label: "직책" },
-  { value: "department", label: "부서" },
-  { value: "phoneNumber", label: "연락처" },
-];
+import ConfirmDialog from "@/components/common/confirmDialog/ConfirmDialog";
 
 const columns = [
   { key: "name", label: "이름", type: "avatar", searchable: true },
@@ -26,11 +18,19 @@ const columns = [
 export default function MemberTable() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { list: members, totalCount, status, error } = useSelector((state) => state.member);
+  const {
+    list: members,
+    totalCount,
+    status,
+    error,
+  } = useSelector((state) => state.member);
 
   const [page, setPage] = useState(1);
   const [keywordType, setKeywordType] = useState("");
   const [keyword, setKeyword] = useState("");
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState(null);
 
   const loadMembers = useCallback(() => {
     dispatch(
@@ -46,7 +46,19 @@ export default function MemberTable() {
     loadMembers();
   }, [loadMembers]);
 
-  const drawMember = (members || []).map((p, idx) => ({
+  const handleDelete = async () => {
+    try {
+      console.log("selectedMember", selectedMember);
+      await dispatch(deleteMember({ memberId: selectedMember.id })).unwrap();
+      setConfirmOpen(false);
+      loadMembers();
+    } catch (err) {
+      console.error("삭제 실패:", err);
+      alert("삭제에 실패했습니다.");
+    }
+  };
+
+  const drawMember = (members || []).map((p) => ({
     ...p,
     name: {
       name: p.name,
@@ -55,33 +67,49 @@ export default function MemberTable() {
   }));
 
   return (
-    <CustomTable
-      columns={columns}
-      rows={drawMember || []}
-      onRowClick={(row) => {
-        navigate(`/members/${row.id}`);
-      }}
-      pagination={{
-        page,
-        size: 10,
-        total: totalCount || 0,
-        onPageChange: (newPage) => setPage(newPage),
-      }}
-      search={{
-        key: keywordType,
-        placeholder: "검색어를 입력하세요",
-        value: keyword,
-        onChange: (newValue) => {
-          setPage(1);
-          setKeyword(newValue);
-        },
-        onKeyChange: (newType) => {
-          setPage(1);
-          setKeywordType(newType);
-        },
-      }}
-      loading={status === "loading"}
-      error={error}
-    />
+    <>
+      <CustomTable
+        columns={columns}
+        rows={drawMember || []}
+        onRowClick={(row) => {
+          navigate(`/members/${row.id}`);
+        }}
+        pagination={{
+          page,
+          size: 10,
+          total: totalCount || 0,
+          onPageChange: (newPage) => setPage(newPage),
+        }}
+        search={{
+          key: keywordType,
+          placeholder: "검색어를 입력하세요",
+          value: keyword,
+          onChange: (newValue) => {
+            setPage(1);
+            setKeyword(newValue);
+          },
+          onKeyChange: (newType) => {
+            setPage(1);
+            setKeywordType(newType);
+          },
+        }}
+        onDelete={(row) => {
+          setSelectedMember(row);
+          setConfirmOpen(true);
+        }}
+        loading={status === "loading"}
+        error={error}
+      />
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="구성원을 삭제하시겠습니까?"
+        description="삭제 후에는 복구할 수 없습니다."
+        isDelete
+        confirmKind="danger"
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleDelete}
+      />
+    </>
   );
 }
