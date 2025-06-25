@@ -6,17 +6,19 @@ import {
   useTheme,
   Paper,
   Card,
+  Chip,
   CardContent,
   Drawer,
   IconButton,
   Stack,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchChecklistProgress, fetchChecklistItems } from "../checklistSlice";
 import StepCardList from "@/components/common/stepCardList/StepCardList";
 import { useParams } from "react-router-dom";
 import ProjectApprovalDetailDrawer from "../components/ProjectApprovalDetailDrawer";
+import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
+import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 
 export default function ProjectApprovalsPage() {
   const { id: projectId } = useParams();
@@ -134,55 +136,81 @@ export default function ProjectApprovalsPage() {
               ) : (
                 grouped[status].map((item, idx) => (
                   <Card
-                    key={idx}
-                    variant="outlined"
                     onClick={() => handleCardClick(item)}
                     sx={{
                       cursor: "pointer",
                       borderRadius: 3,
-                      boxShadow: "none",
-                      backgroundColor: statusColors[status].bg,
-                      borderColor: `${statusColors[status].main}40`,
-                      display: "flex",
-                      overflow: "hidden",
+                      backgroundColor: `${statusColors[status].main}10`,
+                      border: `1px solid ${statusColors[status].main}40`,
+                      boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
                       transition: "all 0.2s ease-in-out",
                       "&:hover": {
-                        transform: "translateY(-2px)",
-                        boxShadow: theme.shadows[2],
+                        transform: "translateY(-3px)",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                       },
                     }}
                   >
                     <CardContent sx={{ p: 2 }}>
-                      <Typography
-                        fontSize={14}
-                        fontWeight={600}
-                        gutterBottom
-                        sx={{ mb: 0.5, color: theme.palette.text.primary }}
+                      {/* 상단: 타이틀 + 단계 */}
+                      <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        mb={1}
                       >
-                        {item.checkListName}
-                      </Typography>
-                      <Typography
-                        fontSize={12}
-                        color="text.secondary"
-                        sx={{ mb: 1 }}
-                      >
-                        {item.projectStepName} · {item.createdAt}
-                      </Typography>
-                      <Typography
-                        fontSize={13}
-                        color="text.secondary"
-                        sx={{
-                          whiteSpace: "pre-line",
-                          lineHeight: 1.6,
-                          display: "-webkit-box",
-                          overflow: "hidden",
-                          WebkitLineClamp: 3,
-                          WebkitBoxOrient: "vertical",
-                        }}
-                        title={item.checkListContent}
-                      >
-                        {item.checkListContent}
-                      </Typography>
+                        <Typography
+                          fontSize={14}
+                          fontWeight={700}
+                          sx={{
+                            color: theme.palette.text.primary,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.title}
+                        </Typography>
+                        <Chip
+                          label={item.projectStepName}
+                          size="small"
+                          sx={{
+                            fontSize: 11,
+                            height: 22,
+                            borderRadius: 1,
+                            fontWeight: 500,
+                            bgcolor: theme.palette.grey[100],
+                            color: theme.palette.grey[700],
+                          }}
+                        />
+                      </Stack>
+
+                      {/* 작성자 + 작성일시 */}
+                      <Stack direction="row" spacing={2} alignItems="center">
+                        <Stack
+                          direction="row"
+                          alignItems="center"
+                          spacing={0.5}
+                        >
+                          <AccountCircleRoundedIcon
+                            sx={{ fontSize: 16, color: "text.secondary" }}
+                          />
+                          <Typography fontSize={12} color="text.secondary">
+                            {item.authorName}
+                          </Typography>
+                        </Stack>
+                        <Stack
+                          direction="row"
+                          alignItems="center"
+                          spacing={0.5}
+                        >
+                          <AccessTimeRoundedIcon
+                            sx={{ fontSize: 16, color: "text.secondary" }}
+                          />
+                          <Typography fontSize={12} color="text.secondary">
+                            {item.createdAt}
+                          </Typography>
+                        </Stack>
+                      </Stack>
                     </CardContent>
                   </Card>
                 ))

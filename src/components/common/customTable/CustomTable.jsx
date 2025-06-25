@@ -96,7 +96,6 @@ export default function CustomTable({
             (value === "true" ? true : value === "false" ? false : value)
         );
       }
-      ㅁ;
     }
     return result;
   }, [rows, searchKey, searchText, search, filter, secondaryFilter]);
