@@ -38,7 +38,6 @@ export default function CustomTable({
   search = null,
   filter = null,
   secondaryFilter = null,
-  onEdit, // (row) => void
   onDelete, // (row) => void
   hideDeleteButton = false, // 삭제 버튼 숨김 옵션 추가
 }) {
@@ -119,7 +118,7 @@ export default function CustomTable({
     ...columns,
     {
       key: "__actions__",
-      label: "",
+      label: "관리",
       type: "actions",
     },
   ];
@@ -284,20 +283,22 @@ export default function CustomTable({
                     </TableCell>
                   ))}
                   {/* 액션 컬럼 */}
-                  {userRole === "ROLE_SYSTEM_ADMIN" && !hideDeleteButton && (
-                    <TableCell key="__actions__" align="center">
-                      <CustomButton
-                        kind="ghost-danger"
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDelete?.(row);
-                        }}
-                      >
-                        삭제
-                      </CustomButton>
-                    </TableCell>
-                  )}
+                  {userRole === "ROLE_SYSTEM_ADMIN" &&
+                    !hideDeleteButton &&
+                    !row.deleted && (
+                      <TableCell key="__actions__" align="center">
+                        <CustomButton
+                          kind="ghost-danger"
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete?.(row);
+                          }}
+                        >
+                          삭제
+                        </CustomButton>
+                      </TableCell>
+                    )}
                 </TableRow>
               ))}
             </TableBody>
