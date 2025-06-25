@@ -37,9 +37,9 @@ export default function ProjectForm({
   isEdit = false,
 }) {
   const STATUS_OPTIONS = [
-    { value: "NOT_STARTED", label: "계획" },
+    { value: "CONTRACT", label: "결제" },
     { value: "IN_PROGRESS", label: "진행" },
-    { value: "PAUSED", label: "중단" },
+    { value: "PAYMENT", label: "검수" },
     { value: "COMPLETED", label: "완료" },
   ];
 
@@ -97,27 +97,63 @@ export default function ProjectForm({
               sx={{ mb: 2 }}
             />
 
-            <TextField
-              select
-              required
-              label="상태"
-              value={form.step || "NOT_STARTED"}
-              onChange={handleChange("step")}
-              fullWidth
-            >
-              {STATUS_OPTIONS.map((opt) => (
-                <MenuItem key={opt.value} value={opt.value}>
-                  {opt.label}
-                </MenuItem>
-              ))}
-            </TextField>
+            {/* 상태 필드는 편집 모드에서만 표시 */}
+            {isEdit && (
+              <TextField
+                select
+                required
+                label="상태"
+                value={form.step || "CONTRACT"}
+                onChange={handleChange("step")}
+                fullWidth
+              >
+                {STATUS_OPTIONS.map((opt) => (
+                  <MenuItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+            )}
           </Box>
 
-          {/* 2) 기간 설정 */}
+          {/* 2) 프로젝트 결제 금액 */}
           <Box>
             <Stack direction="row" alignItems="center" spacing={1}>
               <Typography variant="subtitle1" fontWeight={600}>
-                2. 기간 설정
+                2. 프로젝트 결제 금액
+              </Typography>
+              <Tooltip title="프로젝트 결제 금액을 입력하세요.">
+                <InfoOutlined fontSize="small" color="action" />
+              </Tooltip>
+            </Stack>
+            <Divider sx={{ mt: 1, mb: 2 }} />
+
+            <TextField
+              label="프로젝트 금액 (만원)"
+              placeholder="예) 1000"
+              type="number"
+              value={form.projectAmount || ""}
+              onChange={handleChange("projectAmount")}
+              fullWidth
+              InputProps={{
+                endAdornment: <span>만원</span>,
+                inputProps: { 
+                  step: 1,
+                  min: 0,
+                  style: { 
+                    WebkitAppearance: 'none',
+                    MozAppearance: 'textfield'
+                  }
+                }
+              }}
+            />
+          </Box>
+
+          {/* 3) 기간 설정 */}
+          <Box>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Typography variant="subtitle1" fontWeight={600}>
+                3. 기간 설정
               </Typography>
               <Tooltip title="시작일과 종료일을 선택하세요.">
                 <InfoOutlined fontSize="small" color="action" />
@@ -172,11 +208,11 @@ export default function ProjectForm({
             </LocalizationProvider>
           </Box>
 
-          {/* 3) 고객사/개발사 선택 */}
+          {/* 4) 고객사/개발사 선택 */}
           <Box>
             <Stack direction="row" alignItems="center" spacing={1}>
               <Typography variant="subtitle1" fontWeight={600}>
-                3. 고객사/개발사 선택
+                4. 고객사/개발사 선택
               </Typography>
               <Tooltip title="고객사와 개발사를 선택하세요.">
                 <InfoOutlined fontSize="small" color="action" />

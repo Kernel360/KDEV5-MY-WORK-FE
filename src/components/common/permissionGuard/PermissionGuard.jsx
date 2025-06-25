@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { useSnackbar } from "notistack";
 import LoadingScreen from "@/components/common/loadingScreen/LoadingScreen";
 
-export default function PermissionGuard({ allowedRoles, children }) {
+export default function PermissionGuard({ allowedRoles, children, showNotification = true }) {
   const memberRole = useSelector((state) => state.auth.user?.role);
   const { enqueueSnackbar } = useSnackbar();
 
@@ -15,7 +15,7 @@ export default function PermissionGuard({ allowedRoles, children }) {
     if (!memberRole) return;
 
     if (!allowedRoles.includes(memberRole)) {
-      if (!notifiedRef.current) {
+      if (!notifiedRef.current && showNotification) {
         enqueueSnackbar("⚠️ 접근 권한이 없습니다.", {
           variant: "error",
           autoHideDuration: 3000,
@@ -27,7 +27,7 @@ export default function PermissionGuard({ allowedRoles, children }) {
     }
 
     setChecking(false);
-  }, [allowedRoles, memberRole, enqueueSnackbar]);
+  }, [allowedRoles, memberRole, enqueueSnackbar, showNotification]);
 
   if (checking) {
     return <LoadingScreen message="Loading" />;
