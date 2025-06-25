@@ -222,7 +222,7 @@ export default function ProjectApprovalsPage() {
 
       <ProjectApprovalDetailDrawer
         open={drawerOpen}
-        checkListId={selectedItem?.checkListId}
+        checkListId={selectedItem?.id}
         onClose={handleDrawerClose}
       />
     </Box>
