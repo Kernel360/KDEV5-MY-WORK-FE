@@ -8,8 +8,10 @@ import {
   ListItemText,
   Typography,
   Avatar,
+  IconButton,
 } from "@mui/material";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import MailOutlineRoundedIcon from "@mui/icons-material/MailOutlineRounded";
 
 import {
   SidebarRoot,
@@ -57,12 +59,17 @@ export default function Sidebar({ onClose }) {
     <SidebarRoot>
       <ProfileSection>
         <Avatar src="/toss_logo.png" />
-        <div className="profile-text" style={{ marginLeft: 8 }}>
-          <Typography variant="body2">
-            {getRoleLabel(memberRole) || ""}
-          </Typography>
-          <Typography variant="subtitle1">{memberName || ""}</Typography>
-        </div>
+        <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, justifyContent: 'space-between' }}>
+          <div className="profile-text" style={{ marginLeft: 8 }}>
+            <Typography variant="body2">
+              {getRoleLabel(memberRole) || ""}
+            </Typography>
+            <Typography variant="subtitle1">{memberName || ""}</Typography>
+          </div>
+          <IconButton size="small">
+            <MailOutlineRoundedIcon fontSize="small" sx={{ color: 'grey.400' }} />
+          </IconButton>
+        </Box>
       </ProfileSection>
 
       <NavList>
