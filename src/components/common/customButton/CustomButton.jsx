@@ -1,4 +1,3 @@
-// src/components/common/CustomButton.jsx
 import React from "react";
 import { Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
@@ -16,10 +15,10 @@ const StyledButton = styled(Button)(({ theme, kind }) => {
       backgroundColor: theme.palette.primary.main,
       color: theme.palette.primary.contrastText,
       "&:hover": {
-        backgroundColor: theme.palette.primary.dark,
+        backgroundColor: theme.palette.primary.dark || theme.palette.grey[800],
       },
       "&.Mui-disabled": {
-        backgroundColor: "#eaeaea",
+        backgroundColor: theme.palette.grey[100],
         color: theme.palette.text.disabled,
         opacity: 1,
       },
@@ -33,34 +32,63 @@ const StyledButton = styled(Button)(({ theme, kind }) => {
       },
       "&.Mui-disabled": {
         color: theme.palette.text.disabled,
-        borderColor: "#d5d5d5",
-        backgroundColor: "#f9f9f9",
+        borderColor: theme.palette.grey[300],
+        backgroundColor: theme.palette.grey[100],
         opacity: 1,
       },
     },
     danger: {
-      backgroundColor: theme.palette.error.main,
-      color: "#fff",
+      backgroundColor: theme.palette.status.error.main,
+      color: theme.palette.primary.contrastText,
       "&:hover": {
-        backgroundColor: theme.palette.error.dark,
+        backgroundColor:
+          theme.palette.error.dark || theme.palette.status.error.main,
       },
       "&.Mui-disabled": {
-        backgroundColor: "#f0c8c8",
-        color: "#fff",
+        backgroundColor: theme.palette.status.error.bg,
+        color: theme.palette.primary.contrastText,
         opacity: 1,
       },
     },
     "ghost-danger": {
       backgroundColor: "transparent",
-      color: theme.palette.error.main,
-      border: `1px solid ${theme.palette.error.main}`,
+      color: theme.palette.status.error.main,
+      border: `1px solid ${theme.palette.status.error.main}`,
       "&:hover": {
-        backgroundColor: theme.palette.error.light,
+        backgroundColor: theme.palette.status.error.bg,
       },
       "&.Mui-disabled": {
-        color: "#d44c4c",
-        borderColor: "#f3bcbc",
-        backgroundColor: "#fdf3f3",
+        color: theme.palette.status.error.main,
+        borderColor: theme.palette.status.error.bg,
+        backgroundColor: theme.palette.status.error.bg,
+        opacity: 1,
+      },
+    },
+    "ghost-info": {
+      backgroundColor: "transparent",
+      color: theme.palette.status.info.main,
+      border: `1px solid ${theme.palette.status.info.main}`,
+      "&:hover": {
+        backgroundColor: theme.palette.status.info.bg,
+      },
+      "&.Mui-disabled": {
+        color: theme.palette.status.info.main,
+        borderColor: theme.palette.status.info.bg,
+        backgroundColor: theme.palette.status.info.bg,
+        opacity: 1,
+      },
+    },
+    "ghost-success": {
+      backgroundColor: "transparent",
+      color: theme.palette.status.success.main,
+      border: `1px solid ${theme.palette.status.success.main}`,
+      "&:hover": {
+        backgroundColor: theme.palette.status.success.bg,
+      },
+      "&.Mui-disabled": {
+        color: theme.palette.status.success.main,
+        borderColor: theme.palette.status.success.bg,
+        backgroundColor: theme.palette.status.success.bg,
         opacity: 1,
       },
     },
