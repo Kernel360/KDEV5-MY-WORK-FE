@@ -6,8 +6,10 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
-  Button,
 } from "@mui/material";
+import CustomButton from "@/components/common/customButton/CustomButton";
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 /**
  * 범용 ConfirmDialog 컴포넌트
@@ -16,9 +18,9 @@ import {
  * @param {() => void} onConfirm - 확인 요청 콜백
  * @param {string} title - 다이얼로그 제목
  * @param {string} description - 상세 메시지
- * @param {string} cancelText - 취소 버튼 텍스트
- * @param {string} confirmText - 확인 버튼 텍스트
- * @param {"inherit"|"primary"|"secondary"|"error"|"info"|"success"|"warning"} confirmColor - 확인 버튼 색상
+ * @param {string} confirmText - 확인 버튼 텍스트 (삭제 다이얼로그일 경우 무시됨)
+ * @param {"primary"|"ghost"|"danger"|"ghost-danger"|"ghost-info"|"ghost-success"|"text"} confirmKind - 확인 버튼 종류 (삭제 다이얼로그일 경우 무시됨)
+ * @param {boolean} isDelete - 삭제 다이얼로그 여부 (true일 경우 텍스트/아이콘 고정)
  */
 export default function ConfirmDialog({
   open,
@@ -26,25 +28,35 @@ export default function ConfirmDialog({
   onConfirm,
   title,
   description,
-  cancelText = "취소",
   confirmText = "확인",
-  confirmColor = "primary",
+  confirmKind = "primary",
+  isDelete = false,
 }) {
+  const finalConfirmText = isDelete ? "삭제" : confirmText;
+  const finalConfirmKind = isDelete ? "danger" : confirmKind;
+  const finalConfirmIcon = isDelete ? <DeleteIcon /> : null;
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
       {title && <DialogTitle>{title}</DialogTitle>}
+
       {description && (
         <DialogContent>
           <DialogContentText>{description}</DialogContentText>
         </DialogContent>
       )}
+
       <DialogActions>
-        <Button onClick={onClose} variant="outlined">
-          {cancelText}
-        </Button>
-        <Button onClick={onConfirm} color={confirmColor} variant="contained">
-          {confirmText}
-        </Button>
+        <CustomButton kind="ghost" onClick={onClose} startIcon={<CloseIcon />}>
+          취소
+        </CustomButton>
+        <CustomButton
+          kind={finalConfirmKind}
+          onClick={onConfirm}
+          startIcon={finalConfirmIcon}
+        >
+          {finalConfirmText}
+        </CustomButton>
       </DialogActions>
     </Dialog>
   );
