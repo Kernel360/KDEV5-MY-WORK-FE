@@ -35,10 +35,6 @@ export default function ProjectTable({
     { label: "완료", value: "COMPLETED" },
   ];
 
-  const handleEdit = (row) => {
-    navigate(`/projects/${row.id}/edit`);
-  };
-
   const handleDelete = (row) => {
     if (window.confirm(`프로젝트 "${row.name}"을 삭제하시겠습니까?`)) {
       onDelete?.(row);
@@ -86,7 +82,6 @@ export default function ProjectTable({
       }}
       loading={loading}
       error={error}
-      onEdit={handleEdit}
       onDelete={handleDelete}
     />
   );
