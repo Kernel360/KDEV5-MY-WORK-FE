@@ -1,11 +1,7 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { useDispatch, useSelector } from "react-redux";
+// src/features/project/home/components/ProjectTable.jsx
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CustomTable from "@/components/common/customTable/CustomTable";
-import {
-  fetchProjects,
-  deleteProject, // 단건 삭제로 바꿔주세요!
-} from "@/features/project/slices/projectSlice";
 import { Box } from "@mui/material";
 
 // 컬럼 정의
@@ -17,20 +13,19 @@ const columns = [
   { key: "devCompanyId", label: "개발사", type: "company" },
 ];
 
-export default function ProjectTable() {
-  const dispatch = useDispatch();
+export default function ProjectTable({
+  projects = [],
+  totalCount = 0,
+  loading = false,
+  error = null,
+  onDelete,
+}) {
   const navigate = useNavigate();
-  const {
-    list: rawProjects,
-    totalCount,
-    status,
-    error,
-  } = useSelector((state) => state.project);
 
-  // 페이지, 검색, 필터 상태
   const [page, setPage] = useState(1);
   const [searchText, setSearchText] = useState("");
   const [filterValue, setFilterValue] = useState("");
+
   const filterKey = "step";
   const filterOptions = [
     { label: "전체", value: "" },
@@ -40,37 +35,17 @@ export default function ProjectTable() {
     { label: "완료", value: "COMPLETED" },
   ];
 
-  // 데이터 조회 함수
-  const loadProjects = useCallback(() => {
-    const params = { page, size: 10 };
-    if (searchText.trim()) {
-      params.keyword = searchText.trim();
-      params.keywordType = "PROJECT_NAME";
-    }
-    if (filterValue) params[filterKey] = filterValue;
-    dispatch(fetchProjects(params));
-  }, [dispatch, page, searchText, filterValue]);
-
-  useEffect(() => {
-    loadProjects();
-  }, [loadProjects]);
-
-  // 개별 삭제
-  const handleDelete = (row) => {
-    if (window.confirm(`프로젝트 "${row.name}"을 삭제하시겠습니까?`)) {
-      dispatch(deleteProject({ id: row.id })).then(() => {
-        loadProjects(); // 삭제 후 목록 재조회
-      });
-    }
-  };
-
-  // 수정(예시: 프로젝트 상세로 이동)
   const handleEdit = (row) => {
     navigate(`/projects/${row.id}/edit`);
   };
 
-  // 가공된 row 데이터
-  const enrichedProjects = (rawProjects || []).map((p, idx) => ({
+  const handleDelete = (row) => {
+    if (window.confirm(`프로젝트 "${row.name}"을 삭제하시겠습니까?`)) {
+      onDelete?.(row);
+    }
+  };
+
+  const enrichedProjects = projects.map((p, idx) => ({
     ...p,
     progress: Math.min((idx + 1) * 10, 100),
     manager: {
@@ -85,7 +60,7 @@ export default function ProjectTable() {
       rows={enrichedProjects}
       pagination={{
         page,
-        total: totalCount || 0,
+        total: totalCount,
         onPageChange: (newPage) => setPage(newPage),
         pageSize: 10,
       }}
@@ -109,7 +84,7 @@ export default function ProjectTable() {
           setFilterValue(val);
         },
       }}
-      loading={status === "loading"}
+      loading={loading}
       error={error}
       onEdit={handleEdit}
       onDelete={handleDelete}
