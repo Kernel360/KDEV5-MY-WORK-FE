@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Box } from "@mui/material";
 import CustomTable from "@/components/common/customTable/CustomTable";
-import { fetchCompanies } from "@/features/company/companySlice";
+import ConfirmDialog from "@/components/common/confirmDialog/ConfirmDialog";
+import { fetchCompanies, deleteCompany } from "@/features/company/companySlice";
 
 const columns = [
   { key: "companyName", label: "회사명", type: "logo", searchable: true },
@@ -30,6 +31,7 @@ const columns = [
 export default function CompanyTable() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const {
     list: companies,
     totalCount,
@@ -41,6 +43,8 @@ export default function CompanyTable() {
   const [searchKey, setSearchKey] = useState("companyName");
   const [searchText, setSearchText] = useState("");
   const [filterValue, setFilterValue] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState(null);
 
   const filterKey = "deleted";
 
@@ -51,10 +55,7 @@ export default function CompanyTable() {
   ];
 
   const loadCompany = useCallback(() => {
-    const params = {
-      page,
-      companyType: "DEV",
-    };
+    const params = { page, companyType: "DEV" };
 
     if (searchText.trim()) {
       params.keyword = searchText.trim();
@@ -80,20 +81,20 @@ export default function CompanyTable() {
     dispatch(fetchCompanies(params));
   }, [dispatch, page, searchKey, searchText, filterValue]);
 
-  const handleSearchKeyChange = (newKey) => {
-    setPage(1);
-    setSearchKey(newKey);
-    setSearchText("");
-  };
-
-  const handleSearchTextChange = (newText) => {
-    setPage(1);
-    setSearchText(newText);
-  };
-
   useEffect(() => {
     loadCompany();
   }, [loadCompany]);
+
+  const handleDelete = async () => {
+    try {
+      await dispatch(deleteCompany(selectedCompany.companyId)).unwrap();
+      setConfirmOpen(false);
+      loadCompany();
+    } catch (err) {
+      console.error("삭제 실패:", err);
+      alert("삭제에 실패했습니다.");
+    }
+  };
 
   return (
     <Box>
@@ -105,15 +106,24 @@ export default function CompanyTable() {
           total: totalCount,
           onPageChange: setPage,
         }}
-        onRowClick={(row) => {
-          navigate(`/companies/${row.companyId}`);
+        onRowClick={(row) => navigate(`/companies/${row.companyId}`)}
+        onDelete={(row) => {
+          setSelectedCompany(row);
+          setConfirmOpen(true);
         }}
         search={{
           key: searchKey,
           placeholder: "검색어를 입력하세요",
           value: searchText,
-          onKeyChange: handleSearchKeyChange,
-          onChange: handleSearchTextChange,
+          onKeyChange: (newKey) => {
+            setPage(1);
+            setSearchKey(newKey);
+            setSearchText("");
+          },
+          onChange: (newText) => {
+            setPage(1);
+            setSearchText(newText);
+          },
         }}
         filter={{
           key: filterKey,
@@ -127,6 +137,16 @@ export default function CompanyTable() {
         }}
         loading={loading}
         error={error}
+      />
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="개발사를 삭제하시겠습니까?"
+        description="삭제 후에는 복구할 수 없습니다."
+        isDelete
+        confirmKind="danger"
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleDelete}
       />
     </Box>
   );
