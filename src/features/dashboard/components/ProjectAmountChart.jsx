@@ -107,7 +107,7 @@ const ProjectAmountChart = () => {
           tickLine={false}
           tickFormatter={(v) => formatAmount(v)}
         />
-        <Tooltip content={<CustomTooltip />} />
+        <Tooltip content={<CustomTooltip />} cursor={false} />
       </>
     );
 
