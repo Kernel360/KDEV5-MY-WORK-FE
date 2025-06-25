@@ -118,7 +118,7 @@ export default function CompanyFormPage() {
         onClick={handleSubmit}
         disabled={companyLoading || !form.name}
       >
-        {companyLoading ? "로딩 중..." : isEdit ? "수정 저장" : "생성"}
+        {companyLoading ? "로딩 중..." : isEdit ? "수정 저장" : "등록"}
       </Button>
     </Stack>
   );
@@ -126,8 +126,8 @@ export default function CompanyFormPage() {
   return (
     <PageWrapper>
       <PageHeader
-        title={isEdit ? "개발사 수정" : "개발사 생성"}
-        subtitle="새로운 개발사를 등록해주세요."
+        title={isEdit ? "업체 수정" : "업체 등록"}
+        subtitle="새로운 업체를 등록해주세요."
         action={headerAction}
       />
 

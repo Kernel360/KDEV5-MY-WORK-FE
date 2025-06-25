@@ -69,7 +69,7 @@ const navItems = [
     roles: [ROLES.SYSTEM_ADMIN],
     children: [
       {
-        text: "회원 생성",
+        text: "회원 등록",
         icon: AddBoxRoundedIcon,
         path: "/members/new",
         roles: [ROLES.SYSTEM_ADMIN],

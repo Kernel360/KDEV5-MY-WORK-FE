@@ -32,7 +32,7 @@ export default function MemberPage() {
       >
         <PageHeader
           title="회원"
-          subtitle={`총 ${totalCount ?? 0}개의 회원이 있습니다.`}
+          subtitle={`총 ${totalCount ?? 0}명의 회원이 등록되어 있습니다.`}
         />
         <Box sx={{ flex: 1, overflow: "hidden", mb: 3 }}>
           <MemberTable />

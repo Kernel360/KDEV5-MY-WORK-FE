@@ -4,6 +4,7 @@ import { fetchMembers, deleteMember } from "../memberSlice";
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import ConfirmDialog from "@/components/common/confirmDialog/ConfirmDialog";
+import AlertMessage from "@/components/common/alertMessage/AlertMessage";
 
 const columns = [
   { key: "name", label: "이름", type: "avatar", searchable: true },
@@ -32,6 +33,10 @@ export default function MemberTable() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
 
+  const [notiOpen, setNotiOpen] = useState(false);
+  const [notiMessage, setNotiMessage] = useState("");
+  const [notiType, setNotiType] = useState("error");
+
   const loadMembers = useCallback(() => {
     dispatch(
       fetchMembers({
@@ -52,9 +57,13 @@ export default function MemberTable() {
       await dispatch(deleteMember({ memberId: selectedMember.id })).unwrap();
       setConfirmOpen(false);
       loadMembers();
+      setNotiType("success");
+      setNotiMessage("회원이 삭제되었습니다.");
+      setNotiOpen(true);
     } catch (err) {
-      console.error("삭제 실패:", err);
-      alert("삭제에 실패했습니다.");
+      setNotiType("error");
+      setNotiMessage("삭제에 실패했습니다.");
+      setNotiOpen(true);
     }
   };
 
@@ -103,12 +112,18 @@ export default function MemberTable() {
 
       <ConfirmDialog
         open={confirmOpen}
-        title="구성원을 삭제하시겠습니까?"
+        title="회원을 삭제하시겠습니까?"
         description="삭제 후에는 복구할 수 없습니다."
         isDelete
         confirmKind="danger"
         onClose={() => setConfirmOpen(false)}
         onConfirm={handleDelete}
+      />
+      <AlertMessage
+        open={notiOpen}
+        onClose={() => setNotiOpen(false)}
+        message={notiMessage}
+        severity={notiType}
       />
     </>
   );
