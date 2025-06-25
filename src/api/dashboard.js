@@ -27,3 +27,14 @@ export function getNearDeadlineProjects(params) {
 export function getPopularProjects() {
   return api.get("/api/dashboard/popular-projects");
 }
+
+/**
+ * 프로젝트 금액 차트 데이터 조회
+ * @param {string} chartType - 'CHART_TYPE_WEEK' 또는 'CHART_TYPE_MONTH'
+ * 반환: { chartData: [{ label: string, totalAmount: number }] }
+ */
+export function getProjectAmountChart(chartType) {
+  return api.get("/api/dashboard/project-amount", {
+    params: { chartType },
+  });
+}

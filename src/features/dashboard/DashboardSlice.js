@@ -48,6 +48,22 @@ export const fetchPopularProjects = createAsyncThunk(
   }
 );
 
+// 프로젝트 금액 차트 데이터 조회
+export const fetchProjectAmountChart = createAsyncThunk(
+  "dashboard/fetchProjectAmountChart",
+  async (chartType, thunkAPI) => {
+    try {
+      const response = await dashboardAPI.getProjectAmountChart(chartType);
+      const { chartData } = response.data.data;
+      return { chartData, chartType };
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data || "프로젝트 금액 차트 데이터 조회 실패"
+      );
+    }
+  }
+);
+
 const dashboardSlice = createSlice({
   name: "dashboard",
   initialState: {
@@ -64,6 +80,13 @@ const dashboardSlice = createSlice({
     popularProjects: [],
     popularProjectsLoading: false,
     popularProjectsError: null,
+
+    projectAmountChart: {
+      chartData: [],
+      chartType: 'CHART_TYPE_WEEK',
+      loading: false,
+      error: null,
+    },
   },
   reducers: {
     clearDashboardState(state) {
@@ -77,6 +100,13 @@ const dashboardSlice = createSlice({
 
       state.popularProjects = [];
       state.popularProjectsError = null;
+
+      state.projectAmountChart = {
+        chartData: [],
+        chartType: 'CHART_TYPE_WEEK',
+        loading: false,
+        error: null,
+      };
     },
   },
   extraReducers: (builder) => {
@@ -123,6 +153,21 @@ const dashboardSlice = createSlice({
       .addCase(fetchPopularProjects.rejected, (state, action) => {
         state.popularProjectsLoading = false;
         state.popularProjectsError = action.payload;
+      })
+
+      // 프로젝트 금액 차트
+      .addCase(fetchProjectAmountChart.pending, (state) => {
+        state.projectAmountChart.loading = true;
+        state.projectAmountChart.error = null;
+      })
+      .addCase(fetchProjectAmountChart.fulfilled, (state, action) => {
+        state.projectAmountChart.loading = false;
+        state.projectAmountChart.chartData = action.payload.chartData;
+        state.projectAmountChart.chartType = action.payload.chartType;
+      })
+      .addCase(fetchProjectAmountChart.rejected, (state, action) => {
+        state.projectAmountChart.loading = false;
+        state.projectAmountChart.error = action.payload;
       });
   },
 });

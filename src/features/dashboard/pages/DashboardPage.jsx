@@ -17,6 +17,9 @@ import {
   fetchNearDeadlineProjects,
   fetchPopularProjects,
 } from "../DashboardSlice";
+import ProjectAmountChart from "../components/ProjectAmountChart";
+import PermissionGuard from "@/components/common/permissionGuard/PermissionGuard";
+import { ROLES } from "@/constants/roles";
 
 export default function DashboardPage() {
   const dispatch = useDispatch();
@@ -52,55 +55,74 @@ export default function DashboardPage() {
 
   return (
     <PageWrapper>
-      <PageHeader
-        title="프로젝트 현황 대시보드"
-        subtitle="전체 프로젝트의 진행 상태와 주요 데이터를 한눈에 확인하세요."
-      />
-      <Box display="flex" justifyContent="space-between" mb={3} gap={1} mx={2}>
-        <InfoCard label="전체 프로젝트" value={safeSummary.totalCount} />
-        <InfoCard label="진행중" value={safeSummary.inProgressCount} />
-        <InfoCard label="완료됨" value={safeSummary.completedCount} />
-      </Box>
-      <Box display="flex" justifyContent="space-between" mb={4} gap={3} mx={3}>
-        <Box flex={1}>
-          <SectionBox title="마감 임박 프로젝트 (D-5 이내)">
-            {nearDeadline.length === 0 ? (
-              <Typography color="text.secondary" align="center" sx={{ py: 4 }}>
-                마감임박 프로젝트가 없습니다.
-              </Typography>
-            ) : (
-              <>
-                {nearDeadline.map((p) => (
-                  <RowItem
-                    key={p.id}
-                    id={p.id}
-                    title={p.name}
-                    endAt={p.endAt}
-                    dday={p.dday}
-                  />
-                ))}
-                <Pagination
-                  count={Math.ceil(nearDeadlineTotalCount / pageSize)}
-                  page={duePage}
-                  onChange={(_, val) => setDuePage(val)}
-                  sx={{ mt: 2 }}
-                />
-              </>
-            )}
-          </SectionBox>
+      <Box
+        sx={{
+          flex: 1,
+          overflow: "auto",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <PageHeader
+          title="프로젝트 현황 대시보드"
+          subtitle="전체 프로젝트의 진행 상태와 주요 데이터를 한눈에 확인하세요."
+        />
+        <Box display="flex" justifyContent="space-between" mb={3} gap={1} mx={2}>
+          <InfoCard label="전체 프로젝트" value={safeSummary.totalCount} />
+          <InfoCard label="진행중" value={safeSummary.inProgressCount} />
+          <InfoCard label="완료됨" value={safeSummary.completedCount} />
         </Box>
+        
+        {/* 프로젝트 금액 차트 섹션 - 특정 권한에만 표시 */}
+        <PermissionGuard allowedRoles={[ROLES.DEV_ADMIN, ROLES.CLIENT_ADMIN]} showNotification={false}>
+          <Box mb={4} mx={3}>
+            <SectionBox title="프로젝트 금액 현황">
+              <ProjectAmountChart />
+            </SectionBox>
+          </Box>
+        </PermissionGuard>
 
-        <Box flex={1}>
-          <SectionBox title="게시글 활동이 활발한 프로젝트 TOP 5">
-            {popularProjects.map((p, idx) => (
-              <PopularRowItem
-                key={p.projectId}
-                id={p.projectId}
-                rank={idx + 1}
-                title={p.projectName}
-              />
-            ))}
-          </SectionBox>
+        <Box display="flex" justifyContent="space-between" mb={4} gap={3} mx={3}>
+          <Box flex={1}>
+            <SectionBox title="마감 임박 프로젝트 (D-5 이내)">
+              {nearDeadline.length === 0 ? (
+                <Typography color="text.secondary" align="center" sx={{ py: 4 }}>
+                  마감임박 프로젝트가 없습니다.
+                </Typography>
+              ) : (
+                <>
+                  {nearDeadline.map((p) => (
+                    <RowItem
+                      key={p.id}
+                      id={p.id}
+                      title={p.name}
+                      endAt={p.endAt}
+                      dday={p.dday}
+                    />
+                  ))}
+                  <Pagination
+                    count={Math.ceil(nearDeadlineTotalCount / pageSize)}
+                    page={duePage}
+                    onChange={(_, val) => setDuePage(val)}
+                    sx={{ mt: 2 }}
+                  />
+                </>
+              )}
+            </SectionBox>
+          </Box>
+
+          <Box flex={1}>
+            <SectionBox title="게시글 활동이 활발한 프로젝트 TOP 5">
+              {popularProjects.map((p, idx) => (
+                <PopularRowItem
+                  key={p.projectId}
+                  id={p.projectId}
+                  rank={idx + 1}
+                  title={p.projectName}
+                />
+              ))}
+            </SectionBox>
+          </Box>
         </Box>
       </Box>
     </PageWrapper>
