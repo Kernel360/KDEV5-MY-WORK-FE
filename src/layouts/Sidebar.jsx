@@ -12,7 +12,7 @@ import {
   Badge,
 } from "@mui/material";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
-import MailOutlineRoundedIcon from "@mui/icons-material/MailOutlineRounded";
+import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
 
 import {
   SidebarRoot,
@@ -27,7 +27,11 @@ import {
   clearAuthState,
 } from "@/features/auth/authSlice";
 
-export default function Sidebar({ onClose, onNotificationsClick, unreadCount }) {
+export default function Sidebar({
+  onClose,
+  onNotificationsClick,
+  unreadCount,
+}) {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -60,7 +64,14 @@ export default function Sidebar({ onClose, onNotificationsClick, unreadCount }) 
     <SidebarRoot>
       <ProfileSection>
         <Avatar src="/toss_logo.png" />
-        <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, justifyContent: 'space-between' }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flexGrow: 1,
+            justifyContent: "space-between",
+          }}
+        >
           <div className="profile-text" style={{ marginLeft: 8 }}>
             <Typography variant="body2">
               {getRoleLabel(memberRole) || ""}
@@ -69,7 +80,10 @@ export default function Sidebar({ onClose, onNotificationsClick, unreadCount }) 
           </div>
           <IconButton size="small" onClick={onNotificationsClick}>
             <Badge badgeContent={unreadCount} color="error">
-              <MailOutlineRoundedIcon fontSize="small" sx={{ color: 'grey.400' }} />
+              <NotificationsRoundedIcon
+                fontSize="small"
+                sx={{ color: "grey.400" }}
+              />
             </Badge>
           </IconButton>
         </Box>
