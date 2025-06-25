@@ -35,11 +35,12 @@ export default function ProjectFormPage() {
   const [form, setForm] = useState({
     name: "",
     detail: "",
-    step: "NOT_STARTED",
+    step: "CONTRACT",
     startAt: "",
     endAt: "",
     devCompanyId: "",
     clientCompanyId: "",
+    projectAmount: "",
   });
 
   useEffect(() => {
@@ -53,11 +54,12 @@ export default function ProjectFormPage() {
       setForm({
         name: current.name || "",
         detail: current.detail || "",
-        step: current.step || "NOT_STARTED",
+        step: current.step || "CONTRACT",
         startAt: current.startAt || "",
         endAt: current.endAt || "",
         devCompanyId: current.devCompanyId || "",
         clientCompanyId: current.clientCompanyId || "",
+        projectAmount: current.projectAmount || "",
       });
     }
   }, [isEdit, current]);
@@ -83,6 +85,7 @@ export default function ProjectFormPage() {
         clientCompanyId: form.clientCompanyId,
         ...(form.startAt && { startAt: `${form.startAt}T09:00:00` }),
         ...(form.endAt && { endAt: `${form.endAt}T18:00:00` }),
+        ...(form.projectAmount && { projectAmount: parseInt(form.projectAmount) }),
       };
 
       if (isEdit) {
