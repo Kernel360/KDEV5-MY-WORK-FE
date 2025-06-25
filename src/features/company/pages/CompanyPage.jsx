@@ -23,8 +23,8 @@ export default function CompanyPage() {
         }}
       >
         <PageHeader
-          title="업체 관리"
-          subtitle={`총 ${totalCount ?? 0}개의 프로젝트가 있습니다.`}
+          title="업체"
+          subtitle={`총 ${totalCount ?? 0}개 업체가 등록되어 있습니다.`}
         />
         <Box sx={{ flex: 1, overflow: "hidden", mb: 3 }}>
           <CompanyTable />
