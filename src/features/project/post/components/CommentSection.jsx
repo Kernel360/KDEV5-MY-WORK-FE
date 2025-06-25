@@ -105,20 +105,14 @@ export default function CommentSection({
       <CommentInput postId={postId} onSubmit={(text) => onSubmit(text)} />
 
       {/* 댓글 목록 */}
-      {comments.length === 0 ? (
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-          댓글이 없습니다.
-        </Typography>
-      ) : (
-        comments.map((review) => (
-          <CommentItem
-            key={review.reviewId}
-            review={review}
-            postId={postId}
-            onReply={onReply}
-          />
-        ))
-      )}
+      {comments.map((review) => (
+        <CommentItem
+          key={review.reviewId}
+          review={review}
+          postId={postId}
+          onReply={onReply}
+        />
+      ))}
 
       {/* 더보기 버튼 */}
       {/* <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
