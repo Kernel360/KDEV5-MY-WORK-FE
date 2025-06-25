@@ -11,6 +11,9 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
+import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
+import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
+import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
 import CommentSection from "./CommentSection";
@@ -69,40 +72,70 @@ export default function PostDetailDrawer({ open, post, onClose }) {
           borderBottomLeftRadius: 2,
           overflowY: "auto",
           bgcolor: theme.palette.background.paper,
-          p: 3,
+          p: 4,
           boxSizing: "border-box",
         }}
       >
         {post ? (
-          <Stack spacing={3}>
-            {/* 헤더 */}
+          <Stack spacing={4}>
+            {/* 작성자 + 상태 */}
             <Box
               sx={{
                 display: "flex",
-                alignItems: "center",
                 justifyContent: "space-between",
+                alignItems: "flex-start",
               }}
             >
               <Stack direction="row" spacing={2} alignItems="center">
                 <Avatar sx={{ width: 40, height: 40 }}>
                   {post.companyName?.[0] || "?"}
                 </Avatar>
+
                 <Box>
-                  <Stack direction="row" spacing={1} alignItems="baseline">
-                    <Typography variant="subtitle1" fontWeight={600}>
-                      {post.authorName}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {post.companyName}
+                  {/* 이름 + 회사 한 줄에 */}
+                  <Stack
+                    direction="row"
+                    spacing={2}
+                    alignItems="center"
+                    flexWrap="wrap"
+                  >
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <AccountCircleRoundedIcon
+                        sx={{ fontSize: 16, color: "text.secondary" }}
+                      />
+                      <Typography fontWeight={600}>
+                        {post.authorName}
+                      </Typography>
+                    </Stack>
+
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <BusinessRoundedIcon
+                        sx={{ fontSize: 16, color: "text.secondary" }}
+                      />
+                      <Typography variant="body2" color="text.secondary">
+                        {post.companyName}
+                      </Typography>
+                    </Stack>
+                  </Stack>
+
+                  {/* 작성일 */}
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    alignItems="center"
+                    mt={0.5}
+                  >
+                    <AccessTimeRoundedIcon
+                      sx={{ fontSize: 16, color: "text.secondary" }}
+                    />
+                    <Typography variant="caption" color="text.secondary">
+                      {post.createdAt}
                     </Typography>
                   </Stack>
-                  <Typography variant="caption" color="text.secondary">
-                    {post.createdAt}
-                  </Typography>
                 </Box>
               </Stack>
 
-              <Stack direction="row" spacing={1}>
+              <Stack direction="row" spacing={1} alignItems="center">
                 <IconButton onClick={handleDelete}>
                   <DeleteIcon />
                 </IconButton>
@@ -111,8 +144,6 @@ export default function PostDetailDrawer({ open, post, onClose }) {
                 </IconButton>
               </Stack>
             </Box>
-
-            {/* 제목 + 상태 */}
             <Box
               sx={{
                 display: "flex",
@@ -136,16 +167,22 @@ export default function PostDetailDrawer({ open, post, onClose }) {
               />
             </Box>
 
-            {/* 내용 + 댓글 */}
-            <Box>
+            {/* 본문 + 댓글 */}
+            <Box
+              sx={{
+                p: 2,
+                bgcolor: theme.palette.grey[50],
+                borderRadius: 2,
+              }}
+            >
               <Typography
                 variant="body1"
-                sx={{ whiteSpace: "pre-wrap", lineHeight: 1.6, mb: 3 }}
+                sx={{ whiteSpace: "pre-wrap", lineHeight: 1.8, mb: 3 }}
               >
                 {post.content}
               </Typography>
-              <CommentSection postId={post.postId} comments={reviews} />
             </Box>
+            <CommentSection postId={post.postId} comments={reviews} />
           </Stack>
         ) : (
           <Typography variant="body2" color="text.secondary">
