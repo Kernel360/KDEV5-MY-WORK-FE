@@ -26,7 +26,7 @@ import {
   clearAuthState,
 } from "@/features/auth/authSlice";
 
-export default function Sidebar({ onClose }) {
+export default function Sidebar({ onClose, onNotificationsClick }) {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -66,7 +66,7 @@ export default function Sidebar({ onClose }) {
             </Typography>
             <Typography variant="subtitle1">{memberName || ""}</Typography>
           </div>
-          <IconButton size="small">
+          <IconButton size="small" onClick={onNotificationsClick}>
             <MailOutlineRoundedIcon fontSize="small" sx={{ color: 'grey.400' }} />
           </IconButton>
         </Box>
