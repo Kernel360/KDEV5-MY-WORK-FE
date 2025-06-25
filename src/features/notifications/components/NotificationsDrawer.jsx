@@ -1,13 +1,15 @@
 import React from 'react';
 import { Drawer, Box, Typography, IconButton, List, ListItem, ListItemText, Divider, Chip } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import dayjs from 'dayjs';
+import { formatNotificationDate } from '@/utils/dateUtils';
 
-// 임시 목업 데이터
+// 임시 목업 데이터 (LocalDateTime과 유사한 형식으로 수정)
 const mockNotifications = [
-  { id: 1, title: '새로운 리뷰가 등록되었습니다.', content: '프로젝트 A의 "로그인 기능"에 새로운 리뷰가 달렸습니다.', date: '3시간 전', read: false },
-  { id: 2, title: '결재가 승인되었습니다.', content: '요청하신 "디자인 시안"이 승인되었습니다.', date: '1일 전', read: false },
-  { id: 3, title: '새로운 멤버가 초대되었습니다.', content: '김민준님이 "마케팅팀"에 합류했습니다.', date: '3일 전', read: true },
-  { id: 4, title: '서버 점검 안내', content: '오늘 오후 10시에 정기 서버 점검이 있습니다.', date: '2024-06-20', read: true },
+  { id: 1, title: '새로운 리뷰가 등록되었습니다.', content: '프로젝트 A의 "로그인 기능"에 새로운 리뷰가 달렸습니다.', date: dayjs().subtract(3, 'hour').format('YYYY-MM-DDTHH:mm:ss'), read: false },
+  { id: 2, title: '결재가 승인되었습니다.', content: '요청하신 "디자인 시안"이 승인되었습니다.', date: dayjs().subtract(1, 'day').format('YYYY-MM-DDTHH:mm:ss'), read: false },
+  { id: 3, title: '새로운 멤버가 초대되었습니다.', content: '김민준님이 "마케팅팀"에 합류했습니다.', date: dayjs().subtract(3, 'day').format('YYYY-MM-DDTHH:mm:ss'), read: true },
+  { id: 4, title: '서버 점검 안내', content: '오늘 오후 10시에 정기 서버 점검이 있습니다.', date: dayjs().subtract(10, 'day').format('YYYY-MM-DDTHH:mm:ss'), read: true },
 ];
 
 export default function NotificationsDrawer({ open, onClose }) {
@@ -45,7 +47,7 @@ export default function NotificationsDrawer({ open, onClose }) {
                       {notif.title}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {notif.date}
+                      {formatNotificationDate(notif.date)}
                     </Typography>
                   </Box>
                 }
