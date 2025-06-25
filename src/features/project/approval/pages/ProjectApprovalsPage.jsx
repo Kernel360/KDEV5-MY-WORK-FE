@@ -65,7 +65,7 @@ export default function ProjectApprovalsPage() {
     대기: filteredTasks.filter((t) => t.approval === "PENDING"),
     승인: filteredTasks.filter((t) => t.approval === "APPROVED"),
     반려: filteredTasks.filter((t) => t.approval === "REJECTED"),
-    "수정 요청": filteredTasks.filter((t) => t.approval === "UPDATE_REQUEST"),
+    "수정 요청": filteredTasks.filter((t) => t.approval === "REQUEST_CHANGES"),
   };
 
   const statusColors = {

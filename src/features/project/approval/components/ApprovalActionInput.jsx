@@ -33,7 +33,7 @@ export default function ApprovalActionInput({
         <CustomButton
           kind="ghost-info"
           size="small"
-          onClick={() => setApprovalType("UPDATE_REQUEST")}
+          onClick={() => setApprovalType("REQUEST_CHANGES")}
         >
           수정 요청
         </CustomButton>

@@ -35,7 +35,7 @@ const dummyHistories = [
     companyName: "D회사",
     memberName: "박민수",
     content: "내용 수정",
-    approval: "UPDATE_REQUEST",
+    approval: "REQUEST_CHANGES",
     createdAt: "2025-06-25 04:30",
   },
   {
@@ -135,7 +135,7 @@ export default function ProjectApprovalDetailDrawer({
           <Stack spacing={4}>
             <ApprovalDetailHeader checkList={checkList} onClose={onClose} />
             <ApprovalDetailContent checkList={checkList} />
-            {["PENDING", "UPDATE_REQUEST"].includes(checkList.approval) && (
+            {["PENDING", "REQUEST_CHANGES"].includes(checkList.approval) && (
               <ApprovalActionInput
                 approvalType={approvalType}
                 setApprovalType={setApprovalType}
