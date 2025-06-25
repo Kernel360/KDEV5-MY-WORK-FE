@@ -27,17 +27,19 @@ export default function ProjectPage() {
   const isSystemAdmin = userRole === "ROLE_SYSTEM_ADMIN";
 
   useEffect(() => {
-    dispatch(fetchAllCompanyNames());
-    dispatch(fetchProjects({ page: 1, size: 10 }));
-  }, [dispatch]);
+    if (userRole) {
+      dispatch(fetchAllCompanyNames());
+      dispatch(fetchProjects({ page: 1, size: 10, userRole }));
+    }
+  }, [dispatch, userRole]);
 
   const handleDelete = useCallback(
     (row) => {
       dispatch(deleteProject({ id: row.id })).then(() => {
-        dispatch(fetchProjects({ page: 1, size: 10 }));
+        dispatch(fetchProjects({ page: 1, size: 10, userRole }));
       });
     },
-    [dispatch]
+    [dispatch, userRole]
   );
 
   return (
