@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useMediaQuery } from "@mui/material";
+import { useSelector } from "react-redux";
 import MenuIcon from "@mui/icons-material/Menu";
 import Sidebar from "./Sidebar";
 import {
@@ -15,6 +16,7 @@ export default function MainLayout() {
   const isMobile = useMediaQuery("(max-width:600px)");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const unreadCount = useSelector((state) => state.notifications.unreadCount);
 
   const handleDrawerToggle = () => {
     setMobileOpen((prev) => !prev);
@@ -38,10 +40,10 @@ export default function MainLayout() {
           onClose={handleDrawerToggle}
           ModalProps={{ keepMounted: true }}
         >
-          <Sidebar onClose={handleDrawerToggle} onNotificationsClick={handleNotificationsToggle} />
+          <Sidebar onClose={handleDrawerToggle} onNotificationsClick={handleNotificationsToggle} unreadCount={unreadCount} />
         </StyledDrawer>
       ) : (
-        <Sidebar onClose={() => {}} onNotificationsClick={handleNotificationsToggle} />
+        <Sidebar onClose={() => {}} onNotificationsClick={handleNotificationsToggle} unreadCount={unreadCount} />
       )}
       <Main>
         <Outlet />

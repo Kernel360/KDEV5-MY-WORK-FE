@@ -9,6 +9,7 @@ import {
   Typography,
   Avatar,
   IconButton,
+  Badge,
 } from "@mui/material";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import MailOutlineRoundedIcon from "@mui/icons-material/MailOutlineRounded";
@@ -26,7 +27,7 @@ import {
   clearAuthState,
 } from "@/features/auth/authSlice";
 
-export default function Sidebar({ onClose, onNotificationsClick }) {
+export default function Sidebar({ onClose, onNotificationsClick, unreadCount }) {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -67,7 +68,9 @@ export default function Sidebar({ onClose, onNotificationsClick }) {
             <Typography variant="subtitle1">{memberName || ""}</Typography>
           </div>
           <IconButton size="small" onClick={onNotificationsClick}>
-            <MailOutlineRoundedIcon fontSize="small" sx={{ color: 'grey.400' }} />
+            <Badge badgeContent={unreadCount} color="error">
+              <MailOutlineRoundedIcon fontSize="small" sx={{ color: 'grey.400' }} />
+            </Badge>
           </IconButton>
         </Box>
       </ProfileSection>
