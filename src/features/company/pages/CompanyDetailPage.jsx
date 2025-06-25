@@ -120,9 +120,8 @@ export default function CompanyDetailPage() {
         open={confirmOpen}
         title="개발사를 삭제하시겠습니까?"
         description="삭제 후에는 복구할 수 없습니다."
-        cancelText="취소"
-        confirmText="삭제하기"
-        confirmColor="error"
+        isDelete
+        confirmKind="danger"
         onClose={() => setConfirmOpen(false)}
         onConfirm={handleDelete}
       />
