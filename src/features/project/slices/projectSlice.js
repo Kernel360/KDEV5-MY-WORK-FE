@@ -6,26 +6,32 @@ import * as projectAPI from "@/api/project";
 export const fetchProjects = createAsyncThunk(
   "project/fetchProjects",
   async (
-    { page, size = 10, keyword = null, keywordType = null, step = null },
+    { page, size = 10, keyword = null, keywordType = null, step = null, userRole = null },
     thunkAPI
   ) => {
     try {
-      const params = {
-        page,
-        size,
-      };
-
+      const params = { page, size };
       if (keyword) {
         params.keyword = keyword;
         params.keywordType = keywordType;
       }
-
       if (step) {
         params.step = step;
       }
 
-      const response = await projectAPI.getProjects(params);
-      const { projects, totalCount } = response.data.data;
+      // 역할에 따른 API 분기
+      const isSystemAdmin = userRole === "ROLE_SYSTEM_ADMIN";
+      const response = isSystemAdmin
+        ? await projectAPI.getProjects(params) // 시스템 어드민: 전체 프로젝트 조회
+        : await projectAPI.getMyProjects(); // 그 외 역할: 내 프로젝트 조회
+
+      const responseData = response.data.data;
+      const projects = responseData.projects || [];
+
+      // 시스템 어드민이 아닐 경우, totalCount를 프론트에서 계산
+      const totalCount = isSystemAdmin
+        ? responseData.totalCount
+        : projects.length;
 
       return {
         projects,

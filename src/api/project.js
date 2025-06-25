@@ -12,6 +12,14 @@ export function getProjects(params) {
 }
 
 /**
+ * 내 프로젝트 목록 조회 (역할 기반)
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<ProjectListWebResponse>
+ */
+export function getMyProjects() {
+  return api.get("/api/projects/my-projects");
+}
+
+/**
  * 단일 프로젝트 조회
  * - URL PathVariable로 전달된 projectId로 특정 프로젝트 상세 조회
  * @param {string} id - 조회할 프로젝트의 UUID
