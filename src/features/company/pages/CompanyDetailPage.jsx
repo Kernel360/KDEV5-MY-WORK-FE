@@ -16,10 +16,6 @@ import {
 import { InfoOutlined, Close as CloseIcon } from "@mui/icons-material";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
-import ConfirmDialog from "@/components/common/confirmDialog/ConfirmDialog";
-import CustomButton from "@/components/common/customButton/CustomButton";
-import CreateRoundedIcon from "@mui/icons-material/CreateRounded";
-import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import {
   fetchCompanyById,
   deleteCompany,
@@ -36,7 +32,6 @@ export default function CompanyDetailPage() {
     (state) => state.company
   );
 
-  const [confirmOpen, setConfirmOpen] = useState(false);
   const [members, setMembers] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
@@ -97,35 +92,7 @@ export default function CompanyDetailPage() {
       <PageHeader
         title={company.name}
         subtitle={company.detail || "상세 설명이 없습니다."}
-        action={
-          <Stack direction="row" spacing={1}>
-            <CustomButton
-              kind="danger"
-              startIcon={<DeleteRoundedIcon />}
-              onClick={() => setConfirmOpen(true)}
-            >
-              삭제하기
-            </CustomButton>
-            <CustomButton
-              startIcon={<CreateRoundedIcon />}
-              onClick={() => navigate(`/companies/${id}/edit`)}
-            >
-              수정하기
-            </CustomButton>
-          </Stack>
-        }
       />
-
-      <ConfirmDialog
-        open={confirmOpen}
-        title="개발사를 삭제하시겠습니까?"
-        description="삭제 후에는 복구할 수 없습니다."
-        isDelete
-        confirmKind="danger"
-        onClose={() => setConfirmOpen(false)}
-        onConfirm={handleDelete}
-      />
-
       <Box display="flex" flexDirection="column" flex={1} minHeight={0}>
         <Paper
           sx={{
