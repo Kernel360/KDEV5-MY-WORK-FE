@@ -12,6 +12,7 @@ import DashboardReducer from "@/features/dashboard/DashboardSlice";
 import logsReducer from "@/features/logs/logsSlice";
 import checklistReducer from "@/features/project/approval/checklistSlice";
 import notificationReducer from "@/features/notifications/notificationSlice";
+import checklistHistoryReducer from "@/features/project/approval/checklistHistorySlice";
 
 const preloadedAuth = (() => {
   try {
@@ -53,6 +54,7 @@ export const store = configureStore({
     logs: logsReducer,
     checklist: checklistReducer,
     notifications: notificationReducer,
+    checklistHistory: checklistHistoryReducer,
   },
   preloadedState: {
     auth: preloadedAuth,
