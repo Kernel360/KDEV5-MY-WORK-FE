@@ -64,7 +64,7 @@ export default function ProjectPage() {
           subtitle={`총 ${totalCount ?? 0}개의 프로젝트가 있습니다.`}
           noPaddingBottom
         />
-        <Box sx={{ flex: 1, overflow: "hidden", mb: 0.3 }}>
+        <Box sx={{ flex: 1, minHeight: 0, overflow: "auto", mb: 0.3 }}>
           {isSystemAdmin ? (
             <ProjectTable
               projects={projects}
@@ -75,10 +75,18 @@ export default function ProjectPage() {
               onPageChange={handlePageChange}
             />
           ) : (
-            <ProjectCardList
-              projects={projects}
-              onClick={(p) => navigate(`/projects/${p.id}/posts`)}
-            />
+            <Box
+              sx={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <ProjectCardList
+                projects={projects}
+                onClick={(p) => navigate(`/projects/${p.id}/posts`)}
+              />
+            </Box>
           )}
         </Box>
       </Box>
