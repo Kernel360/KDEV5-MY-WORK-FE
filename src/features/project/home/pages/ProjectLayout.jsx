@@ -96,7 +96,7 @@ export default function ProjectLayout() {
                 color="primary"
               >
                 <ToggleButton value={0}>업무 관리</ToggleButton>
-                <ToggleButton value={1}>결재 관리</ToggleButton>
+                <ToggleButton value={1}>체크리스트</ToggleButton>
               </ToggleButtonGroup>
             </Stack>
           }
