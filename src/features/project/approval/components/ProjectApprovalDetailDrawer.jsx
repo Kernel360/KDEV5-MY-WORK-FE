@@ -1,4 +1,3 @@
-// ProjectApprovalDetailDrawer.jsx
 import React, { useEffect, useState } from "react";
 import {
   Drawer,
@@ -15,59 +14,11 @@ import {
   getCheckListByIdThunk,
   approveCheckListThunk,
 } from "../checklistSlice";
-import CustomButton from "@/components/common/customButton/CustomButton";
+import { fetchCheckListHistories } from "../checklistHistorySlice"; // ✅ 추가
 import ApprovalDetailHeader from "./ApprovalDetailHeader";
 import ApprovalDetailContent from "./ApprovalDetailContent";
 import ApprovalActionInput from "./ApprovalActionInput";
 import ApprovalHistoryList from "./ApprovalHistoryList";
-
-const dummyHistories = [
-  {
-    historyId: "0197a35a-a736-739b-84bb-6563d1073f4d",
-    companyName: "E회사",
-    memberName: "최지우",
-    content: "최종 승인",
-    approval: "APPROVED",
-    createdAt: "2025-06-25 05:30",
-  },
-  {
-    historyId: "0197a35a-7e51-783b-8143-a1c99099598a",
-    companyName: "D회사",
-    memberName: "박민수",
-    content: "내용 수정",
-    approval: "REQUEST_CHANGES",
-    createdAt: "2025-06-25 04:30",
-  },
-  {
-    historyId: "0197a35a-65bb-762c-b54d-1f419c94ba7a",
-    companyName: "C회사",
-    memberName: "이영희",
-    content: "반려 처리",
-    approval: "REJECTED",
-    createdAt: "2025-06-25 03:30",
-  },
-  {
-    historyId: "0197a35a-4daa-7fde-b9cf-260213a9f8e1",
-    companyName: "B회사",
-    memberName: "김철수",
-    content: "승인 요청",
-    approval: "APPROVED",
-    createdAt: "2025-06-25 02:30",
-  },
-  {
-    historyId: "0197a35a-297b-7f7c-a262-cb26581f8c6d",
-    companyName: "A회사",
-    memberName: "홍길동",
-    content: "최초 등록",
-    approval: "PENDING",
-    createdAt: "2025-06-25 01:30",
-  },
-];
-
-const formattedHistories = dummyHistories.map((h) => ({
-  ...h,
-  message: `${h.companyName}의 ${h.memberName}님께서 ${h.content}하였습니다.`,
-}));
 
 export default function ProjectApprovalDetailDrawer({
   open,
@@ -77,16 +28,20 @@ export default function ProjectApprovalDetailDrawer({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const dispatch = useDispatch();
+
   const { current: checkList, error } = useSelector((state) => state.checklist);
+  const { items: histories, loading: historyLoading } = useSelector(
+    (state) => state.checklistHistory || {}
+  );
+  console.log("histories", histories);
 
   const [approvalType, setApprovalType] = useState(null);
   const [reasonText, setReasonText] = useState("");
 
   useEffect(() => {
     if (open && checkListId) {
-      dispatch(getCheckListByIdThunk(checkListId)).catch((err) =>
-        console.error("조회 실패:", err)
-      );
+      dispatch(getCheckListByIdThunk(checkListId));
+      dispatch(fetchCheckListHistories(checkListId)); // ✅ 히스토리 호출 추가
     }
   }, [open, checkListId, dispatch]);
 
@@ -148,7 +103,10 @@ export default function ProjectApprovalDetailDrawer({
                 onConfirm={handleConfirm}
               />
             )}
-            <ApprovalHistoryList histories={formattedHistories} />
+            <ApprovalHistoryList
+              histories={histories}
+              loading={historyLoading}
+            />
           </Stack>
         ) : error ? (
           <Box sx={{ textAlign: "center", mt: 10 }}>
