@@ -19,6 +19,7 @@ export default function ProjectTable({
   loading = false,
   error = null,
   onDelete,
+  onPageChange,
 }) {
   const navigate = useNavigate();
 
@@ -41,6 +42,11 @@ export default function ProjectTable({
     }
   };
 
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    onPageChange?.(newPage);
+  };
+
   const enrichedProjects = projects.map((p, idx) => ({
     ...p,
     progress: Math.min((idx + 1) * 10, 100),
@@ -57,7 +63,7 @@ export default function ProjectTable({
       pagination={{
         page,
         total: totalCount,
-        onPageChange: (newPage) => setPage(newPage),
+        onPageChange: handlePageChange,
         pageSize: 10,
       }}
       onRowClick={(row) => navigate(`/projects/${row.id}/posts`)}

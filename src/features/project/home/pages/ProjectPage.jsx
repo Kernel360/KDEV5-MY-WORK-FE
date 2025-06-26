@@ -42,6 +42,13 @@ export default function ProjectPage() {
     [dispatch, userRole]
   );
 
+  const handlePageChange = useCallback(
+    (page) => {
+      dispatch(fetchProjects({ page, size: 10, userRole }));
+    },
+    [dispatch, userRole]
+  );
+
   return (
     <PageWrapper>
       <Box
@@ -65,6 +72,7 @@ export default function ProjectPage() {
               loading={status === "loading"}
               error={error}
               onDelete={handleDelete}
+              onPageChange={handlePageChange}
             />
           ) : (
             <ProjectCardList
