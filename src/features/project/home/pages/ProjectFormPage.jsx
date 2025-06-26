@@ -7,7 +7,7 @@ import {
   updateProject,
 } from "@/features/project/slices/projectSlice";
 import { fetchCompanyNamesByType } from "@/features/company/companySlice";
-import { Button, Stack } from "@mui/material";
+import { Button, Stack, Box } from "@mui/material";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
 import ProjectForm from "../components/ProjectForm";
@@ -104,45 +104,49 @@ export default function ProjectFormPage() {
     navigate(-1);
   };
 
-  const headerAction = (
-    <Stack direction="row" spacing={2}>
-      <Button variant="outlined" onClick={handleCancel}>
-        취소
-      </Button>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleSubmit}
-        disabled={projectLoading || companyLoading || !form.name}
-      >
-        {projectLoading
-          ? isEdit
-            ? "로딩 중..."
-            : "로딩 중..."
-          : isEdit
-            ? "저장"
-            : "생성"}
-      </Button>
-    </Stack>
-  );
-
   return (
     <PageWrapper>
       <PageHeader
         title={isEdit ? "프로젝트 수정" : "프로젝트 생성"}
         subtitle="새로운 프로젝트를 등록하여 업무 현황을 관리하세요."
-        action={headerAction}
       />
-      <ProjectForm
-        form={form}
-        handleChange={handleChange}
-        handleSubmit={handleSubmit}
-        onCancel={handleCancel}
-        loading={projectLoading}
-        developerCompanies={devList}
-        clientCompanies={clientList}
-        isEdit={isEdit}
-      />
+      <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+        <ProjectForm
+          form={form}
+          handleChange={handleChange}
+          handleSubmit={handleSubmit}
+          onCancel={handleCancel}
+          loading={projectLoading}
+          developerCompanies={devList}
+          clientCompanies={clientList}
+          isEdit={isEdit}
+        />
+      </Box>
+
+      <Stack
+        direction="row"
+        justifyContent="flex-end"
+        spacing={2}
+        sx={{ px: 3, mb: 4 }}
+      >
+        <Button variant="outlined" onClick={handleCancel}>
+          취소
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleSubmit}
+          disabled={projectLoading || companyLoading || !form.name}
+        >
+          {projectLoading
+            ? isEdit
+              ? "로딩 중..."
+              : "로딩 중..."
+            : isEdit
+              ? "저장"
+              : "생성"}
+        </Button>
+      </Stack>
     </PageWrapper>
   );
 }
