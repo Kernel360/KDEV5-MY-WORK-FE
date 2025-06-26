@@ -53,7 +53,7 @@ export const store = configureStore({
     dashboard: DashboardReducer,
     logs: logsReducer,
     checklist: checklistReducer,
-    notifications: notificationReducer,
+    notification: notificationReducer,
     checklistHistory: checklistHistoryReducer,
   },
   preloadedState: {
