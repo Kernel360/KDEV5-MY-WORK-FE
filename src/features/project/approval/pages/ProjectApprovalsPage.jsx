@@ -11,6 +11,8 @@ import {
   Drawer,
   IconButton,
   Stack,
+  Toolbar,
+  Button,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchChecklistProgress, fetchChecklistItems } from "../checklistSlice";
@@ -82,22 +84,6 @@ export default function ProjectApprovalsPage() {
 
   return (
     <Box>
-      {/* 생성 버튼 */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-end",
-          mb: 2,
-        }}
-      >
-        <CustomButton
-          variant="contained"
-          onClick={() => setCreateDrawerOpen(true)}
-        >
-          + 새 결재 항목
-        </CustomButton>
-      </Box>
-
       <StepCardList
         steps={progressList.map((step) => ({
           title: step.projectStepName,
@@ -107,10 +93,27 @@ export default function ProjectApprovalsPage() {
         selectedStep={selected}
         onStepChange={handleStepChange}
       />
-
+      
+      {/* 새 결재 항목 버튼을 포함하는 툴바 */}
       <Box
         sx={{
-          mt: 4,
+          display: "flex",
+          justifyContent: "flex-end",
+          mb: 2, // 업무 관리 페이지와 동일한 하단 여백 적용
+        }}
+      >
+        <CustomButton
+          variant="contained"
+          onClick={() => setCreateDrawerOpen(true)}
+          sx={{ ml: 2 }} // 업무 관리 페이지와 동일한 왼쪽 여백 적용
+        >
+          새 체크리스트
+        </CustomButton>
+      </Box>
+
+      {/* 결재 현황 카드 섹션 */}
+      <Box
+        sx={{
           display: "flex",
           gap: 2,
           flexDirection: isMobile ? "column" : "row",
