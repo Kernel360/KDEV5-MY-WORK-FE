@@ -1,56 +1,61 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Box,
   Typography,
   IconButton,
   Stack,
   Paper,
-  Chip,
   useTheme,
   useMediaQuery,
+  CircularProgress,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import dayjs from "dayjs";
-import { formatNotificationDate } from "@/utils/dateUtils";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchNotifications } from "@/features/notifications/notificationSlice";
+import { formatNotificationDate } from "@/utils/dateUtils";
 
-const mockNotifications = [
-  {
-    id: 1,
-    title: "새로운 리뷰가 등록되었습니다.",
-    content: '프로젝트 A의 "로그인 기능"에 새로운 리뷰가 달렸습니다.',
-    date: dayjs().subtract(3, "hour").format("YYYY-MM-DDTHH:mm:ss"),
-    read: false,
-  },
-  {
-    id: 2,
-    title: "결재가 승인되었습니다.",
-    content: '요청하신 "디자인 시안"이 승인되었습니다.',
-    date: dayjs().subtract(1, "day").format("YYYY-MM-DDTHH:mm:ss"),
-    read: false,
-  },
-  {
-    id: 3,
-    title: "새로운 멤버가 초대되었습니다.",
-    content: '김민준님이 "마케팅팀"에 합류했습니다.',
-    date: dayjs().subtract(3, "day").format("YYYY-MM-DDTHH:mm:ss"),
-    read: true,
-  },
-  {
-    id: 4,
-    title: "서버 점검 안내",
-    content: "오늘 오후 10시에 정기 서버 점검이 있습니다.",
-    date: dayjs().subtract(10, "day").format("YYYY-MM-DDTHH:mm:ss"),
-    read: true,
-  },
-];
+const getActionLabel = (type) => {
+  switch (type) {
+    case "APPROVED":
+      return "승인";
+    case "REJECTED":
+      return "반려";
+    case "REQUEST_CHANGES":
+      return "수정 요청";
+    case "PENDING":
+      return "결재 요청";
+    default:
+      return type;
+  }
+};
+
+const getTargetLabel = (type) => {
+  switch (type) {
+    case "PROJECT_CHECK_LIST":
+      return "결재 요청 항목";
+    default:
+      return type;
+  }
+};
 
 export default function NotificationsDrawer({ open, onClose }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const dispatch = useDispatch();
+
+  const { notifications = [], loading } = useSelector(
+    (state) => state.notification
+  );
 
   const SIDEBAR_WIDTH = 216;
   const DRAWER_WIDTH = 360;
+
+  useEffect(() => {
+    if (open) {
+      dispatch(fetchNotifications({ page: 1 }));
+    }
+  }, [open, dispatch]);
 
   return (
     <Box
@@ -96,7 +101,6 @@ export default function NotificationsDrawer({ open, onClose }) {
               알림
             </Typography>
           </Box>
-
           <IconButton onClick={onClose}>
             <CloseIcon />
           </IconButton>
@@ -104,85 +108,69 @@ export default function NotificationsDrawer({ open, onClose }) {
 
         {/* 알림 리스트 */}
         <Stack spacing={1.5} px={2} pb={2}>
-          {/* 필터 버튼들 생략 */}
-
-          {mockNotifications.map((notif) => (
-            <Paper
-              key={notif.id}
-              elevation={0}
-              sx={{
-                borderRadius: 3, // ✅ 더 둥글게
-                px: 2,
-                py: 2,
-                backgroundColor: notif.read ? "#f9f9f9" : "#eeeeee",
-                border: "1px solid #e0e0e0",
-                transition: "all 0.2s ease",
-                overflow: "hidden",
-                "&:hover": {
-                  backgroundColor: notif.read ? "#f0f0f0" : "#e5e5e5",
-                },
-              }}
-            >
-              <Stack spacing={1}>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  gap={1}
-                >
-                  <Box
-                    display="flex"
-                    alignItems="center"
-                    gap={1}
-                    minWidth={0}
-                    flex={1}
+          {loading ? (
+            <Box sx={{ textAlign: "center", mt: 6 }}>
+              <CircularProgress />
+            </Box>
+          ) : notifications.length === 0 ? (
+            <Box sx={{ textAlign: "center", mt: 6 }}>
+              <Typography variant="body2" color="text.secondary">
+                새로운 알림이 없습니다.
+              </Typography>
+            </Box>
+          ) : (
+            notifications.map((notif) => (
+              <Paper
+                key={notif.id}
+                elevation={0}
+                sx={{
+                  borderRadius: 3,
+                  px: 2,
+                  py: 2,
+                  backgroundColor: notif.isRead ? "#f9f9f9" : "#eeeeee",
+                  border: "1px solid #e0e0e0",
+                  transition: "all 0.2s ease",
+                  overflow: "hidden",
+                  "&:hover": {
+                    backgroundColor: notif.isRead ? "#f0f0f0" : "#e5e5e5",
+                  },
+                }}
+              >
+                <Stack spacing={1}>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 1,
+                      lineHeight: 1.6,
+                    }}
                   >
-                    {/* ✅ 읽지 않은 알림이면 dot 표시 */}
-                    {!notif.read && (
+                    {!notif.isRead && (
                       <Box
+                        component="span"
                         sx={{
                           width: 8,
                           height: 8,
                           borderRadius: "50%",
-                          bgcolor: "#1a1a1a", // primary main
+                          bgcolor: "#1a1a1a",
                           flexShrink: 0,
+                          mt: "6px",
                         }}
                       />
                     )}
-
-                    <Typography
-                      variant="subtitle2"
-                      fontWeight={500}
-                      color="text.primary"
-                      sx={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {notif.title}
-                    </Typography>
-                  </Box>
-
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ whiteSpace: "nowrap", flexShrink: 0 }}
-                  >
-                    {formatNotificationDate(notif.date)}
+                    <span>
+                      {notif.actorName}님이{" "}
+                      <strong>{getTargetLabel(notif.targetType)}</strong>에 대해{" "}
+                      <strong>{getActionLabel(notif.actionType)}</strong>을(를)
+                      남겼습니다.
+                    </span>
                   </Typography>
-                </Box>
-
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ lineHeight: 1.6 }}
-                >
-                  {notif.content}
-                </Typography>
-              </Stack>
-            </Paper>
-          ))}
+                </Stack>
+              </Paper>
+            ))
+          )}
         </Stack>
       </Box>
     </Box>

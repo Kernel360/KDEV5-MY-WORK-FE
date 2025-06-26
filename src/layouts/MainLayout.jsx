@@ -11,12 +11,13 @@ import {
 } from "./MainLayout.styles";
 import { Outlet } from "react-router-dom";
 import NotificationsDrawer from "@/features/notifications/components/NotificationsDrawer";
+import useNotificationPolling from "@/hooks/useNotificationPolling";
 
 export default function MainLayout() {
+  useNotificationPolling();
   const isMobile = useMediaQuery("(max-width:600px)");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const unreadCount = useSelector((state) => state.notifications.unreadCount);
 
   const handleDrawerToggle = () => {
     setMobileOpen((prev) => !prev);
@@ -40,15 +41,24 @@ export default function MainLayout() {
           onClose={handleDrawerToggle}
           ModalProps={{ keepMounted: true }}
         >
-          <Sidebar onClose={handleDrawerToggle} onNotificationsClick={handleNotificationsToggle} unreadCount={unreadCount} />
+          <Sidebar
+            onClose={handleDrawerToggle}
+            onNotificationsClick={handleNotificationsToggle}
+          />
         </StyledDrawer>
       ) : (
-        <Sidebar onClose={() => {}} onNotificationsClick={handleNotificationsToggle} unreadCount={unreadCount} />
+        <Sidebar
+          onClose={() => {}}
+          onNotificationsClick={handleNotificationsToggle}
+        />
       )}
       <Main>
         <Outlet />
       </Main>
-      <NotificationsDrawer open={notificationsOpen} onClose={handleNotificationsToggle} />
+      <NotificationsDrawer
+        open={notificationsOpen}
+        onClose={handleNotificationsToggle}
+      />
     </Root>
   );
 }
