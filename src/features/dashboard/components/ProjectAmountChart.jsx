@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -42,6 +42,13 @@ const ProjectAmountChart = () => {
 
   const formatAmount = (amount) =>
     new Intl.NumberFormat("ko-KR").format(amount);
+
+  const reversedChartData = useMemo(() => {
+    if (selectedChartType === "CHART_TYPE_WEEK") {
+      return [...chartData].reverse();
+    }
+    return chartData;
+  }, [chartData, selectedChartType]);
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload?.length) {
@@ -88,7 +95,7 @@ const ProjectAmountChart = () => {
 
   const renderChart = () => {
     const commonProps = {
-      data: chartData,
+      data: reversedChartData,
       margin: { top: 20, right: 20, left: 10, bottom: 10 },
     };
 
