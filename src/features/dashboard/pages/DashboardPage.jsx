@@ -1,13 +1,21 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import {
   Box,
   Typography,
   Stack,
   Pagination,
-  Divider,
   Chip,
+  Paper,
+  Divider,
 } from "@mui/material";
+import DashboardIcon from "@mui/icons-material/DashboardRounded";
+import HourglassBottomIcon from "@mui/icons-material/HourglassBottomRounded";
+import CheckCircleIcon from "@mui/icons-material/CheckCircleRounded";
+import AccessTimeIcon from "@mui/icons-material/AccessTimeRounded";
+import WhatshotIcon from "@mui/icons-material/WhatshotRounded";
+import BarChartIcon from "@mui/icons-material/BarChartRounded";
+
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
 import { useDispatch, useSelector } from "react-redux";
@@ -23,14 +31,12 @@ import { ROLES } from "@/constants/roles";
 
 export default function DashboardPage() {
   const dispatch = useDispatch();
-  const dashboard = useSelector((state) => state.dashboard) || {};
   const {
     summary,
     nearDeadline = [],
     nearDeadlineTotalCount = 0,
-    loading = false,
     popularProjects = [],
-  } = dashboard;
+  } = useSelector((state) => state.dashboard || {});
 
   const safeSummary = summary || {
     totalCount: 0,
@@ -67,60 +73,104 @@ export default function DashboardPage() {
           title="프로젝트 현황 대시보드"
           subtitle="전체 프로젝트의 진행 상태와 주요 데이터를 한눈에 확인하세요."
         />
-        <Box display="flex" justifyContent="space-between" mb={3} gap={1} mx={2}>
-          <InfoCard label="전체 프로젝트" value={safeSummary.totalCount} />
-          <InfoCard label="진행중" value={safeSummary.inProgressCount} />
-          <InfoCard label="완료됨" value={safeSummary.completedCount} />
+
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          mb={3}
+          gap={3}
+          mx={3}
+        >
+          <InfoCard
+            icon={<DashboardIcon />}
+            label="전체"
+            value={safeSummary.totalCount}
+            color="neutral"
+          />
+          <InfoCard
+            icon={<HourglassBottomIcon />}
+            label="진행 중"
+            value={safeSummary.inProgressCount}
+            color="warning"
+          />
+          <InfoCard
+            icon={<CheckCircleIcon />}
+            label="완료"
+            value={safeSummary.completedCount}
+            color="success"
+          />
         </Box>
-        
-        {/* 프로젝트 금액 차트 섹션 - 특정 권한에만 표시 */}
-        <PermissionGuard allowedRoles={[ROLES.DEV_ADMIN, ROLES.CLIENT_ADMIN]} showNotification={false}>
+
+        <PermissionGuard
+          allowedRoles={[ROLES.DEV_ADMIN, ROLES.CLIENT_ADMIN]}
+          showNotification={false}
+        >
           <Box mb={4} mx={3}>
-            <SectionBox title="프로젝트 금액 현황">
+            <SectionBox icon={<BarChartIcon />} title="프로젝트 금액 현황">
               <ProjectAmountChart />
             </SectionBox>
           </Box>
         </PermissionGuard>
 
-        <Box display="flex" justifyContent="space-between" mb={4} gap={3} mx={3}>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          mb={4}
+          gap={3}
+          mx={3}
+        >
           <Box flex={1}>
-            <SectionBox title="마감 임박 프로젝트 (D-5 이내)">
+            <SectionBox
+              icon={<AccessTimeIcon />}
+              title="마감 임박 프로젝트 (D-5 이내)"
+              iconColor="warning.main"
+              height={350}
+            >
               {nearDeadline.length === 0 ? (
-                <Typography color="text.secondary" align="center" sx={{ py: 4 }}>
+                <Typography
+                  color="text.secondary"
+                  align="center"
+                  sx={{ py: 4 }}
+                >
                   마감임박 프로젝트가 없습니다.
                 </Typography>
               ) : (
                 <>
-                  {nearDeadline.map((p) => (
-                    <RowItem
-                      key={p.id}
-                      id={p.id}
-                      title={p.name}
-                      endAt={p.endAt}
-                      dday={p.dday}
+                  <Box sx={{ flexGrow: 1, overflowY: "auto", minHeight: 0 }}>
+                    {nearDeadline.map((p) => (
+                      <RowItem key={p.id} {...p} />
+                    ))}
+                  </Box>
+                  <Box display="flex" justifyContent="flex-end" mt={2}>
+                    <Pagination
+                      count={Math.ceil(nearDeadlineTotalCount / pageSize)}
+                      page={duePage}
+                      onChange={(_, val) => setDuePage(val)}
+                      size="small"
                     />
-                  ))}
-                  <Pagination
-                    count={Math.ceil(nearDeadlineTotalCount / pageSize)}
-                    page={duePage}
-                    onChange={(_, val) => setDuePage(val)}
-                    sx={{ mt: 2 }}
-                  />
+                  </Box>
                 </>
               )}
             </SectionBox>
           </Box>
 
           <Box flex={1}>
-            <SectionBox title="게시글 활동이 활발한 프로젝트 TOP 5">
-              {popularProjects.map((p, idx) => (
-                <PopularRowItem
-                  key={p.projectId}
-                  id={p.projectId}
-                  rank={idx + 1}
-                  title={p.projectName}
-                />
-              ))}
+            <SectionBox
+              icon={<WhatshotIcon />}
+              title="게시글 활동이 활발한 프로젝트 TOP 5"
+              iconColor="error.main"
+              height={350}
+            >
+              <Box sx={{ maxHeight: 250, overflowY: "auto" }}>
+                {popularProjects.map((p, idx) => (
+                  <PopularRowItem
+                    key={p.projectId}
+                    id={p.projectId}
+                    rank={idx + 1}
+                    title={p.projectName}
+                  />
+                ))}
+              </Box>
             </SectionBox>
           </Box>
         </Box>
@@ -129,68 +179,112 @@ export default function DashboardPage() {
   );
 }
 
-function InfoCard({ label, value }) {
+function InfoCard({ icon, label, value, color }) {
   return (
-    <Box
+    <Paper
       sx={{
+        flex: 1,
+        p: 2,
+        borderRadius: 3,
         border: "1px solid",
         borderColor: "divider",
-        borderRadius: 2,
-        p: 3,
-        flex: 1,
-        mx: 1,
-        bgcolor: "background.paper",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+        boxShadow: "none",
+        display: "flex",
+        alignItems: "center",
+        gap: 2,
       }}
     >
-      <Typography variant="body2" color="text.secondary" mb={1}>
-        {label}
-      </Typography>
-      <Typography variant="h4" color="primary.main">
-        {value}
-      </Typography>
-    </Box>
+      <Box
+        sx={{
+          fontSize: 32,
+          color: (theme) => theme.palette.status[color]?.main,
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        {icon}
+      </Box>
+      <Stack spacing={0.5} sx={{ flex: 1 }}>
+        <Chip
+          label={label}
+          sx={(theme) => ({
+            width: "fit-content",
+            height: 24,
+            fontSize: 12,
+            fontWeight: 500,
+            bgcolor: theme.palette.status[color]?.bg,
+            color: theme.palette.status[color]?.main,
+            border: "none",
+          })}
+        />
+        <Typography variant="h5" fontWeight={700} color="text.primary">
+          {value}
+        </Typography>
+      </Stack>
+    </Paper>
   );
 }
 
-function SectionBox({ title, children }) {
+function SectionBox({
+  icon,
+  title,
+  children,
+  iconColor = "primary.main",
+  height = 300,
+}) {
   return (
-    <Box
+    <Paper
       sx={{
+        p: 3,
+        borderRadius: 3,
+        bgcolor: "background.paper",
         border: "1px solid",
         borderColor: "divider",
-        borderRadius: 2,
-        p: 3,
-        mb: 4,
-        bgcolor: "background.paper",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-        minHeight: 350,
+        boxShadow: "none",
         display: "flex",
         flexDirection: "column",
+        gap: 2,
+        height,
       }}
     >
-      <Typography variant="h6" color="text.primary" mb={2}>
-        {title}
-      </Typography>
-      <Box sx={{ flex: 1 }}>{children}</Box>
-    </Box>
+      <Stack direction="row" alignItems="center" spacing={1}>
+        <Box
+          fontSize={20}
+          color={iconColor}
+          sx={{ display: "flex", alignItems: "center" }}
+        >
+          {icon}
+        </Box>
+        <Typography variant="subtitle1" fontWeight={600} color="text.primary">
+          {title}
+        </Typography>
+      </Stack>
+      {children}
+    </Paper>
   );
 }
 
-function RowItem({ title, endAt, dday, id }) {
+function RowItem({ name, endAt, dday, id }) {
   const navigate = useNavigate();
+
+  const getColorKey = (dday) => {
+    if (dday <= 1) return "error";
+    if (dday <= 3) return "warning";
+    return "success";
+  };
+
+  const colorKey = getColorKey(dday);
 
   return (
     <Box
       onClick={() => navigate(`/projects/${id}/posts`)}
-      sx={{
+      sx={(theme) => ({
         cursor: "pointer",
-        "&:hover": {
-          bgcolor: "grey.100",
-        },
+        "&:hover": { bgcolor: theme.palette.grey[100] },
         borderRadius: 1,
+        borderColor: "divider",
         p: 1,
-      }}
+      })}
     >
       <Stack
         direction="row"
@@ -200,7 +294,7 @@ function RowItem({ title, endAt, dday, id }) {
       >
         <Box>
           <Typography fontWeight={500} color="text.primary">
-            {title}
+            {name}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             종료 예정일: {dayjs(endAt).format("YYYY-MM-DD")}
@@ -208,94 +302,61 @@ function RowItem({ title, endAt, dday, id }) {
         </Box>
         <Chip
           label={`D-${dday}`}
-          color={dday <= 1 ? "error" : dday <= 3 ? "warning" : "default"}
-          variant="outlined"
-          sx={{
+          variant="filled"
+          sx={(theme) => ({
             borderRadius: 1,
             fontWeight: 500,
-            bgcolor:
-              dday <= 1
-                ? "status.error.bg"
-                : dday <= 3
-                  ? "status.warning.bg"
-                  : "background.default",
-            color:
-              dday <= 1
-                ? "status.error.main"
-                : dday <= 3
-                  ? "status.warning.main"
-                  : "text.secondary",
-          }}
+            bgcolor: theme.palette.status[colorKey].bg,
+            color: theme.palette.status[colorKey].main,
+          })}
         />
       </Stack>
-      <Divider sx={{ mb: 1 }} />
     </Box>
   );
 }
 
 function PopularRowItem({ rank, title, id }) {
   const navigate = useNavigate();
-
-  const getColor = (rank) => {
-    switch (rank) {
-      case 1:
-        return "#fce7e7";
-      case 2:
-        return "#fff3e0";
-      case 3:
-        return "#e5f6ee";
-      default:
-        return "#f5f5f5";
-    }
-  };
-
-  const getTextColor = (rank) => {
-    switch (rank) {
-      case 1:
-        return "#d44c4c";
-      case 2:
-        return "#f1a545";
-      case 3:
-        return "#3ba272";
-      default:
-        return "#4a4a4a";
-    }
-  };
+  const colorKeys = ["error", "warning", "success", "neutral"];
+  const colorKey = colorKeys[rank - 1] || "neutral";
 
   return (
     <Box
       onClick={() => navigate(`/projects/${id}/posts`)}
-      sx={{
+      sx={(theme) => ({
+        p: 2,
+        borderRadius: 2,
+        transition: "all 0.2s",
+        "&:hover": { bgcolor: theme.palette.grey[100] },
         cursor: "pointer",
-        borderRadius: 1,
-        p: 1,
-        "&:hover": {
-          bgcolor: "grey.100",
-        },
-      }}
+      })}
     >
-      <Stack direction="row" alignItems="center" gap={1} mb={1.5}>
+      <Stack direction="row" alignItems="center" spacing={2}>
         <Box
-          sx={{
+          sx={(theme) => ({
             width: 32,
             height: 32,
             borderRadius: "50%",
-            bgcolor: getColor(rank),
-            color: getTextColor(rank),
+            bgcolor: theme.palette.status[colorKey].bg,
+            color: theme.palette.status[colorKey].main,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             fontWeight: 700,
             fontSize: 18,
-          }}
+          })}
         >
           {rank}
         </Box>
-        <Typography fontWeight={500} color="text.primary">
+        <Typography
+          fontWeight={600}
+          color="text.primary"
+          noWrap
+          sx={{ overflow: "hidden", textOverflow: "ellipsis" }}
+        >
           {title}
         </Typography>
       </Stack>
-      <Divider sx={{ mb: 1 }} />
     </Box>
   );
 }
