@@ -8,17 +8,11 @@ import CustomButton from "@/components/common/customButton/CustomButton";
 import { useNavigate } from "react-router-dom";
 import { Add } from "@mui/icons-material";
 import { Box } from "@mui/material";
-import { fetchMembers } from "@/features/member/memberSlice";
 
 export default function MemberPage() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const { totalCount } = useSelector((state) => state.member);
-
-  useEffect(() => {
-    dispatch(fetchMembers({ page: 1 }));
-  }, [dispatch]);
 
   return (
     <PageWrapper>
