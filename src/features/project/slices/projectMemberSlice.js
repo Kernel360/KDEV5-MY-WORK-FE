@@ -62,8 +62,8 @@ export const removeMemberFromProject = createAsyncThunk(
 const projectMemberSlice = createSlice({
   name: "projectMember",
   initialState: {
-    list: [],          // 전체 프로젝트 멤버
-    companyMembers: [],// 내 회사 멤버
+    list: [], // 전체 프로젝트 멤버
+    companyMembers: [], // 내 회사 멤버
     loading: false,
     error: null,
   },
@@ -76,9 +76,6 @@ const projectMemberSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchProjectMemberList.fulfilled, (state, action) => {
-        console.log('action', action)
-        console.log('state', state)
-
         state.loading = false;
         state.list = action.payload.members; // assuming .members array
       })
@@ -122,9 +119,7 @@ const projectMemberSlice = createSlice({
       })
       .addCase(removeMemberFromProject.fulfilled, (state, action) => {
         state.loading = false;
-        state.list = state.list.filter(
-          (m) => m.id !== action.payload.memberId
-        );
+        state.list = state.list.filter((m) => m.id !== action.payload.memberId);
       })
       .addCase(removeMemberFromProject.rejected, (state, action) => {
         state.loading = false;
