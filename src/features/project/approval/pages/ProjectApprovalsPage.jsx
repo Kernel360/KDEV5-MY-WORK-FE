@@ -15,19 +15,24 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { fetchChecklistProgress, fetchChecklistItems } from "../checklistSlice";
 import StepCardList from "@/components/common/stepCardList/StepCardList";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import ProjectApprovalDetailDrawer from "../components/ProjectApprovalDetailDrawer";
 import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
+import CustomButton from "@/components/common/customButton/CustomButton";
+import CreateCheckListDrawer from "../components/CreateCheckListDrawer";
 
 export default function ProjectApprovalsPage() {
   const { id: projectId } = useParams();
+  const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const dispatch = useDispatch();
   const [selected, setSelected] = useState("전체");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+
+  const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
 
   const { progressList = [], checklistItems = [] } = useSelector(
     (state) => state.checklist
@@ -77,6 +82,22 @@ export default function ProjectApprovalsPage() {
 
   return (
     <Box>
+      {/* 생성 버튼 */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          mb: 2,
+        }}
+      >
+        <CustomButton
+          variant="contained"
+          onClick={() => setCreateDrawerOpen(true)}
+        >
+          + 새 결재 항목
+        </CustomButton>
+      </Box>
+
       <StepCardList
         steps={progressList.map((step) => ({
           title: step.projectStepName,
@@ -134,8 +155,9 @@ export default function ProjectApprovalsPage() {
                   항목 없음
                 </Typography>
               ) : (
-                grouped[status].map((item, idx) => (
+                grouped[status].map((item) => (
                   <Card
+                    key={item.id}
                     onClick={() => handleCardClick(item)}
                     sx={{
                       cursor: "pointer",
@@ -224,6 +246,17 @@ export default function ProjectApprovalsPage() {
         open={drawerOpen}
         checkListId={selectedItem?.id}
         onClose={handleDrawerClose}
+      />
+
+      <CreateCheckListDrawer
+        open={createDrawerOpen}
+        onClose={() => setCreateDrawerOpen(false)}
+        onSubmit={() => {
+          // 다시 목록 새로고침
+          dispatch(fetchChecklistItems({ projectId }));
+          dispatch(fetchChecklistProgress(projectId));
+          setCreateDrawerOpen(false);
+        }}
       />
     </Box>
   );
