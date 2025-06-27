@@ -1,3 +1,4 @@
+// src/features/project/approval/pages/ProjectApprovalsPage.jsx
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -8,16 +9,12 @@ import {
   Card,
   Chip,
   CardContent,
-  Drawer,
-  IconButton,
   Stack,
-  Toolbar,
-  Button,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
+import { useParams, useLocation } from "react-router-dom";
 import { fetchChecklistProgress, fetchChecklistItems } from "../checklistSlice";
 import StepCardList from "@/components/common/stepCardList/StepCardList";
-import { useParams, useNavigate } from "react-router-dom";
 import ProjectApprovalDetailDrawer from "../components/ProjectApprovalDetailDrawer";
 import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
@@ -26,14 +23,14 @@ import CreateCheckListDrawer from "../components/CreateCheckListDrawer";
 
 export default function ProjectApprovalsPage() {
   const { id: projectId } = useParams();
-  const navigate = useNavigate();
+  const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const dispatch = useDispatch();
+
   const [selected, setSelected] = useState("전체");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-
   const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
 
   const { progressList = [], checklistItems = [] } = useSelector(
@@ -45,10 +42,26 @@ export default function ProjectApprovalsPage() {
     dispatch(fetchChecklistItems({ projectId }));
   }, [projectId, dispatch]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+
+    const targetId = params.get("targetId");
+
+    if (targetId && checklistItems.length > 0) {
+      const target = checklistItems.find(
+        (item) => String(item.id) === String(targetId)
+      );
+      if (target) {
+        setSelectedItem(target);
+        setDrawerOpen(true);
+      }
+    }
+  }, [location.search, checklistItems]);
+
   const handleStepChange = (id, title) => {
     setSelected(title);
     dispatch(
-      fetchChecklistItems({ projectId, projectStepId: id ?? undefined })
+      fetchChecklistItems({ projectId, projectStepId: id || undefined })
     );
   };
 
@@ -93,25 +106,16 @@ export default function ProjectApprovalsPage() {
         selectedStep={selected}
         onStepChange={handleStepChange}
       />
-      
-      {/* 새 결재 항목 버튼을 포함하는 툴바 */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-end",
-          mb: 2, // 업무 관리 페이지와 동일한 하단 여백 적용
-        }}
-      >
+
+      <Box display="flex" justifyContent="flex-end" mb={2}>
         <CustomButton
           variant="contained"
           onClick={() => setCreateDrawerOpen(true)}
-          sx={{ ml: 2 }} // 업무 관리 페이지와 동일한 왼쪽 여백 적용
         >
           새 체크리스트
         </CustomButton>
       </Box>
 
-      {/* 결재 현황 카드 섹션 */}
       <Box
         sx={{
           display: "flex",
@@ -176,7 +180,6 @@ export default function ProjectApprovalsPage() {
                     }}
                   >
                     <CardContent sx={{ p: 2 }}>
-                      {/* 상단: 타이틀 + 단계 */}
                       <Stack
                         direction="row"
                         justifyContent="space-between"
@@ -186,12 +189,7 @@ export default function ProjectApprovalsPage() {
                         <Typography
                           fontSize={14}
                           fontWeight={700}
-                          sx={{
-                            color: theme.palette.text.primary,
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
+                          sx={{ color: "text.primary" }}
                         >
                           {item.title}
                         </Typography>
@@ -209,7 +207,6 @@ export default function ProjectApprovalsPage() {
                         />
                       </Stack>
 
-                      {/* 작성자 + 작성일시 */}
                       <Stack direction="row" spacing={2} alignItems="center">
                         <Stack
                           direction="row"
@@ -255,7 +252,6 @@ export default function ProjectApprovalsPage() {
         open={createDrawerOpen}
         onClose={() => setCreateDrawerOpen(false)}
         onSubmit={() => {
-          // 다시 목록 새로고침
           dispatch(fetchChecklistItems({ projectId }));
           dispatch(fetchChecklistProgress(projectId));
           setCreateDrawerOpen(false);
