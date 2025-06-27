@@ -17,9 +17,9 @@ export const fetchNotifications = createAsyncThunk(
 // 알림 읽음 처리 Thunk
 export const markNotificationsAsRead = createAsyncThunk(
   "notification/markAsRead",
-  async (ids, { rejectWithValue }) => {
+  async (id, { rejectWithValue }) => {
     try {
-      const res = await readNotification({ ids });
+      const res = await readNotification({ id });
       return res.data.data; // NotificationReadWebResponse
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
