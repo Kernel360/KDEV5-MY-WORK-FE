@@ -69,15 +69,6 @@ export default function LoginPage() {
           MyWork
         </Typography>
 
-        <Typography
-          variant="h5"
-          gutterBottom
-          textAlign="center"
-          fontWeight={600}
-        >
-          로그인
-        </Typography>
-
         <form onSubmit={handleSubmit}>
           <Stack spacing={2}>
             <TextField
