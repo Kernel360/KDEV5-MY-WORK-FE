@@ -6,7 +6,7 @@ import api from "./api";
  * 대시보드 요약 정보 조회 (전체, 진행중, 완료 등)
  */
 export const getDashboardTotalSummary = () => {
-  return api.get("/api/dashboard/totalSummery");
+  return api.get("/api/dashboard/total-summary");
 };
 
 /**
