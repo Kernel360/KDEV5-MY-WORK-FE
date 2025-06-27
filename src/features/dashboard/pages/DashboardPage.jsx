@@ -29,6 +29,11 @@ import ProjectAmountChart from "../components/ProjectAmountChart";
 import PermissionGuard from "@/components/common/permissionGuard/PermissionGuard";
 import { ROLES } from "@/constants/roles";
 
+import InfoCard from "../components/InfoCard";
+import SectionBox from "../components/SectionBox";
+import RowItem from "../components/RowItem";
+import PopularRowItem from "../components/PopularRowItem";
+
 export default function DashboardPage() {
   const dispatch = useDispatch();
   const {
@@ -106,7 +111,11 @@ export default function DashboardPage() {
           showNotification={false}
         >
           <Box mb={4} mx={3}>
-            <SectionBox icon={<BarChartIcon />} title="프로젝트 금액 현황">
+            <SectionBox
+              icon={<BarChartIcon />}
+              title="프로젝트 금액 현황"
+              height={450}
+            >
               <ProjectAmountChart />
             </SectionBox>
           </Box>
@@ -124,7 +133,7 @@ export default function DashboardPage() {
               icon={<AccessTimeIcon />}
               title="마감 임박 프로젝트 (D-5 이내)"
               iconColor="warning.main"
-              height={350}
+              height={450}
             >
               {nearDeadline.length === 0 ? (
                 <Typography
@@ -153,15 +162,14 @@ export default function DashboardPage() {
               )}
             </SectionBox>
           </Box>
-
           <Box flex={1}>
             <SectionBox
               icon={<WhatshotIcon />}
               title="게시글 활동이 활발한 프로젝트 TOP 5"
               iconColor="error.main"
-              height={350}
+              height={450}
             >
-              <Box sx={{ maxHeight: 250, overflowY: "auto" }}>
+              <Box sx={{ maxHeight: 300, overflowY: "auto" }}>
                 {popularProjects.map((p, idx) => (
                   <PopularRowItem
                     key={p.projectId}
@@ -176,187 +184,5 @@ export default function DashboardPage() {
         </Box>
       </Box>
     </PageWrapper>
-  );
-}
-
-function InfoCard({ icon, label, value, color }) {
-  return (
-    <Paper
-      sx={{
-        flex: 1,
-        p: 2,
-        borderRadius: 3,
-        border: "1px solid",
-        borderColor: "divider",
-        boxShadow: "none",
-        display: "flex",
-        alignItems: "center",
-        gap: 2,
-      }}
-    >
-      <Box
-        sx={{
-          fontSize: 32,
-          color: (theme) => theme.palette.status[color]?.main,
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        {icon}
-      </Box>
-      <Stack spacing={0.5} sx={{ flex: 1 }}>
-        <Chip
-          label={label}
-          sx={(theme) => ({
-            width: "fit-content",
-            height: 24,
-            fontSize: 12,
-            fontWeight: 500,
-            bgcolor: theme.palette.status[color]?.bg,
-            color: theme.palette.status[color]?.main,
-            border: "none",
-          })}
-        />
-        <Typography variant="h5" fontWeight={700} color="text.primary">
-          {value}
-        </Typography>
-      </Stack>
-    </Paper>
-  );
-}
-
-function SectionBox({
-  icon,
-  title,
-  children,
-  iconColor = "primary.main",
-  height = 300,
-}) {
-  return (
-    <Paper
-      sx={{
-        p: 3,
-        borderRadius: 3,
-        bgcolor: "background.paper",
-        border: "1px solid",
-        borderColor: "divider",
-        boxShadow: "none",
-        display: "flex",
-        flexDirection: "column",
-        gap: 2,
-        height,
-      }}
-    >
-      <Stack direction="row" alignItems="center" spacing={1}>
-        <Box
-          fontSize={20}
-          color={iconColor}
-          sx={{ display: "flex", alignItems: "center" }}
-        >
-          {icon}
-        </Box>
-        <Typography variant="subtitle1" fontWeight={600} color="text.primary">
-          {title}
-        </Typography>
-      </Stack>
-      {children}
-    </Paper>
-  );
-}
-
-function RowItem({ name, endAt, dday, id }) {
-  const navigate = useNavigate();
-
-  const getColorKey = (dday) => {
-    if (dday <= 1) return "error";
-    if (dday <= 3) return "warning";
-    return "success";
-  };
-
-  const colorKey = getColorKey(dday);
-
-  return (
-    <Box
-      onClick={() => navigate(`/projects/${id}/posts`)}
-      sx={(theme) => ({
-        cursor: "pointer",
-        "&:hover": { bgcolor: theme.palette.grey[100] },
-        borderRadius: 1,
-        borderColor: "divider",
-        p: 1,
-      })}
-    >
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={1.5}
-      >
-        <Box>
-          <Typography fontWeight={500} color="text.primary">
-            {name}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            종료 예정일: {dayjs(endAt).format("YYYY-MM-DD")}
-          </Typography>
-        </Box>
-        <Chip
-          label={`D-${dday}`}
-          variant="filled"
-          sx={(theme) => ({
-            borderRadius: 1,
-            fontWeight: 500,
-            bgcolor: theme.palette.status[colorKey].bg,
-            color: theme.palette.status[colorKey].main,
-          })}
-        />
-      </Stack>
-    </Box>
-  );
-}
-
-function PopularRowItem({ rank, title, id }) {
-  const navigate = useNavigate();
-  const colorKeys = ["error", "warning", "success", "neutral"];
-  const colorKey = colorKeys[rank - 1] || "neutral";
-
-  return (
-    <Box
-      onClick={() => navigate(`/projects/${id}/posts`)}
-      sx={(theme) => ({
-        p: 2,
-        borderRadius: 2,
-        transition: "all 0.2s",
-        "&:hover": { bgcolor: theme.palette.grey[100] },
-        cursor: "pointer",
-      })}
-    >
-      <Stack direction="row" alignItems="center" spacing={2}>
-        <Box
-          sx={(theme) => ({
-            width: 32,
-            height: 32,
-            borderRadius: "50%",
-            bgcolor: theme.palette.status[colorKey].bg,
-            color: theme.palette.status[colorKey].main,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontWeight: 700,
-            fontSize: 18,
-          })}
-        >
-          {rank}
-        </Box>
-        <Typography
-          fontWeight={600}
-          color="text.primary"
-          noWrap
-          sx={{ overflow: "hidden", textOverflow: "ellipsis" }}
-        >
-          {title}
-        </Typography>
-      </Stack>
-    </Box>
   );
 }
