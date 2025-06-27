@@ -202,7 +202,6 @@ const checklistSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchChecklistItems.fulfilled, (state, action) => {
-        console.log("action", action);
         state.loading = false;
         state.checklistItems = action.payload.projectCheckLists || [];
       })

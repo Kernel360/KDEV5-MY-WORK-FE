@@ -53,7 +53,6 @@ export default function MemberTable() {
 
   const handleDelete = async () => {
     try {
-      console.log("selectedMember", selectedMember);
       await dispatch(deleteMember({ memberId: selectedMember.id })).unwrap();
       setConfirmOpen(false);
       loadMembers();

@@ -33,7 +33,6 @@ export default function ProjectApprovalDetailDrawer({
   const { items: histories, loading: historyLoading } = useSelector(
     (state) => state.checklistHistory || {}
   );
-  console.log("histories", histories);
 
   const [approvalType, setApprovalType] = useState(null);
   const [reasonText, setReasonText] = useState("");
