@@ -41,7 +41,9 @@ export default function CompanyMemberSelector({
     if (companyId && projectId) {
       dispatch(fetchCompanyMembersInProject({ projectId, companyId })).then(
         (action) => {
-          if (action.payload?.members) {
+          if (Array.isArray(action.payload)) {
+            setAssigned(action.payload);
+          } else if (action.payload?.members) {
             setAssigned(action.payload.members);
           }
         }
@@ -57,6 +59,8 @@ export default function CompanyMemberSelector({
         .then((action) => {
           if (Array.isArray(action.payload)) {
             setOptions(action.payload);
+          } else if (action.payload?.members) {
+            setOptions(action.payload.members);
           }
         })
         .finally(() => setLoading(false));
@@ -98,23 +102,27 @@ export default function CompanyMemberSelector({
         onChange={handleChange}
         inputValue={inputValue}
         onInputChange={(_, newInput) => setInputValue(newInput)}
-        renderOption={(props, option, { selected }) => (
-          <Box
-            component="li"
-            {...props}
-            sx={{ display: "flex", alignItems: "center", py: 0.5 }}
-          >
-            <Avatar sx={{ width: 30, height: 30, mr: 1 }}>
-              {getInitial(option.memberName)}
-            </Avatar>
-            <Typography sx={{ flexGrow: 1 }}>{option.memberName}</Typography>
-            {selected && (
-              <Typography variant="caption" color="primary">
-                선택됨
-              </Typography>
-            )}
-          </Box>
-        )}
+        renderOption={(props, option, { selected }) => {
+          const { key, ...rest } = props;
+          return (
+            <Box
+              component="li"
+              key={key}
+              {...rest}
+              sx={{ display: "flex", alignItems: "center", py: 0.5 }}
+            >
+              <Avatar sx={{ width: 30, height: 30, mr: 1 }}>
+                {getInitial(option.memberName)}
+              </Avatar>
+              <Typography sx={{ flexGrow: 1 }}>{option.memberName}</Typography>
+              {selected && (
+                <Typography variant="caption" color="primary">
+                  선택됨
+                </Typography>
+              )}
+            </Box>
+          );
+        }}
         renderTags={() => null}
         renderInput={(params) => (
           <TextField
