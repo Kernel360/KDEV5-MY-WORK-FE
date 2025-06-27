@@ -62,7 +62,6 @@ export default function ProjectPage() {
         <PageHeader
           title="프로젝트"
           subtitle={`총 ${totalCount ?? 0}개의 프로젝트가 있습니다.`}
-          noPaddingBottom
         />
         <Box sx={{ flex: 1, minHeight: 0, overflow: "auto", mb: 0.3 }}>
           {isSystemAdmin ? (
