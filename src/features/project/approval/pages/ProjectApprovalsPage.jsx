@@ -112,7 +112,7 @@ export default function ProjectApprovalsPage() {
           variant="contained"
           onClick={() => setCreateDrawerOpen(true)}
         >
-          새 체크리스트
+          체크리스트 작성
         </CustomButton>
       </Box>
 

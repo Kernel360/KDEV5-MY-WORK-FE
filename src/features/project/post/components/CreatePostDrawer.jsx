@@ -137,7 +137,7 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
               }}
             >
               <Typography variant="h3" fontWeight={600}>
-                새 게시글 작성
+                게시글 작성
               </Typography>
               <IconButton onClick={handleCancel}>
                 <CloseIcon />
