@@ -32,12 +32,10 @@ const MemberFormPage = () => {
 
   const [fetching, setFetching] = useState(false);
 
-  // 회사 목록 로딩
   useEffect(() => {
     dispatch(fetchAllCompanyNames());
   }, [dispatch]);
 
-  // 수정 모드일 때 기존 멤버 데이터 로딩
   useEffect(() => {
     if (!memberId) return;
 
@@ -130,11 +128,9 @@ const MemberFormPage = () => {
   return (
     <PageWrapper>
       <PageHeader
-        title={isEdit ? "멤버 수정" : "멤버 등록"}
+        title={isEdit ? "회원 수정" : "회원 등록"}
         subtitle={
-          isEdit
-            ? "멤버 정보를 수정합니다."
-            : "새로운 멤버를 등록하여 팀을 구성하세요."
+          isEdit ? "회원 정보를 수정합니다." : "업체 소속 회원을 동록하세요."
         }
         action={headerAction}
       />
