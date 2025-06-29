@@ -174,6 +174,70 @@ export const reissueAttachmentUploadUrl = createAsyncThunk(
   }
 );
 
+// 11) 첨부파일 이미지 가져오기 (다운로드 URL 발급 + 이미지 다운로드)
+export const fetchAttachmentImages = createAsyncThunk(
+  "post/fetchAttachmentImages",
+  async (postAttachments, thunkAPI) => {
+    try {
+      const imagePromises = postAttachments.map(async (attachment) => {
+        try {
+          // 1. 다운로드 URL 발급
+          const urlResponse = await postAPI.getAttachmentDownloadUrl(attachment.postAttachmentId);
+          const downloadUrl = urlResponse.data.data.downloadUrl;
+          
+          // 2. S3에서 이미지 다운로드
+          const imageBlob = await postAPI.downloadImageFromS3(downloadUrl);
+          
+          // 3. Blob을 Object URL로 변환
+          const imageUrl = URL.createObjectURL(imageBlob);
+          
+          return {
+            id: attachment.postAttachmentId,
+            fileName: attachment.fileName,
+            fileSize: imageBlob.size,
+            fileType: imageBlob.type,
+            imageUrl: imageUrl,
+            isImage: imageBlob.type.startsWith('image/')
+          };
+        } catch (error) {
+          console.error(`Failed to load image ${attachment.fileName}:`, error);
+          return {
+            id: attachment.postAttachmentId,
+            fileName: attachment.fileName,
+            fileSize: 0,
+            fileType: 'unknown',
+            imageUrl: null,
+            isImage: false,
+            error: error.message
+          };
+        }
+      });
+      
+      const images = await Promise.all(imagePromises);
+      return images;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.message || "첨부파일 이미지 로드 실패"
+      );
+    }
+  }
+);
+
+// 12) 첨부파일 삭제
+export const deleteAttachment = createAsyncThunk(
+  "post/deleteAttachment",
+  async (postAttachmentId, thunkAPI) => {
+    try {
+      await postAPI.deleteAttachment(postAttachmentId);
+      return postAttachmentId;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data || "첨부파일 삭제 실패"
+      );
+    }
+  }
+);
+
 const postSlice = createSlice({
   name: "post",
   initialState: {
@@ -186,16 +250,29 @@ const postSlice = createSlice({
     // 첨부파일 관련 상태
     attachmentLoading: false,
     attachmentError: null,
+    attachmentImages: [], // 첨부파일 이미지 배열
+    imagesLoading: false, // 이미지 로딩 상태
+    imagesError: null,    // 이미지 로딩 에러
   },
   reducers: {
     clearPostDetail(state) {
       state.detail = null;
+      // 첨부파일 이미지도 함께 정리
+      state.attachmentImages.forEach(image => {
+        if (image.imageUrl) {
+          URL.revokeObjectURL(image.imageUrl);
+        }
+      });
+      state.attachmentImages = [];
     },
     clearNewPostId(state) {
       state.newId = null;
     },
     clearAttachmentError(state) {
       state.attachmentError = null;
+    },
+    clearImagesError(state) {
+      state.imagesError = null;
     },
   },
   extraReducers: (builder) => {
@@ -331,9 +408,37 @@ const postSlice = createSlice({
       .addCase(reissueAttachmentUploadUrl.rejected, (state, action) => {
         state.attachmentLoading = false;
         state.attachmentError = action.payload;
+      })
+
+      // fetchAttachmentImages
+      .addCase(fetchAttachmentImages.pending, (state) => {
+        state.imagesLoading = true;
+        state.imagesError = null;
+      })
+      .addCase(fetchAttachmentImages.fulfilled, (state, action) => {
+        state.imagesLoading = false;
+        state.attachmentImages = action.payload;
+      })
+      .addCase(fetchAttachmentImages.rejected, (state, action) => {
+        state.imagesLoading = false;
+        state.imagesError = action.payload;
+      })
+
+      // deleteAttachment
+      .addCase(deleteAttachment.pending, (state) => {
+        state.attachmentLoading = true;
+        state.attachmentError = null;
+      })
+      .addCase(deleteAttachment.fulfilled, (state, action) => {
+        state.attachmentLoading = false;
+        // 삭제된 첨부파일 ID와 일치하는 항목 제거 (필요한 경우)
+      })
+      .addCase(deleteAttachment.rejected, (state, action) => {
+        state.attachmentLoading = false;
+        state.attachmentError = action.payload;
       });
   },
 });
 
-export const { clearPostDetail, clearNewPostId, clearAttachmentError } = postSlice.actions;
+export const { clearPostDetail, clearNewPostId, clearAttachmentError, clearImagesError } = postSlice.actions;
 export default postSlice.reducer;

@@ -26,7 +26,7 @@ import { InfoOutlined, CloudUpload, Delete, AttachFile, ZoomIn, Refresh } from "
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { createPostId, createPost } from "@/features/project/post/postSlice";
+import { createPostId, createPost, deleteAttachment } from "@/features/project/post/postSlice";
 import * as postAPI from "@/api/post";
 
 export default function CreatePostDrawer({ open, onClose, onSubmit }) {
@@ -221,8 +221,34 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
   };
 
   // 파일 삭제 핸들러
-  const handleFileDelete = (fileId) => {
-    setFiles(prev => prev.filter(file => file.id !== fileId));
+  const handleFileDelete = async (fileId) => {
+    const fileToDelete = files.find(file => file.id === fileId);
+    if (!fileToDelete) return;
+
+    // 확인 대화상자
+    if (!window.confirm(`"${fileToDelete.name}" 파일을 삭제하시겠습니까?`)) {
+      return;
+    }
+
+    try {
+      // 업로드가 완료된 파일인 경우 서버에서도 삭제
+      if (fileToDelete.status === 'success' && fileToDelete.postAttachmentId) {
+        await dispatch(deleteAttachment(fileToDelete.postAttachmentId)).unwrap();
+        console.log('서버에서 첨부파일 삭제 완료:', fileToDelete.postAttachmentId);
+      }
+      
+      // 로컬 상태에서 파일 제거
+      setFiles(prev => prev.filter(file => file.id !== fileId));
+      
+      // Object URL 정리 (메모리 누수 방지)
+      if (fileToDelete.file) {
+        URL.revokeObjectURL(URL.createObjectURL(fileToDelete.file));
+      }
+      
+    } catch (error) {
+      console.error('파일 삭제 실패:', error);
+      alert('파일 삭제에 실패했습니다. 다시 시도해주세요.');
+    }
   };
 
   // 파일 재업로드 핸들러
