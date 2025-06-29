@@ -111,6 +111,69 @@ export const deletePost = createAsyncThunk(
   }
 );
 
+// 7) 첨부파일 업로드 URL 발급
+export const issueAttachmentUploadUrl = createAsyncThunk(
+  "post/issueAttachmentUploadUrl",
+  async ({ postId, fileName }, thunkAPI) => {
+    try {
+      const response = await postAPI.issueAttachmentUploadUrl({ postId, fileName });
+      return response.data.data; // { postAttachmentId, uploadUrl }
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data || "업로드 URL 발급 실패"
+      );
+    }
+  }
+);
+
+// 8) S3 파일 업로드
+export const uploadFileToS3 = createAsyncThunk(
+  "post/uploadFileToS3",
+  async ({ presignedUrl, file }, thunkAPI) => {
+    try {
+      const response = await postAPI.uploadFileToS3(presignedUrl, file);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return { success: true };
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.message || "S3 파일 업로드 실패"
+      );
+    }
+  }
+);
+
+// 9) 첨부파일 활성화
+export const setAttachmentActive = createAsyncThunk(
+  "post/setAttachmentActive",
+  async ({ postAttachmentId, active }, thunkAPI) => {
+    try {
+      const response = await postAPI.setAttachmentActive({ postAttachmentId, active });
+      return response.data.data; // { postAttachmentId, active }
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data || "첨부파일 활성화 실패"
+      );
+    }
+  }
+);
+
+// 10) 첨부파일 재업로드 URL 발급
+export const reissueAttachmentUploadUrl = createAsyncThunk(
+  "post/reissueAttachmentUploadUrl",
+  async ({ postAttachmentId, fileName }, thunkAPI) => {
+    try {
+      const response = await postAPI.reissueAttachmentUploadUrl({ postAttachmentId, fileName });
+      return response.data.data; // { postAttachmentId, uploadUrl }
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data || "재업로드 URL 발급 실패"
+      );
+    }
+  }
+);
+
 const postSlice = createSlice({
   name: "post",
   initialState: {
@@ -120,6 +183,9 @@ const postSlice = createSlice({
     detail: null,     // 단건 조회 결과
     loading: false,
     error: null,
+    // 첨부파일 관련 상태
+    attachmentLoading: false,
+    attachmentError: null,
   },
   reducers: {
     clearPostDetail(state) {
@@ -127,6 +193,9 @@ const postSlice = createSlice({
     },
     clearNewPostId(state) {
       state.newId = null;
+    },
+    clearAttachmentError(state) {
+      state.attachmentError = null;
     },
   },
   extraReducers: (builder) => {
@@ -181,8 +250,7 @@ const postSlice = createSlice({
       })
       .addCase(createPost.fulfilled, (state, action) => {
         state.loading = false;
-        state.list.unshift(action.payload);
-        state.totalCount += 1;
+        // 성공 후 새로운 ID 생성은 컴포넌트에서 처리
       })
       .addCase(createPost.rejected, (state, action) => {
         state.loading = false;
@@ -196,8 +264,6 @@ const postSlice = createSlice({
       })
       .addCase(updatePost.fulfilled, (state, action) => {
         state.loading = false;
-        const idx = state.list.findIndex((p) => p.id === action.payload.id);
-        if (idx !== -1) state.list[idx] = action.payload;
       })
       .addCase(updatePost.rejected, (state, action) => {
         state.loading = false;
@@ -211,15 +277,63 @@ const postSlice = createSlice({
       })
       .addCase(deletePost.fulfilled, (state, action) => {
         state.loading = false;
-        state.list = state.list.filter((p) => p.id !== action.payload);
-        state.totalCount -= 1;
+        state.list = state.list.filter(post => post.id !== action.payload);
       })
       .addCase(deletePost.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      // 첨부파일 관련 액션들
+      .addCase(issueAttachmentUploadUrl.pending, (state) => {
+        state.attachmentLoading = true;
+        state.attachmentError = null;
+      })
+      .addCase(issueAttachmentUploadUrl.fulfilled, (state) => {
+        state.attachmentLoading = false;
+      })
+      .addCase(issueAttachmentUploadUrl.rejected, (state, action) => {
+        state.attachmentLoading = false;
+        state.attachmentError = action.payload;
+      })
+
+      .addCase(uploadFileToS3.pending, (state) => {
+        state.attachmentLoading = true;
+        state.attachmentError = null;
+      })
+      .addCase(uploadFileToS3.fulfilled, (state) => {
+        state.attachmentLoading = false;
+      })
+      .addCase(uploadFileToS3.rejected, (state, action) => {
+        state.attachmentLoading = false;
+        state.attachmentError = action.payload;
+      })
+
+      .addCase(setAttachmentActive.pending, (state) => {
+        state.attachmentLoading = true;
+        state.attachmentError = null;
+      })
+      .addCase(setAttachmentActive.fulfilled, (state) => {
+        state.attachmentLoading = false;
+      })
+      .addCase(setAttachmentActive.rejected, (state, action) => {
+        state.attachmentLoading = false;
+        state.attachmentError = action.payload;
+      })
+
+      .addCase(reissueAttachmentUploadUrl.pending, (state) => {
+        state.attachmentLoading = true;
+        state.attachmentError = null;
+      })
+      .addCase(reissueAttachmentUploadUrl.fulfilled, (state) => {
+        state.attachmentLoading = false;
+      })
+      .addCase(reissueAttachmentUploadUrl.rejected, (state, action) => {
+        state.attachmentLoading = false;
+        state.attachmentError = action.payload;
       });
   },
 });
 
-export const { clearPostDetail, clearNewPostId } = postSlice.actions;
+export const { clearPostDetail, clearNewPostId, clearAttachmentError } = postSlice.actions;
 export default postSlice.reducer;

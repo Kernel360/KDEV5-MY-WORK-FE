@@ -69,3 +69,66 @@ export function findPosts(projectId, page, { keyword, keywordType, projectStepId
 export function deletePost(postId) {
   return api.delete(`/api/posts/${postId}`);
 }
+
+// ===== 첨부파일 관련 API =====
+
+/**
+ * 게시글 파일 업로드 URL 발급
+ * POST /api/posts/attachment/upload-url/issue
+ *
+ * @param {{ postId: string; fileName: string; }} data
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<PostAttachmentUploadUrlResponse>
+ */
+export function issueAttachmentUploadUrl(data) {
+  return api.post("/api/posts/attachment/upload-url/issue", data);
+}
+
+/**
+ * 게시글 파일 재업로드 URL 발급
+ * POST /api/posts/attachment/upload-url/reissue
+ *
+ * @param {{ postAttachmentId: string; fileName: string; }} data
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<PostAttachmentReuploadUrlResponse>
+ */
+export function reissueAttachmentUploadUrl(data) {
+  return api.post("/api/posts/attachment/upload-url/reissue", data);
+}
+
+/**
+ * 게시글 파일 업로드 완료 상태 변경
+ * POST /api/posts/attachment/active
+ *
+ * @param {{ postAttachmentId: string; active: boolean; }} data
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<PostAttachmentActiveResponse>
+ */
+export function setAttachmentActive(data) {
+  return api.post("/api/posts/attachment/active", data);
+}
+
+/**
+ * 게시글 파일 다운로드 URL 발급
+ * GET /api/posts/attachment/download-url
+ *
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<PostAttachmentDownloadUrlResponse>
+ */
+export function getAttachmentDownloadUrl() {
+  return api.get("/api/posts/attachment/download-url");
+}
+
+/**
+ * Presigned URL로 파일 업로드 (S3 직접 업로드)
+ * PUT {presignedUrl}
+ *
+ * @param {string} presignedUrl - 발급받은 presigned URL
+ * @param {File} file - 업로드할 파일
+ * @returns {Promise<Response>} S3 업로드 응답
+ */
+export function uploadFileToS3(presignedUrl, file) {
+  return fetch(presignedUrl, {
+    method: 'PUT',
+    body: file,
+    headers: {
+      'Content-Type': file.type,
+    },
+  });
+}

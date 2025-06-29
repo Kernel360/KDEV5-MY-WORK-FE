@@ -22,11 +22,12 @@ import {
   Avatar,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { InfoOutlined, CloudUpload, Delete, AttachFile, ZoomIn } from "@mui/icons-material";
+import { InfoOutlined, CloudUpload, Delete, AttachFile, ZoomIn, Refresh } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { createPostId, createPost } from "@/features/project/post/postSlice";
+import * as postAPI from "@/api/post";
 
 export default function CreatePostDrawer({ open, onClose, onSubmit }) {
   const theme = useTheme();
@@ -44,7 +45,6 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
     content: "",
   });
   const [files, setFiles] = useState([]); // 첨부 파일 목록
-  const [uploadingFiles, setUploadingFiles] = useState([]); // 업로드 중인 파일 목록
   const [loadingId, setLoadingId] = useState(false);
   const [loading, setLoading] = useState(false);
   const [previewModal, setPreviewModal] = useState({ open: false, file: null }); // 미리보기 모달
@@ -88,6 +88,75 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
     }
 
     return errors;
+  };
+
+  // 실제 파일 업로드 함수 (프리사인드 URL 방식)
+  const uploadFileWithPresignedUrl = async (fileItem) => {
+    try {
+      // 1. 파일 상태를 uploading으로 변경
+      setFiles(prev => prev.map(file => 
+        file.id === fileItem.id 
+          ? { ...file, status: 'uploading', progress: 0, error: null }
+          : file
+      ));
+
+      // 2. 업로드 URL 발급 요청
+      const uploadUrlResponse = await postAPI.issueAttachmentUploadUrl({
+        postId: form.id,
+        fileName: fileItem.file.name
+      });
+
+      const { postAttachmentId, uploadUrl } = uploadUrlResponse.data.data;
+
+      // 3. 진행률 10% 업데이트
+      setFiles(prev => prev.map(file => 
+        file.id === fileItem.id 
+          ? { ...file, progress: 10, postAttachmentId }
+          : file
+      ));
+
+      // 4. S3에 파일 업로드
+      const uploadResponse = await postAPI.uploadFileToS3(uploadUrl, fileItem.file);
+      
+      if (!uploadResponse.ok) {
+        throw new Error(`파일 업로드 실패: ${uploadResponse.status}`);
+      }
+
+      // 5. 진행률 80% 업데이트
+      setFiles(prev => prev.map(file => 
+        file.id === fileItem.id 
+          ? { ...file, progress: 80 }
+          : file
+      ));
+
+      // 6. 첨부파일 활성화
+      await postAPI.setAttachmentActive({
+        postAttachmentId,
+        active: true
+      });
+
+      // 7. 업로드 완료
+      setFiles(prev => prev.map(file => 
+        file.id === fileItem.id 
+          ? { ...file, status: 'success', progress: 100, postAttachmentId }
+          : file
+      ));
+
+    } catch (error) {
+      console.error('파일 업로드 실패:', error);
+      
+      // 업로드 실패 상태로 변경
+      setFiles(prev => prev.map(file => 
+        file.id === fileItem.id 
+          ? { 
+              ...file, 
+              status: 'error', 
+              progress: 0,
+              error: error.response?.data?.error?.message || error.message || '파일 업로드에 실패했습니다.'
+            }
+          : file
+      ));
+    }
   };
 
   // 파일 선택 핸들러
@@ -139,14 +208,15 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
       type: file.type,
       status: 'pending', // pending, uploading, success, error
       progress: 0,
-      error: null
+      error: null,
+      postAttachmentId: null
     }));
 
     setFiles(prev => [...prev, ...newFileItems]);
 
-    // 파일들을 즉시 업로드 시작
+    // 파일들을 순차적으로 업로드 시작
     for (const fileItem of newFileItems) {
-      await simulateFileUpload(fileItem);
+      await uploadFileWithPresignedUrl(fileItem);
     }
   };
 
@@ -155,30 +225,12 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
     setFiles(prev => prev.filter(file => file.id !== fileId));
   };
 
-  // 파일 업로드 시뮬레이션 (API 연결 전 임시)
-  const simulateFileUpload = async (fileItem) => {
-    setFiles(prev => prev.map(file => 
-      file.id === fileItem.id 
-        ? { ...file, status: 'uploading', progress: 0 }
-        : file
-    ));
-
-    // 업로드 진행률 시뮬레이션
-    for (let i = 0; i <= 100; i += 10) {
-      await new Promise(resolve => setTimeout(resolve, 200));
-      setFiles(prev => prev.map(file => 
-        file.id === fileItem.id 
-          ? { ...file, progress: i }
-          : file
-      ));
+  // 파일 재업로드 핸들러
+  const handleFileRetry = async (fileId) => {
+    const fileItem = files.find(file => file.id === fileId);
+    if (fileItem) {
+      await uploadFileWithPresignedUrl(fileItem);
     }
-
-    // 업로드 완료
-    setFiles(prev => prev.map(file => 
-      file.id === fileItem.id 
-        ? { ...file, status: 'success', progress: 100 }
-        : file
-    ));
   };
 
   useEffect(() => {
@@ -201,7 +253,9 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
       }
     };
 
-    generateNewPostId();
+    if (open) {
+      generateNewPostId();
+    }
   }, [dispatch, open]);
 
   const handleChange = (key) => (e) =>
@@ -212,10 +266,19 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
     if (!projectStepId || !title.trim() || !content.trim()) return;
 
     // 파일 업로드가 완료되지 않은 파일이 있는지 확인
-    const hasUnfinishedUploads = files.some(file => file.status === 'uploading');
+    const hasUnfinishedUploads = files.some(file => file.status === 'uploading' || file.status === 'pending');
     if (hasUnfinishedUploads) {
       alert('파일 업로드가 완료될 때까지 기다려주세요.');
       return;
+    }
+
+    // 실패한 파일이 있는지 확인
+    const hasFailedUploads = files.some(file => file.status === 'error');
+    if (hasFailedUploads) {
+      const confirmSubmit = window.confirm('업로드에 실패한 파일이 있습니다. 그래도 게시글을 등록하시겠습니까?');
+      if (!confirmSubmit) {
+        return;
+      }
     }
 
     setLoading(true);
@@ -227,12 +290,6 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
         content,
         companyName,
         authorName: userName,
-        attachments: files.filter(file => file.status === 'success').map(file => ({
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          // TODO: API 연결 시 실제 파일 URL 추가
-        }))
       };
 
       if (onSubmit) {
@@ -241,12 +298,22 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
         await dispatch(createPost({ projectId, data: payload })).unwrap();
       }
 
-      localStorage.removeItem("newPostId");
+      // 성공 후 새로운 게시글 ID 생성
+      try {
+        const newResult = await dispatch(createPostId()).unwrap();
+        const newId = typeof newResult === "string" ? newResult : newResult.postId;
+        localStorage.setItem("newPostId", newId);
+      } catch (err) {
+        console.error("새 게시글 ID 생성 실패:", err);
+      }
+
+      // 폼 초기화
       setForm({ id: "", projectStepId: "", title: "", content: "" });
       setFiles([]);
       onClose();
     } catch (e) {
       console.error(e);
+      alert('게시글 등록에 실패했습니다.');
     } finally {
       setLoading(false);
     }
@@ -523,6 +590,19 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
                               )}
                               {file.status === 'error' && (
                                 <Chip label="오류" size="small" color="error" />
+                              )}
+                              
+                              {/* 재시도 버튼 (에러 상태인 경우만) */}
+                              {file.status === 'error' && (
+                                <Tooltip title="다시 업로드">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleFileRetry(file.id)}
+                                    color="warning"
+                                  >
+                                    <Refresh fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
                               )}
                               
                               {/* 미리보기 버튼 (이미지인 경우만) */}
