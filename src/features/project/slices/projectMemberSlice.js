@@ -7,7 +7,6 @@ import {
   getCompanyMembersInProject,
 } from "@/api/projectMember";
 
-// 프로젝트멤버 전체 목록 조회
 export const fetchProjectMemberList = createAsyncThunk(
   "projectMember/fetchList",
   async ({ companyId, projectId }, { rejectWithValue }) => {
@@ -20,7 +19,6 @@ export const fetchProjectMemberList = createAsyncThunk(
   }
 );
 
-// 내 회사 멤버 조회
 export const fetchCompanyMembersInProject = createAsyncThunk(
   "projectMember/fetchCompanyMembers",
   async ({ projectId, companyId }, { rejectWithValue }) => {
@@ -33,7 +31,6 @@ export const fetchCompanyMembersInProject = createAsyncThunk(
   }
 );
 
-// 프로젝트 멤버 추가
 export const addMemberToProject = createAsyncThunk(
   "projectMember/add",
   async ({ projectId, memberId }, { rejectWithValue }) => {
@@ -46,7 +43,6 @@ export const addMemberToProject = createAsyncThunk(
   }
 );
 
-// 프로젝트 멤버 삭제
 export const removeMemberFromProject = createAsyncThunk(
   "projectMember/remove",
   async ({ projectId, memberId }, { rejectWithValue }) => {
@@ -62,8 +58,8 @@ export const removeMemberFromProject = createAsyncThunk(
 const projectMemberSlice = createSlice({
   name: "projectMember",
   initialState: {
-    list: [], // 전체 프로젝트 멤버
-    companyMembers: [], // 내 회사 멤버
+    list: [],
+    companyMembers: [],
     loading: false,
     error: null,
   },

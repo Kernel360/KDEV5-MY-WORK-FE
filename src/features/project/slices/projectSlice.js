@@ -6,7 +6,14 @@ import * as projectAPI from "@/api/project";
 export const fetchProjects = createAsyncThunk(
   "project/fetchProjects",
   async (
-    { page, size = 10, keyword = null, keywordType = null, step = null, userRole = null },
+    {
+      page,
+      size = 10,
+      keyword = null,
+      keywordType = null,
+      step = null,
+      userRole = null,
+    },
     thunkAPI
   ) => {
     try {
@@ -227,8 +234,6 @@ const projectSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
-      // 프로젝트 멤버 목록 조회
       .addCase(fetchProjectMembers.pending, (state) => {
         state.membersLoading = true;
         state.membersError = null;

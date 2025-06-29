@@ -99,7 +99,7 @@ export default function MemberDetailPage() {
 
       <ConfirmDialog
         open={confirmOpen}
-        title="멤버를 삭제하시겠습니까?"
+        title="회원을 삭제하시겠습니까?"
         description="삭제 후에는 복구할 수 없습니다."
         cancelText="취소"
         confirmText="삭제하기"
@@ -133,7 +133,7 @@ export default function MemberDetailPage() {
                 <Typography variant="subtitle1" fontWeight={600}>
                   1. 기본 정보
                 </Typography>
-                <Tooltip title="멤버의 이름, 이메일, 연락처를 확인합니다.">
+                <Tooltip title="회원의 이름, 이메일, 연락처를 확인합니다.">
                   <InfoOutlined fontSize="small" color="action" />
                 </Tooltip>
               </Stack>
@@ -166,7 +166,7 @@ export default function MemberDetailPage() {
                 <Typography variant="subtitle1" fontWeight={600}>
                   2. 직무 정보
                 </Typography>
-                <Tooltip title="멤버의 소속 부서와 직책을 확인합니다.">
+                <Tooltip title="회원의 소속 부서와 직책을 확인합니다.">
                   <InfoOutlined fontSize="small" color="action" />
                 </Tooltip>
               </Stack>
@@ -193,7 +193,7 @@ export default function MemberDetailPage() {
                 <Typography variant="subtitle1" fontWeight={600}>
                   3. 상태 & 권한
                 </Typography>
-                <Tooltip title="멤버의 활성 상태와 시스템 권한을 확인합니다.">
+                <Tooltip title="회원의 활성 상태와 시스템 권한을 확인합니다.">
                   <InfoOutlined fontSize="small" color="action" />
                 </Tooltip>
               </Stack>
@@ -234,7 +234,7 @@ export default function MemberDetailPage() {
                 <Typography variant="subtitle1" fontWeight={600}>
                   4. 회사 정보
                 </Typography>
-                <Tooltip title="멤버가 소속된 회사 정보를 확인합니다.">
+                <Tooltip title="회원이 소속된 회사 정보를 확인합니다.">
                   <InfoOutlined fontSize="small" color="action" />
                 </Tooltip>
               </Stack>
