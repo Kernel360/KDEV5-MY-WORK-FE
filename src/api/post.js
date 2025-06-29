@@ -109,10 +109,39 @@ export function setAttachmentActive(data) {
  * 게시글 파일 다운로드 URL 발급
  * GET /api/posts/attachment/download-url
  *
+ * @param {string} postAttachmentId - 첨부파일 UUID
  * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<PostAttachmentDownloadUrlResponse>
  */
-export function getAttachmentDownloadUrl() {
-  return api.get("/api/posts/attachment/download-url");
+export function getAttachmentDownloadUrl(postAttachmentId) {
+  return api.get("/api/posts/attachment/download-url", {
+    params: { postAttachmentId }
+  });
+}
+
+/**
+ * Presigned URL로 이미지 다운로드 (S3에서 이미지 가져오기)
+ * GET {presignedUrl}
+ *
+ * @param {string} presignedUrl - 발급받은 presigned URL
+ * @returns {Promise<Blob>} 이미지 Blob 데이터
+ */
+export async function downloadImageFromS3(presignedUrl) {
+  const response = await fetch(presignedUrl);
+  if (!response.ok) {
+    throw new Error(`Failed to download image: ${response.status}`);
+  }
+  return response.blob();
+}
+
+/**
+ * 게시글 첨부파일 삭제
+ * DELETE /api/posts/attachment/{postAttachmentId}
+ *
+ * @param {string} postAttachmentId - 삭제할 첨부파일의 UUID
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<PostAttachmentDeleteResponse>
+ */
+export function deleteAttachment(postAttachmentId) {
+  return api.delete(`/api/posts/attachment/${postAttachmentId}`);
 }
 
 /**
