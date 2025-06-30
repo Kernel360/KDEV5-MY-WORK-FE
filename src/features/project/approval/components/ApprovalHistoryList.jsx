@@ -1,25 +1,50 @@
 import React, { useState } from "react";
-import { Box, Typography, Stack, Paper, IconButton } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Stack,
+  Paper,
+  IconButton,
+  useTheme,
+} from "@mui/material";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
+const getApprovalLabel = (approval) => {
+  switch (approval) {
+    case "APPROVED":
+      return "승인";
+    case "REJECTED":
+      return "반려";
+    case "REQUEST_CHANGES":
+      return "수정 요청";
+    case "PENDING":
+      return "체크리스트를 새로 작성";
+    default:
+      return approval;
+  }
+};
+
+const getColorByApproval = (approval, theme) => {
+  switch (approval) {
+    case "APPROVED":
+      return theme.palette.success.main;
+    case "REJECTED":
+      return theme.palette.error.main;
+    case "REQUEST_CHANGES":
+      return theme.palette.info.main;
+    case "PENDING":
+      return theme.palette.warning.main;
+    default:
+      return theme.palette.text.secondary;
+  }
+};
+
 export default function ApprovalHistoryList({ histories }) {
   const [expanded, setExpanded] = useState(true);
+  const theme = useTheme();
 
   if (!histories || histories.length === 0) return null;
-
-  const getColorByApproval = (approval, theme) => {
-    switch (approval) {
-      case "APPROVED":
-        return theme.palette.success.main;
-      case "REJECTED":
-        return theme.palette.error.main;
-      case "REQUEST_CHANGES":
-        return theme.palette.info.main;
-      default:
-        return theme.palette.text.secondary;
-    }
-  };
 
   return (
     <Box>
@@ -41,47 +66,75 @@ export default function ApprovalHistoryList({ histories }) {
 
       {expanded && (
         <Stack spacing={1.5}>
-          {histories.map((history) => (
-            <Paper
-              key={history.historyId}
-              variant="outlined"
-              sx={{
-                p: 1.5,
-                borderRadius: 2,
-                borderColor: (theme) => theme.palette.divider,
-                bgcolor: (theme) => theme.palette.grey[50],
-              }}
-            >
-              <Typography
-                variant="body2"
-                sx={(theme) => ({
-                  fontSize: 14,
-                  color: theme.palette.text.primary,
-                })}
+          {histories.map((history) => {
+            const label = getApprovalLabel(history.approval);
+            const color = getColorByApproval(history.approval, theme);
+            const isPending = history.approval === "PENDING";
+
+            return (
+              <Paper
+                key={history.historyId}
+                variant="outlined"
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  bgcolor: theme.palette.background.paper,
+                  borderColor: theme.palette.divider,
+                }}
               >
-                <Box
-                  component="span"
-                  sx={{ color: (theme) => theme.palette.text.secondary, mr: 1 }}
-                >
-                  {history.createdAt}
-                </Box>
-                <Box component="span" fontWeight={600}>
-                  {history.memberName}
-                </Box>
-                님께서{" "}
-                <Box
-                  component="span"
-                  fontWeight={600}
-                  sx={(theme) => ({
-                    color: getColorByApproval(history.approval, theme),
-                  })}
-                >
-                  {history.content}
-                </Box>
-                하였습니다.
-              </Typography>
-            </Paper>
-          ))}
+                <Stack spacing={1}>
+                  <Typography
+                    variant="caption"
+                    sx={{ color: theme.palette.text.disabled }}
+                  >
+                    {history.createdAt}
+                  </Typography>
+
+                  <Typography variant="body2" sx={{ lineHeight: 1.7 }}>
+                    <Typography component="span" fontWeight={600}>
+                      {history.memberName}
+                    </Typography>
+                    {isPending ? (
+                      <>
+                        {" "}
+                        님이{" "}
+                        <Typography
+                          component="span"
+                          fontWeight={600}
+                          sx={{ color }}
+                        >
+                          {label}
+                        </Typography>
+                        하였습니다.
+                      </>
+                    ) : (
+                      <>
+                        {" "}
+                        님이{" "}
+                        <Typography
+                          component="span"
+                          fontWeight={600}
+                          sx={{ color }}
+                        >
+                          {label}
+                        </Typography>
+                        하였습니다.
+                      </>
+                    )}
+                  </Typography>
+
+                  {!isPending && history.reason && (
+                    <Typography
+                      variant="body2"
+                      sx={{ color: theme.palette.text.secondary, fontSize: 13 }}
+                    >
+                      사유: {history.reason}
+                    </Typography>
+                  )}
+                </Stack>
+              </Paper>
+            );
+          })}
         </Stack>
       )}
     </Box>
