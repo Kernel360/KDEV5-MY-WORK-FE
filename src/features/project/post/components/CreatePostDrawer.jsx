@@ -22,7 +22,10 @@ import {
   Avatar,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { InfoOutlined, CloudUpload, Delete, AttachFile, ZoomIn, Refresh } from "@mui/icons-material";
+import { 
+  InfoOutlined, CloudUpload, Delete, AttachFile, ZoomIn, Refresh,
+  PictureAsPdf, Description, TableChart, Archive, Code, Movie, MusicNote, Image
+} from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -58,18 +61,59 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  // 파일 타입 검증 함수
-  const isValidImageType = (file) => {
-    const allowedTypes = [
-      'image/jpeg',
-      'image/jpg', 
-      'image/png',
-      'image/gif',
-      'image/webp',
-      'image/bmp',
-      'image/svg+xml'
+  // 파일 타입별 아이콘 반환 함수
+  const getFileIcon = (fileName, fileType) => {
+    const extension = fileName.toLowerCase().split('.').pop();
+    
+    // 이미지 파일
+    if (fileType.startsWith('image/')) {
+      return <Image color="primary" />;
+    }
+    
+    // 문서 파일
+    if (['pdf'].includes(extension)) {
+      return <PictureAsPdf color="error" />;
+    }
+    if (['doc', 'docx', 'txt', 'rtf'].includes(extension)) {
+      return <Description color="primary" />;
+    }
+    if (['xls', 'xlsx', 'csv'].includes(extension)) {
+      return <TableChart color="success" />;
+    }
+    
+    // 압축 파일
+    if (['zip', 'rar', '7z', 'tar', 'gz'].includes(extension)) {
+      return <Archive color="warning" />;
+    }
+    
+    // 코드 파일
+    if (['js', 'ts', 'jsx', 'tsx', 'html', 'css', 'json', 'xml'].includes(extension)) {
+      return <Code color="info" />;
+    }
+    
+    // 동영상 파일
+    if (['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv'].includes(extension)) {
+      return <Movie color="secondary" />;
+    }
+    
+    // 오디오 파일
+    if (['mp3', 'wav', 'flac', 'aac', 'ogg'].includes(extension)) {
+      return <MusicNote color="secondary" />;
+    }
+    
+    // 기본 파일 아이콘
+    return <AttachFile color="action" />;
+  };
+
+  // 파일 타입 검증 함수 (위험한 파일 확장자 차단)
+  const isValidFileType = (file) => {
+    const dangerousExtensions = [
+      '.exe', '.bat', '.cmd', '.com', '.pif', '.scr', '.vbs', '.js', '.jar',
+      '.app', '.deb', '.pkg', '.rpm', '.dmg', '.msi', '.run', '.sh'
     ];
-    return allowedTypes.includes(file.type);
+    
+    const fileName = file.name.toLowerCase();
+    return !dangerousExtensions.some(ext => fileName.endsWith(ext));
   };
 
   // 파일 검증 함수
@@ -82,9 +126,9 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
       errors.push(`파일 크기가 5MB를 초과합니다. (${formatFileSize(file.size)})`);
     }
 
-    // 파일 타입 검증 (이미지만)
-    if (!isValidImageType(file)) {
-      errors.push('이미지 파일만 업로드 가능합니다. (JPEG, PNG, GIF, WebP, BMP, SVG)');
+    // 파일 타입 검증 (위험한 파일 차단)
+    if (!isValidFileType(file)) {
+      errors.push('보안상 위험한 파일 형식입니다. (실행 파일, 스크립트 등은 업로드할 수 없습니다)');
     }
 
     return errors;
@@ -518,7 +562,7 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
                     <Typography variant="subtitle1" fontWeight={600}>
                       4. 파일 첨부
                     </Typography>
-                    <Tooltip title="이미지 파일만 첨부 가능합니다. (JPEG, PNG, GIF, WebP, BMP, SVG, 최대 5MB)">
+                    <Tooltip title="모든 파일 형식 첨부 가능합니다. (최대 5MB, 실행파일 제외)">
                       <InfoOutlined fontSize="small" color="action" />
                     </Tooltip>
                   </Stack>
@@ -531,7 +575,7 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
                       onChange={handleFileSelect}
                       style={{ display: 'none' }}
                       id="file-upload"
-                      accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/bmp,image/svg+xml"
+                      accept="*"
                     />
                     <label htmlFor="file-upload">
                       <Button 
@@ -576,11 +620,11 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
                           }}
                         >
                           <Stack direction="row" alignItems="center" spacing={2}>
-                            {/* 이미지 미리보기 썸네일 */}
+                            {/* 파일 아이콘/썸네일 */}
                             <Box
                               sx={{
-                                width: 60,
-                                height: 60,
+                                width: 48,
+                                height: 48,
                                 borderRadius: 1,
                                 overflow: 'hidden',
                                 border: '1px solid',
@@ -589,13 +633,13 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                cursor: 'pointer',
-                                '&:hover': {
+                                cursor: file.type.startsWith('image/') ? 'pointer' : 'default',
+                                '&:hover': file.type.startsWith('image/') ? {
                                   borderColor: 'primary.main',
                                   opacity: 0.8
-                                }
+                                } : {}
                               }}
-                              onClick={() => handlePreviewOpen(file)}
+                              onClick={() => file.type.startsWith('image/') && handlePreviewOpen(file)}
                             >
                               {file.type.startsWith('image/') ? (
                                 <img
@@ -608,7 +652,7 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
                                   }}
                                 />
                               ) : (
-                                <AttachFile color="action" />
+                                getFileIcon(file.name, file.type)
                               )}
                             </Box>
                             

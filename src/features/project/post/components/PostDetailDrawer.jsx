@@ -29,11 +29,15 @@ import DownloadIcon from "@mui/icons-material/Download";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import ImageIcon from "@mui/icons-material/Image";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
+import {
+  PictureAsPdf, Description, TableChart, Archive, Code, Movie, MusicNote
+} from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
 import CommentSection from "./CommentSection";
 import { fetchReviews } from "../reviewSlice";
-import { deletePost, fetchAttachmentImages } from "../postSlice";
+import { deletePost, fetchAttachmentImages, clearAttachmentImages } from "../postSlice";
+import * as postAPI from "@/api/post";
 
 export default function PostDetailDrawer({ open, post, onClose }) {
   const theme = useTheme();
@@ -61,10 +65,46 @@ export default function PostDetailDrawer({ open, post, onClose }) {
   };
 
   // 파일 확장자에 따른 아이콘 반환
-  const getFileIcon = (fileType) => {
+  const getFileIcon = (fileName, fileType) => {
+    const extension = fileName.toLowerCase().split('.').pop();
+    
+    // 이미지 파일
     if (fileType.startsWith('image/')) {
       return <ImageIcon color="primary" />;
     }
+    
+    // 문서 파일
+    if (['pdf'].includes(extension)) {
+      return <PictureAsPdf color="error" />;
+    }
+    if (['doc', 'docx', 'txt', 'rtf'].includes(extension)) {
+      return <Description color="primary" />;
+    }
+    if (['xls', 'xlsx', 'csv'].includes(extension)) {
+      return <TableChart color="success" />;
+    }
+    
+    // 압축 파일
+    if (['zip', 'rar', '7z', 'tar', 'gz'].includes(extension)) {
+      return <Archive color="warning" />;
+    }
+    
+    // 코드 파일
+    if (['js', 'ts', 'jsx', 'tsx', 'html', 'css', 'json', 'xml'].includes(extension)) {
+      return <Code color="info" />;
+    }
+    
+    // 동영상 파일
+    if (['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv'].includes(extension)) {
+      return <Movie color="secondary" />;
+    }
+    
+    // 오디오 파일
+    if (['mp3', 'wav', 'flac', 'aac', 'ogg'].includes(extension)) {
+      return <MusicNote color="secondary" />;
+    }
+    
+    // 기본 파일 아이콘
     return <InsertDriveFileIcon color="action" />;
   };
 
@@ -78,14 +118,52 @@ export default function PostDetailDrawer({ open, post, onClose }) {
     setPreviewModal({ open: false, attachment: null });
   };
 
-  // 파일 다운로드 (임시)
-  const handleDownload = (attachment) => {
-    console.log('다운로드:', attachment.fileName);
-    // 나중에 실제 다운로드 API 연결
+  // 파일 다운로드
+  const handleDownload = async (attachment) => {
+    try {
+      // 다운로드 URL 발급 API 호출
+      const response = await postAPI.getAttachmentDownloadUrl(attachment.id);
+      
+      if (response.data.result === 'SUCCESS') {
+        const downloadUrl = response.data.data.downloadUrl;
+        
+        // S3에서 파일 다운로드 후 브라우저에서 다운로드
+        const fileResponse = await fetch(downloadUrl);
+        if (!fileResponse.ok) {
+          throw new Error(`파일 다운로드 실패: ${fileResponse.status}`);
+        }
+        
+        // Blob으로 변환
+        const blob = await fileResponse.blob();
+        
+        // Blob URL 생성하여 다운로드
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = attachment.fileName; // 파일명 지정
+        link.style.display = 'none';
+        
+        // DOM에 추가 후 클릭하여 다운로드 실행
+        document.body.appendChild(link);
+        link.click();
+        
+        // 정리
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl); // 메모리 정리
+      } else {
+        throw new Error('다운로드 URL 발급 실패');
+      }
+    } catch (error) {
+      console.error('파일 다운로드 실패:', error);
+      alert('파일 다운로드에 실패했습니다.');
+    }
   };
 
   useEffect(() => {
     if (open && post?.postId) {
+      // 항상 첨부파일 상태 초기화 (이전 게시글 데이터 제거)
+      dispatch(clearAttachmentImages());
+      
       dispatch(fetchReviews({ postId: post.postId, page: 1 }));
       
       // 첨부파일이 있으면 이미지 로드
@@ -121,7 +199,10 @@ export default function PostDetailDrawer({ open, post, onClose }) {
       <Drawer
         anchor="right"
         open={open}
-        onClose={onClose}
+        onClose={() => {
+          dispatch(clearAttachmentImages());
+          onClose();
+        }}
         PaperProps={{
           sx: {
             width: { xs: "100%", sm: "50vw" },
@@ -204,7 +285,10 @@ export default function PostDetailDrawer({ open, post, onClose }) {
                   <IconButton onClick={handleDelete}>
                     <DeleteIcon />
                   </IconButton>
-                  <IconButton onClick={onClose}>
+                  <IconButton onClick={() => {
+                    dispatch(clearAttachmentImages());
+                    onClose();
+                  }}>
                     <CloseIcon />
                   </IconButton>
                 </Stack>
@@ -254,9 +338,9 @@ export default function PostDetailDrawer({ open, post, onClose }) {
               {(attachmentImages.length > 0 || imagesLoading) && (
                 <Box>
                   <Stack direction="row" alignItems="center" spacing={1} mb={2}>
-                    <ImageIcon color="action" />
+                    <AttachFileIcon color="action" />
                     <Typography variant="h6" fontWeight={600}>
-                      첨부 이미지 ({attachmentImages.length}개)
+                      첨부파일 ({attachmentImages.length}개)
                       {imagesLoading && " (로딩 중...)"}
                     </Typography>
                   </Stack>
@@ -264,113 +348,92 @@ export default function PostDetailDrawer({ open, post, onClose }) {
 
                   {imagesError && (
                     <Alert severity="error" sx={{ mb: 2 }}>
-                      이미지 로드 실패: {imagesError}
+                      파일 로드 실패: {imagesError}
                     </Alert>
                   )}
 
-                  <Grid container spacing={2}>
+                  {/* 파일 리스트 */}
+                  <Stack spacing={1}>
                     {attachmentImages.map((attachment) => (
-                      <Grid item xs={12} key={attachment.id}>
-                        <Box
-                          sx={{
-                            border: '1px solid',
-                            borderColor: 'grey.300',
-                            borderRadius: 2,
-                            bgcolor: 'background.paper',
-                            overflow: 'hidden',
-                            transition: 'all 0.2s ease-in-out',
-                            '&:hover': {
-                              borderColor: 'primary.main',
-                              boxShadow: theme.shadows[4],
-                              transform: 'translateY(-2px)'
-                            }
-                          }}
-                        >
-                          {/* 이미지 영역 */}
+                      <Box
+                        key={attachment.id}
+                        sx={{
+                          p: 2,
+                          border: '1px solid',
+                          borderColor: 'grey.300',
+                          borderRadius: 1,
+                          bgcolor: 'background.paper',
+                          transition: 'all 0.2s ease-in-out',
+                          '&:hover': {
+                            borderColor: 'primary.main',
+                            bgcolor: 'grey.50'
+                          }
+                        }}
+                      >
+                        <Stack direction="row" alignItems="center" spacing={2}>
+                          {/* 파일 아이콘 */}
                           <Box
                             sx={{
-                              width: '100%',
-                              height: 300, // 큰 이미지 높이
-                              position: 'relative',
-                              cursor: 'pointer',
+                              width: 40,
+                              height: 40,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
                               bgcolor: 'grey.100',
-                              overflow: 'hidden'
+                              borderRadius: 1
                             }}
-                            onClick={() => handlePreviewOpen(attachment)}
                           >
-                            {attachment.imageUrl ? (
-                              <img
-                                src={attachment.imageUrl}
-                                alt={attachment.fileName}
-                                style={{
-                                  width: '100%',
-                                  height: '100%',
-                                  objectFit: 'cover',
-                                  transition: 'transform 0.3s ease-in-out'
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.target.style.transform = 'scale(1.05)';
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.target.style.transform = 'scale(1)';
-                                }}
-                              />
-                            ) : (
-                              <Box
-                                sx={{
-                                  width: '100%',
-                                  height: '100%',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  bgcolor: 'grey.200'
-                                }}
-                              >
-                                {attachment.error ? (
-                                  <Box sx={{ textAlign: 'center' }}>
-                                    <ImageIcon sx={{ fontSize: 48, color: 'grey.400', mb: 1 }} />
-                                    <Typography variant="body2" color="error">
-                                      이미지 로드 실패
-                                    </Typography>
-                                  </Box>
-                                ) : (
-                                  <Box sx={{ textAlign: 'center' }}>
-                                    <CircularProgress size={40} sx={{ mb: 2 }} />
-                                    <Typography variant="body2" color="text.secondary">
-                                      이미지 로딩 중...
-                                    </Typography>
-                                  </Box>
-                                )}
-                              </Box>
-                            )}
-
-                            {/* 확대 아이콘 오버레이 */}
-                            {attachment.imageUrl && (
-                              <Box
-                                sx={{
-                                  position: 'absolute',
-                                  top: 8,
-                                  right: 8,
-                                  bgcolor: 'rgba(0, 0, 0, 0.6)',
-                                  borderRadius: '50%',
-                                  p: 1,
-                                  opacity: 0,
-                                  transition: 'opacity 0.3s ease-in-out',
-                                  '.MuiBox-root:hover &': {
-                                    opacity: 1
-                                  }
-                                }}
-                              >
-                                <ZoomInIcon sx={{ color: 'white', fontSize: 20 }} />
-                              </Box>
-                            )}
+                            {getFileIcon(attachment.fileName, attachment.fileType)}
+                          </Box>
+                          
+                          {/* 파일 정보 */}
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography variant="body2" fontWeight={600} noWrap>
+                              {attachment.fileName}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {formatFileSize(attachment.fileSize)}
+                              {attachment.fileType && ` • ${attachment.fileType}`}
+                            </Typography>
                           </Box>
 
+                          {/* 액션 버튼들 */}
+                          <Stack direction="row" spacing={1}>
+                            {/* 이미지인 경우 미리보기 버튼 */}
+                            {attachment.isImage && attachment.imageUrl && (
+                              <Tooltip title="미리보기">
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handlePreviewOpen(attachment)}
+                                  color="primary"
+                                >
+                                  <ZoomInIcon />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                            
+                            {/* 다운로드 버튼 */}
+                            <Tooltip title="다운로드">
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDownload(attachment)}
+                                color="primary"
+                              >
+                                <DownloadIcon />
+                              </IconButton>
+                            </Tooltip>
+                          </Stack>
+                        </Stack>
 
-                        </Box>
-                      </Grid>
+                        {/* 로딩/에러 상태 */}
+                        {attachment.error && (
+                          <Alert severity="error" sx={{ mt: 1 }}>
+                            파일 로드 실패: {attachment.error}
+                          </Alert>
+                        )}
+                      </Box>
                     ))}
-                  </Grid>
+                  </Stack>
                 </Box>
               )}
 

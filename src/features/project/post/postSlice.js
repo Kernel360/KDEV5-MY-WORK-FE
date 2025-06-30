@@ -304,6 +304,17 @@ const postSlice = createSlice({
     clearImagesError(state) {
       state.imagesError = null;
     },
+    clearAttachmentImages(state) {
+      // 기존 Object URL들 정리 (메모리 누수 방지)
+      state.attachmentImages.forEach(image => {
+        if (image.imageUrl) {
+          URL.revokeObjectURL(image.imageUrl);
+        }
+      });
+      state.attachmentImages = [];
+      state.imagesLoading = false;
+      state.imagesError = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -496,5 +507,5 @@ const postSlice = createSlice({
   },
 });
 
-export const { clearPostDetail, clearNewPostId, clearAttachmentError, clearImagesError } = postSlice.actions;
+export const { clearPostDetail, clearNewPostId, clearAttachmentError, clearImagesError, clearAttachmentImages } = postSlice.actions;
 export default postSlice.reducer;
