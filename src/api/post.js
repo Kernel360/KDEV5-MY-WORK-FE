@@ -46,7 +46,11 @@ export function getPostDetail(postId) {
   return api.get(`/api/posts/${postId}`);
 }
 
-export function findPosts(projectId, page, { keyword, keywordType, projectStepId, deleted, approval }) {
+export function findPosts(
+  projectId,
+  page,
+  { keyword, keywordType, projectStepId, deleted, approval }
+) {
   return api.get(`/api/projects/${projectId}/posts`, {
     params: {
       page,
@@ -103,7 +107,7 @@ export function reissueAttachmentUploadUrl(data) {
  */
 export function setAttachmentActive(data) {
   return api.post("/api/posts/attachments/active", {
-    postAttachments: [data]
+    postAttachments: [data],
   });
 }
 
@@ -116,7 +120,7 @@ export function setAttachmentActive(data) {
  */
 export function getAttachmentDownloadUrl(postAttachmentId) {
   return api.get("/api/posts/attachment/download-url", {
-    params: { postAttachmentId }
+    params: { postAttachmentId },
   });
 }
 
@@ -156,10 +160,10 @@ export function deleteAttachment(postAttachmentId) {
  */
 export function uploadFileToS3(presignedUrl, file) {
   return fetch(presignedUrl, {
-    method: 'PUT',
+    method: "PUT",
     body: file,
     headers: {
-      'Content-Type': file.type,
+      "Content-Type": file.type,
     },
   });
 }
@@ -174,7 +178,7 @@ export function uploadFileToS3(presignedUrl, file) {
 export function bulkActivateAttachments(data) {
   return api.post("/api/posts/attachments/active", {
     postId: data.postId,
-    active: true
+    active: true,
   });
 }
 
@@ -188,3 +192,9 @@ export function bulkActivateAttachments(data) {
 export function cleanupPostAttachments(postId) {
   return api.delete(`/api/posts/${postId}/attachments/cleanup`);
 }
+
+export const changePostApprovalStatus = (postId, approvalStatus) => {
+  return api.put(`/api/posts/${postId}/approval`, {
+    approvalStatus,
+  });
+};
