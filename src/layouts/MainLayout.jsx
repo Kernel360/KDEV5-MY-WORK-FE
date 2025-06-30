@@ -14,10 +14,11 @@ import NotificationsDrawer from "@/features/notifications/components/Notificatio
 import useNotificationPolling from "@/hooks/useNotificationPolling";
 
 export default function MainLayout() {
-  useNotificationPolling();
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+
+  useNotificationPolling(!notificationsOpen);
   const isMobile = useMediaQuery("(max-width:600px)");
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen((prev) => !prev);
