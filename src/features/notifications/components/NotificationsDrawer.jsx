@@ -83,9 +83,10 @@ export default function NotificationsDrawer({ open, onClose }) {
       dispatch(markNotificationsAsRead(notif.id));
     }
     if (notif.targetType === "PROJECT_CHECK_LIST") {
-      navigate(
-        `/projects/${notif.projectId}/approvals?targetId=${notif.targetId}`
-      );
+      navigate(`/projects/${notif.projectId}/approvals`, {
+        state: { openTargetId: notif.targetId },
+      });
+
       onClose();
     }
   };

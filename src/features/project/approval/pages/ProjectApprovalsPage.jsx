@@ -43,20 +43,18 @@ export default function ProjectApprovalsPage() {
   }, [projectId, dispatch]);
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
+    const openTargetId = location.state?.openTargetId;
 
-    const targetId = params.get("targetId");
-
-    if (targetId && checklistItems.length > 0) {
+    if (openTargetId && checklistItems.length > 0) {
       const target = checklistItems.find(
-        (item) => String(item.id) === String(targetId)
+        (item) => String(item.id) === String(openTargetId)
       );
       if (target) {
         setSelectedItem(target);
         setDrawerOpen(true);
       }
     }
-  }, [location.search, checklistItems]);
+  }, [location.state?.openTargetId, checklistItems]);
 
   const handleStepChange = (id, title) => {
     setSelected(title);
