@@ -26,7 +26,7 @@ import { InfoOutlined, CloudUpload, Delete, AttachFile, ZoomIn, Refresh } from "
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { createPostId, createPost, deleteAttachment, setAttachmentActive, cleanupPostAttachments } from "@/features/project/post/postSlice";
+import { createPostId, createPost, deleteAttachment, bulkActivateAttachments, cleanupPostAttachments } from "@/features/project/post/postSlice";
 import * as postAPI from "@/api/post";
 
 export default function CreatePostDrawer({ open, onClose, onSubmit }) {
@@ -318,28 +318,20 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
         createdPostId = result?.id || id;
       }
 
-      // 2. 업로드 성공한 파일들을 개별 활성화
+      // 2. 업로드 성공한 파일들을 일괄 활성화
       const successfulFiles = files.filter(file => file.status === 'success' && file.postAttachmentId);
       if (successfulFiles.length > 0) {
-        console.log(`${successfulFiles.length}개 파일 개별 활성화 시작...`);
+        console.log(`${successfulFiles.length}개 파일 일괄 활성화 시작...`);
         
-        // 개별 파일마다 활성화 API 호출
-        const activatePromises = successfulFiles.map(async (file) => {
-          try {
-            await dispatch(setAttachmentActive({ 
-              postAttachmentId: file.postAttachmentId, 
-              active: true 
-            })).unwrap();
-            console.log(`파일 활성화 완료: ${file.name}`);
-          } catch (error) {
-            console.error(`파일 활성화 실패: ${file.name}`, error);
-            // 개별 파일 활성화 실패는 전체 프로세스에 영향을 주지 않음
-          }
-        });
-        
-        // 모든 활성화 작업을 병렬로 처리
-        await Promise.allSettled(activatePromises);
-        console.log('모든 파일 활성화 작업 완료');
+        try {
+          await dispatch(bulkActivateAttachments({ 
+            postId: createdPostId 
+          })).unwrap();
+          console.log('파일 일괄 활성화 완료');
+        } catch (activateError) {
+          console.error('파일 활성화 실패:', activateError);
+          // 파일 활성화 실패는 게시글 생성 성공에 영향을 주지 않음
+        }
       }
 
       // 3. 폼 초기화 및 창 닫기
