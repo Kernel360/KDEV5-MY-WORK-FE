@@ -22,6 +22,10 @@ export default function useProjectDetailSections(
   setPeriodStart,
   periodEnd,
   setPeriodEnd,
+  projectAmount,
+  setProjectAmount,
+  projectStep,
+  setProjectStep,
   setStepEdited,
   setStepSaveFn
 ) {
@@ -54,6 +58,10 @@ export default function useProjectDetailSections(
           setPeriodStart={setPeriodStart}
           periodEnd={periodEnd}
           setPeriodEnd={setPeriodEnd}
+          projectAmount={projectAmount}
+          setProjectAmount={setProjectAmount}
+          projectStep={projectStep}
+          setProjectStep={setProjectStep}
         />
       ),
     },

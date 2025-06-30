@@ -36,6 +36,8 @@ export default function ProjectDetailPage() {
   const [projectDetail, setProjectDetail] = useState("");
   const [periodStart, setPeriodStart] = useState("");
   const [periodEnd, setPeriodEnd] = useState("");
+  const [projectAmount, setProjectAmount] = useState("");
+  const [projectStep, setProjectStep] = useState("");
 
   const [isAddStepOpen, setIsAddStepOpen] = useState(false);
   const [newStepName, setNewStepName] = useState("");
@@ -57,6 +59,8 @@ export default function ProjectDetailPage() {
       setProjectDetail(project.detail || "");
       setPeriodStart(dayjs(project.startAt).format("YYYY-MM-DD") || "");
       setPeriodEnd(dayjs(project.endAt).format("YYYY-MM-DD") || "");
+      setProjectAmount(project.projectAmount ?? "");
+      setProjectStep(project.step || "CONTRACT");
     }
   }, [loading, project, error, navigate]);
 
@@ -66,9 +70,11 @@ export default function ProjectDetailPage() {
       project.name !== projectName ||
       project.detail !== projectDetail ||
       dayjs(project.startAt).format("YYYY-MM-DD") !== periodStart ||
-      dayjs(project.endAt).format("YYYY-MM-DD") !== periodEnd
+      dayjs(project.endAt).format("YYYY-MM-DD") !== periodEnd ||
+      project.projectAmount !== projectAmount ||
+      project.step !== projectStep
     );
-  }, [project, projectName, projectDetail, periodStart, periodEnd]);
+  }, [project, projectName, projectDetail, periodStart, periodEnd, projectAmount, projectStep]);
 
   const isEdited = isInfoEdited || stepEdited;
 
@@ -78,6 +84,8 @@ export default function ProjectDetailPage() {
     setProjectDetail(project.detail);
     setPeriodStart(dayjs(project.startAt).format("YYYY-MM-DD"));
     setPeriodEnd(dayjs(project.endAt).format("YYYY-MM-DD"));
+    setProjectAmount(project.projectAmount ?? "");
+    setProjectStep(project.step || "CONTRACT");
   };
 
   const handleSave = async () => {
@@ -89,6 +97,8 @@ export default function ProjectDetailPage() {
           detail: projectDetail,
           ...(periodStart && { startAt: `${periodStart}T09:00:00` }),
           ...(periodEnd && { endAt: `${periodEnd}T18:00:00` }),
+          projectAmount: projectAmount === "" ? null : Number(projectAmount),
+          step: projectStep,
           deleted: false,
         };
         await dispatch(updateProject(payload)).unwrap();
@@ -138,6 +148,10 @@ export default function ProjectDetailPage() {
     setPeriodStart,
     periodEnd,
     setPeriodEnd,
+    projectAmount,
+    setProjectAmount,
+    projectStep,
+    setProjectStep,
     setStepEdited,
     setStepSaveFn
   );
