@@ -1,25 +1,23 @@
-// src/hooks/useNotificationPolling.js
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchNotifications } from "@/features/notifications/notificationSlice";
+import { refreshNotifications } from "@/features/notifications/notificationSlice";
 
 export default function useNotificationPolling(
-  intervalMs = 18000,
-  page = 1,
-  isRead
+  enabled = true,
+  intervalMs = 18000
 ) {
   const dispatch = useDispatch();
-  const isLoggedIn = useSelector((state) => !!state.auth?.user); // 또는 state.auth.isLoggedIn
+  const isLoggedIn = useSelector((state) => !!state.auth?.user);
 
   useEffect(() => {
-    if (!isLoggedIn) return;
+    if (!enabled || !isLoggedIn) return;
 
-    dispatch(fetchNotifications({ page, isRead }));
+    dispatch(refreshNotifications());
 
     const timerId = setInterval(() => {
-      dispatch(fetchNotifications({ page, isRead }));
+      dispatch(refreshNotifications());
     }, intervalMs);
 
     return () => clearInterval(timerId);
-  }, [dispatch, intervalMs, page, isRead, isLoggedIn]);
+  }, [dispatch, enabled, isLoggedIn, intervalMs]);
 }
