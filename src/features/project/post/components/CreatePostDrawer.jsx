@@ -26,7 +26,7 @@ import { InfoOutlined, CloudUpload, Delete, AttachFile, ZoomIn, Refresh } from "
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { createPostId, createPost, deleteAttachment } from "@/features/project/post/postSlice";
+import { createPostId, createPost, deleteAttachment, setAttachmentActive, cleanupPostAttachments } from "@/features/project/post/postSlice";
 import * as postAPI from "@/api/post";
 
 export default function CreatePostDrawer({ open, onClose, onSubmit }) {
@@ -129,13 +129,7 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
           : file
       ));
 
-      // 6. 첨부파일 활성화
-      await postAPI.setAttachmentActive({
-        postAttachmentId,
-        active: true
-      });
-
-      // 7. 업로드 완료
+      // 6. 업로드 완료 (Active API는 게시글 생성 후 일괄 처리)
       setFiles(prev => prev.map(file => 
         file.id === fileItem.id 
           ? { ...file, status: 'success', progress: 100, postAttachmentId }
@@ -261,21 +255,17 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
 
   useEffect(() => {
     const generateNewPostId = async () => {
-      const storedId = localStorage.getItem("newPostId");
-      if (!storedId) {
-        try {
-          setLoadingId(true);
-          const result = await dispatch(createPostId()).unwrap();
-          const newId = typeof result === "string" ? result : result.postId;
-          localStorage.setItem("newPostId", newId);
-          setForm((prev) => ({ ...prev, id: newId }));
-        } catch (err) {
-          console.error("Post ID 생성 실패:", err);
-        } finally {
-          setLoadingId(false);
-        }
-      } else {
-        setForm((prev) => ({ ...prev, id: storedId }));
+      // 게시글 생성창이 열릴 때마다 새로운 UUID 발급 (독립성 보장)
+      try {
+        setLoadingId(true);
+        const result = await dispatch(createPostId()).unwrap();
+        const newId = typeof result === "string" ? result : result.postId;
+        setForm((prev) => ({ ...prev, id: newId }));
+        console.log("새로운 게시글 UUID 발급:", newId);
+      } catch (err) {
+        console.error("Post ID 생성 실패:", err);
+      } finally {
+        setLoadingId(false);
       }
     };
 
@@ -318,34 +308,69 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
         authorName: userName,
       };
 
+      // 1. 게시글 생성
+      let createdPostId;
       if (onSubmit) {
-        await onSubmit(payload);
+        const result = await onSubmit(payload);
+        createdPostId = result?.id || id;
       } else {
-        await dispatch(createPost({ projectId, data: payload })).unwrap();
+        const result = await dispatch(createPost({ projectId, data: payload })).unwrap();
+        createdPostId = result?.id || id;
       }
 
-      // 성공 후 새로운 게시글 ID 생성
-      try {
-        const newResult = await dispatch(createPostId()).unwrap();
-        const newId = typeof newResult === "string" ? newResult : newResult.postId;
-        localStorage.setItem("newPostId", newId);
-      } catch (err) {
-        console.error("새 게시글 ID 생성 실패:", err);
+      // 2. 업로드 성공한 파일들을 개별 활성화
+      const successfulFiles = files.filter(file => file.status === 'success' && file.postAttachmentId);
+      if (successfulFiles.length > 0) {
+        console.log(`${successfulFiles.length}개 파일 개별 활성화 시작...`);
+        
+        // 개별 파일마다 활성화 API 호출
+        const activatePromises = successfulFiles.map(async (file) => {
+          try {
+            await dispatch(setAttachmentActive({ 
+              postAttachmentId: file.postAttachmentId, 
+              active: true 
+            })).unwrap();
+            console.log(`파일 활성화 완료: ${file.name}`);
+          } catch (error) {
+            console.error(`파일 활성화 실패: ${file.name}`, error);
+            // 개별 파일 활성화 실패는 전체 프로세스에 영향을 주지 않음
+          }
+        });
+        
+        // 모든 활성화 작업을 병렬로 처리
+        await Promise.allSettled(activatePromises);
+        console.log('모든 파일 활성화 작업 완료');
       }
 
-      // 폼 초기화
+      // 3. 폼 초기화 및 창 닫기
       setForm({ id: "", projectStepId: "", title: "", content: "" });
       setFiles([]);
       onClose();
+      
+      console.log('게시글 생성 완료:', createdPostId);
     } catch (e) {
-      console.error(e);
+      console.error('게시글 생성 실패:', e);
       alert('게시글 등록에 실패했습니다.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
+    // 업로드된 파일이 있는 경우 정리
+    const hasUploadedFiles = files.some(file => file.status === 'success' && file.postAttachmentId);
+    
+    if (hasUploadedFiles && form.id) {
+      try {
+        console.log('게시글 취소 - 업로드된 파일 정리 시작:', form.id);
+        await dispatch(cleanupPostAttachments(form.id)).unwrap();
+        console.log('업로드된 파일 정리 완료');
+      } catch (error) {
+        console.error('파일 정리 실패:', error);
+        // 정리 실패해도 창은 닫음
+      }
+    }
+    
     setForm((prev) => ({ ...prev, projectStepId: "", title: "", content: "" }));
     setFiles([]);
     onClose();
