@@ -6,11 +6,24 @@ import {
   Tooltip,
   Stack,
   Divider,
+  MenuItem,
 } from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { CalendarTodayRounded, InfoOutlined } from "@mui/icons-material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
+
+const STATUS_OPTIONS = [
+  { value: "CONTRACT", label: "결제" },
+  { value: "IN_PROGRESS", label: "진행" },
+  { value: "PAYMENT", label: "검수" },
+  { value: "COMPLETED", label: "완료" },
+];
+
+const getStatusLabel = (status) => {
+  const option = STATUS_OPTIONS.find(opt => opt.value === status);
+  return option ? option.label : status || "-";
+};
 
 export default function ProjectBasicInfoSectionContent({
   isEditable,
@@ -22,6 +35,10 @@ export default function ProjectBasicInfoSectionContent({
   setPeriodStart,
   periodEnd,
   setPeriodEnd,
+  projectAmount,
+  setProjectAmount,
+  projectStep,
+  setProjectStep,
   project,
 }) {
   return (
@@ -61,6 +78,32 @@ export default function ProjectBasicInfoSectionContent({
                   설명
                 </Typography>
                 <Typography variant="body1">{projectDetail || "-"}</Typography>
+              </>
+            )}
+          </Grid>
+
+          <Grid item xs={12} sm={isEditable ? 12 : 6}>
+            {isEditable ? (
+              <TextField
+                select
+                label="프로젝트 상태"
+                value={projectStep}
+                onChange={(e) => setProjectStep(e.target.value)}
+                fullWidth
+                required
+              >
+                {STATUS_OPTIONS.map((opt) => (
+                  <MenuItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+            ) : (
+              <>
+                <Typography variant="body2" color="text.secondary">
+                  프로젝트 상태
+                </Typography>
+                <Typography variant="body1">{getStatusLabel(project?.step)}</Typography>
               </>
             )}
           </Grid>
@@ -116,8 +159,16 @@ export default function ProjectBasicInfoSectionContent({
           </Grid>
 
           <Grid item xs={12} sm={isEditable ? 12 : 6}>
-            {/* 읽기모드에서만 프로젝트 금액 노출 */}
-            {!isEditable && (
+            {isEditable ? (
+              <TextField
+                label="프로젝트 금액(만원)"
+                value={projectAmount}
+                onChange={(e) => setProjectAmount(e.target.value)}
+                fullWidth
+                type="number"
+                inputProps={{ min: 0 }}
+              />
+            ) : (
               <>
                 <Typography variant="body2" color="text.secondary">
                   프로젝트 금액(만원)
