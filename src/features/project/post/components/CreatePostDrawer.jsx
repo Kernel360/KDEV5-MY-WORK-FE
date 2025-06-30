@@ -31,6 +31,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { createPostId, createPost, deleteAttachment, bulkActivateAttachments, cleanupPostAttachments } from "@/features/project/post/postSlice";
 import * as postAPI from "@/api/post";
+import CustomButton from "@/components/common/customButton/CustomButton";
 
 export default function CreatePostDrawer({ open, onClose, onSubmit }) {
   const theme = useTheme();
@@ -578,22 +579,13 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
                       accept="*"
                     />
                     <label htmlFor="file-upload">
-                      <Button 
-                        variant="outlined" 
+                      <CustomButton 
+                        kind="ghost"
                         component="span"
                         startIcon={<CloudUpload />}
-                        sx={{ 
-                          border: '2px dashed',
-                          borderColor: 'primary.main',
-                          color: 'primary.main',
-                          '&:hover': {
-                            borderColor: 'primary.dark',
-                            backgroundColor: 'primary.50'
-                          }
-                        }}
                       >
                         파일 선택
-                      </Button>
+                      </CustomButton>
                     </label>
                   </Stack>
                 </Box>
@@ -740,16 +732,16 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
                 )}
 
                 <Stack direction="row" justifyContent="flex-end" spacing={2}>
-                  <Button variant="text" onClick={handleCancel}>
+                  <CustomButton kind="text" onClick={handleCancel}>
                     취소
-                  </Button>
-                  <Button
-                    variant="contained"
+                  </CustomButton>
+                  <CustomButton
+                    kind="primary"
                     onClick={handleSubmit}
                     disabled={loading}
                   >
                     {loading ? "등록 중…" : "등록"}
-                  </Button>
+                  </CustomButton>
                 </Stack>
               </>
             )}
