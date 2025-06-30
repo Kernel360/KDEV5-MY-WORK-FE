@@ -28,82 +28,101 @@ import AttachFileIcon from "@mui/icons-material/AttachFile";
 import DownloadIcon from "@mui/icons-material/Download";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import ImageIcon from "@mui/icons-material/Image";
+import CustomButton from "@/components/common/customButton/CustomButton";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 import {
-  PictureAsPdf, Description, TableChart, Archive, Code, Movie, MusicNote
+  PictureAsPdf,
+  Description,
+  TableChart,
+  Archive,
+  Code,
+  Movie,
+  MusicNote,
 } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
 import CommentSection from "./CommentSection";
 import { fetchReviews } from "../reviewSlice";
-import { deletePost, fetchAttachmentImages, clearAttachmentImages } from "../postSlice";
+import {
+  deletePost,
+  fetchAttachmentImages,
+  clearAttachmentImages,
+} from "../postSlice";
 import * as postAPI from "@/api/post";
 
 export default function PostDetailDrawer({ open, post, onClose }) {
   const theme = useTheme();
   const dispatch = useDispatch();
   const reviews = useSelector((state) => state.review.items || []);
-  
+
   // 첨부파일 이미지 관련 상태
-  const attachmentImages = useSelector((state) => state.post.attachmentImages || []);
+  const attachmentImages = useSelector(
+    (state) => state.post.attachmentImages || []
+  );
   const imagesLoading = useSelector((state) => state.post.imagesLoading);
   const imagesError = useSelector((state) => state.post.imagesError);
-  
+
   // 이미지 미리보기 모달 상태
-  const [previewModal, setPreviewModal] = useState({ 
-    open: false, 
-    attachment: null 
+  const [previewModal, setPreviewModal] = useState({
+    open: false,
+    attachment: null,
   });
 
   // 파일 크기 포맷팅
   const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   // 파일 확장자에 따른 아이콘 반환
   const getFileIcon = (fileName, fileType) => {
-    const extension = fileName.toLowerCase().split('.').pop();
-    
+    const extension = fileName.toLowerCase().split(".").pop();
+
     // 이미지 파일
-    if (fileType.startsWith('image/')) {
+    if (fileType.startsWith("image/")) {
       return <ImageIcon color="primary" />;
     }
-    
+
     // 문서 파일
-    if (['pdf'].includes(extension)) {
+    if (["pdf"].includes(extension)) {
       return <PictureAsPdf color="error" />;
     }
-    if (['doc', 'docx', 'txt', 'rtf'].includes(extension)) {
+    if (["doc", "docx", "txt", "rtf"].includes(extension)) {
       return <Description color="primary" />;
     }
-    if (['xls', 'xlsx', 'csv'].includes(extension)) {
+    if (["xls", "xlsx", "csv"].includes(extension)) {
       return <TableChart color="success" />;
     }
-    
+
     // 압축 파일
-    if (['zip', 'rar', '7z', 'tar', 'gz'].includes(extension)) {
+    if (["zip", "rar", "7z", "tar", "gz"].includes(extension)) {
       return <Archive color="warning" />;
     }
-    
+
     // 코드 파일
-    if (['js', 'ts', 'jsx', 'tsx', 'html', 'css', 'json', 'xml'].includes(extension)) {
+    if (
+      ["js", "ts", "jsx", "tsx", "html", "css", "json", "xml"].includes(
+        extension
+      )
+    ) {
       return <Code color="info" />;
     }
-    
+
     // 동영상 파일
-    if (['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv'].includes(extension)) {
+    if (["mp4", "avi", "mov", "wmv", "flv", "mkv"].includes(extension)) {
       return <Movie color="secondary" />;
     }
-    
+
     // 오디오 파일
-    if (['mp3', 'wav', 'flac', 'aac', 'ogg'].includes(extension)) {
+    if (["mp3", "wav", "flac", "aac", "ogg"].includes(extension)) {
       return <MusicNote color="secondary" />;
     }
-    
+
     // 기본 파일 아이콘
     return <InsertDriveFileIcon color="action" />;
   };
@@ -123,39 +142,39 @@ export default function PostDetailDrawer({ open, post, onClose }) {
     try {
       // 다운로드 URL 발급 API 호출
       const response = await postAPI.getAttachmentDownloadUrl(attachment.id);
-      
-      if (response.data.result === 'SUCCESS') {
+
+      if (response.data.result === "SUCCESS") {
         const downloadUrl = response.data.data.downloadUrl;
-        
+
         // S3에서 파일 다운로드 후 브라우저에서 다운로드
         const fileResponse = await fetch(downloadUrl);
         if (!fileResponse.ok) {
           throw new Error(`파일 다운로드 실패: ${fileResponse.status}`);
         }
-        
+
         // Blob으로 변환
         const blob = await fileResponse.blob();
-        
+
         // Blob URL 생성하여 다운로드
         const blobUrl = URL.createObjectURL(blob);
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = blobUrl;
         link.download = attachment.fileName; // 파일명 지정
-        link.style.display = 'none';
-        
+        link.style.display = "none";
+
         // DOM에 추가 후 클릭하여 다운로드 실행
         document.body.appendChild(link);
         link.click();
-        
+
         // 정리
         document.body.removeChild(link);
         URL.revokeObjectURL(blobUrl); // 메모리 정리
       } else {
-        throw new Error('다운로드 URL 발급 실패');
+        throw new Error("다운로드 URL 발급 실패");
       }
     } catch (error) {
-      console.error('파일 다운로드 실패:', error);
-      alert('파일 다운로드에 실패했습니다.');
+      console.error("파일 다운로드 실패:", error);
+      alert("파일 다운로드에 실패했습니다.");
     }
   };
 
@@ -163,9 +182,9 @@ export default function PostDetailDrawer({ open, post, onClose }) {
     if (open && post?.postId) {
       // 항상 첨부파일 상태 초기화 (이전 게시글 데이터 제거)
       dispatch(clearAttachmentImages());
-      
+
       dispatch(fetchReviews({ postId: post.postId, page: 1 }));
-      
+
       // 첨부파일이 있으면 이미지 로드
       if (post.postAttachments && post.postAttachments.length > 0) {
         dispatch(fetchAttachmentImages(post.postAttachments));
@@ -183,6 +202,10 @@ export default function PostDetailDrawer({ open, post, onClose }) {
       console.error(err);
       alert("삭제 실패");
     }
+  };
+
+  const handleApprovalToggle = () => {
+    console.log("승인 상태 변경 or 처리 UI 표시");
   };
 
   const statusMap = {
@@ -285,10 +308,12 @@ export default function PostDetailDrawer({ open, post, onClose }) {
                   <IconButton onClick={handleDelete}>
                     <DeleteIcon />
                   </IconButton>
-                  <IconButton onClick={() => {
-                    dispatch(clearAttachmentImages());
-                    onClose();
-                  }}>
+                  <IconButton
+                    onClick={() => {
+                      dispatch(clearAttachmentImages());
+                      onClose();
+                    }}
+                  >
                     <CloseIcon />
                   </IconButton>
                 </Stack>
@@ -305,17 +330,22 @@ export default function PostDetailDrawer({ open, post, onClose }) {
                 <Typography variant="h5" fontWeight={700}>
                   {post.title}
                 </Typography>
-                <Chip
-                  label={stat.label}
-                  size="medium"
-                  sx={{
-                    bgcolor: theme.palette.status?.[stat.color]?.bg,
-                    color: theme.palette.status?.[stat.color]?.main,
-                    fontWeight: 600,
-                    py: 0.5,
-                    px: 1.5,
-                  }}
-                />
+                <CustomButton
+                  kind={
+                    post.approval === "APPROVED" ? "ghost-success" : "ghost"
+                  }
+                  size="small"
+                  onClick={handleApprovalToggle}
+                  startIcon={
+                    post.approval === "APPROVED" ? (
+                      <CheckCircleIcon fontSize="small" />
+                    ) : (
+                      <HourglassBottomIcon fontSize="small" />
+                    )
+                  }
+                >
+                  {stat.label}
+                </CustomButton>
               </Box>
 
               {/* 본문 */}
@@ -359,15 +389,15 @@ export default function PostDetailDrawer({ open, post, onClose }) {
                         key={attachment.id}
                         sx={{
                           p: 2,
-                          border: '1px solid',
-                          borderColor: 'grey.300',
+                          border: "1px solid",
+                          borderColor: "grey.300",
                           borderRadius: 1,
-                          bgcolor: 'background.paper',
-                          transition: 'all 0.2s ease-in-out',
-                          '&:hover': {
-                            borderColor: 'primary.main',
-                            bgcolor: 'grey.50'
-                          }
+                          bgcolor: "background.paper",
+                          transition: "all 0.2s ease-in-out",
+                          "&:hover": {
+                            borderColor: "primary.main",
+                            bgcolor: "grey.50",
+                          },
                         }}
                       >
                         <Stack direction="row" alignItems="center" spacing={2}>
@@ -376,24 +406,31 @@ export default function PostDetailDrawer({ open, post, onClose }) {
                             sx={{
                               width: 40,
                               height: 40,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              bgcolor: 'grey.100',
-                              borderRadius: 1
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              bgcolor: "grey.100",
+                              borderRadius: 1,
                             }}
                           >
-                            {getFileIcon(attachment.fileName, attachment.fileType)}
+                            {getFileIcon(
+                              attachment.fileName,
+                              attachment.fileType
+                            )}
                           </Box>
-                          
+
                           {/* 파일 정보 */}
                           <Box sx={{ flex: 1, minWidth: 0 }}>
                             <Typography variant="body2" fontWeight={600} noWrap>
                               {attachment.fileName}
                             </Typography>
-                            <Typography variant="caption" color="text.secondary">
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
                               {formatFileSize(attachment.fileSize)}
-                              {attachment.fileType && ` • ${attachment.fileType}`}
+                              {attachment.fileType &&
+                                ` • ${attachment.fileType}`}
                             </Typography>
                           </Box>
 
@@ -411,7 +448,7 @@ export default function PostDetailDrawer({ open, post, onClose }) {
                                 </IconButton>
                               </Tooltip>
                             )}
-                            
+
                             {/* 다운로드 버튼 */}
                             <Tooltip title="다운로드">
                               <IconButton
@@ -448,54 +485,54 @@ export default function PostDetailDrawer({ open, post, onClose }) {
         </Paper>
       </Drawer>
 
-            {/* 이미지 미리보기 모달 */}
+      {/* 이미지 미리보기 모달 */}
       <Modal
         open={previewModal.open}
         onClose={handlePreviewClose}
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          p: { xs: 1, sm: 2 }
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          p: { xs: 1, sm: 2 },
         }}
       >
         <Box
           sx={{
-            position: 'relative',
-            width: { xs: '95vw', sm: '90vw', md: '80vw' },
-            maxHeight: { xs: '95vh', sm: '90vh' },
-            bgcolor: 'background.paper',
+            position: "relative",
+            width: { xs: "95vw", sm: "90vw", md: "80vw" },
+            maxHeight: { xs: "95vh", sm: "90vh" },
+            bgcolor: "background.paper",
             borderRadius: 3,
             boxShadow: 24,
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column'
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
           }}
         >
           {/* 모달 헤더 */}
           <Box
             sx={{
               p: 2,
-              borderBottom: '1px solid',
-              borderColor: 'divider',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              bgcolor: 'rgba(0, 0, 0, 0.03)',
-              backdropFilter: 'blur(10px)'
+              borderBottom: "1px solid",
+              borderColor: "divider",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              bgcolor: "rgba(0, 0, 0, 0.03)",
+              backdropFilter: "blur(10px)",
             }}
           >
             <Typography variant="h6" noWrap sx={{ fontWeight: 600 }}>
               {previewModal.attachment?.fileName}
             </Typography>
-            <IconButton 
-              onClick={handlePreviewClose} 
+            <IconButton
+              onClick={handlePreviewClose}
               size="small"
               sx={{
-                bgcolor: 'rgba(0, 0, 0, 0.1)',
-                '&:hover': {
-                  bgcolor: 'rgba(0, 0, 0, 0.2)'
-                }
+                bgcolor: "rgba(0, 0, 0, 0.1)",
+                "&:hover": {
+                  bgcolor: "rgba(0, 0, 0, 0.2)",
+                },
               }}
             >
               <CloseIcon />
@@ -507,24 +544,24 @@ export default function PostDetailDrawer({ open, post, onClose }) {
             <Box
               sx={{
                 flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
                 p: 3,
-                bgcolor: 'grey.50',
+                bgcolor: "grey.50",
                 minHeight: 0,
-                position: 'relative'
+                position: "relative",
               }}
             >
               <img
                 src={previewModal.attachment.imageUrl}
                 alt={previewModal.attachment.fileName}
                 style={{
-                  maxWidth: '100%',
-                  maxHeight: '100%',
-                  objectFit: 'contain',
-                  borderRadius: '8px',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                  objectFit: "contain",
+                  borderRadius: "8px",
+                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
                 }}
               />
             </Box>
@@ -534,15 +571,22 @@ export default function PostDetailDrawer({ open, post, onClose }) {
           <Box
             sx={{
               p: 2,
-              borderTop: '1px solid',
-              borderColor: 'divider',
-              bgcolor: 'background.paper'
+              borderTop: "1px solid",
+              borderColor: "divider",
+              bgcolor: "background.paper",
             }}
           >
             <Stack direction="row" spacing={3} alignItems="center">
               <Box>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                  <strong>크기:</strong> {previewModal.attachment ? formatFileSize(previewModal.attachment.fileSize) : ''}
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 0.5 }}
+                >
+                  <strong>크기:</strong>{" "}
+                  {previewModal.attachment
+                    ? formatFileSize(previewModal.attachment.fileSize)
+                    : ""}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   <strong>타입:</strong> {previewModal.attachment?.fileType}
