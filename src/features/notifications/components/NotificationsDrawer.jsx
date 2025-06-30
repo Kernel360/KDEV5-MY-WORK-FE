@@ -37,8 +37,6 @@ export default function NotificationsDrawer({ open, onClose }) {
     hasMore,
   } = useSelector((state) => state.notification);
 
-  console.log("notifications", notifications);
-
   const SIDEBAR_WIDTH = 216;
   const DRAWER_WIDTH = 360;
 
