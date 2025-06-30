@@ -530,9 +530,7 @@ const postSlice = createSlice({
         const { id, approvalStatus } = action.payload;
 
         if (state.detail?.postId === id) {
-          console.log("변경 전:", state.detail.approval);
           state.detail.approval = approvalStatus;
-          console.log("변경 후:", state.detail.approval);
         }
       })
       .addCase(updatePostApproval.rejected, (state, action) => {

@@ -49,6 +49,8 @@ import {
   deletePost,
   fetchAttachmentImages,
   clearAttachmentImages,
+  updatePostApproval,
+  fetchPostById,
 } from "../postSlice";
 import * as postAPI from "@/api/post";
 
@@ -56,6 +58,13 @@ export default function PostDetailDrawer({ open, post, onClose }) {
   const theme = useTheme();
   const dispatch = useDispatch();
   const reviews = useSelector((state) => state.review.items || []);
+  const approval = useSelector((state) => state.post.detail?.approval);
+
+  const [alert, setAlert] = useState({
+    open: false,
+    message: "",
+    severity: "info",
+  });
 
   // 첨부파일 이미지 관련 상태
   const attachmentImages = useSelector(
@@ -205,15 +214,37 @@ export default function PostDetailDrawer({ open, post, onClose }) {
   };
 
   const handleApprovalToggle = () => {
-    console.log("승인 상태 변경 or 처리 UI 표시");
+    if (!post) return;
+
+    const newStatus = approval === "APPROVED" ? "PENDING" : "APPROVED";
+
+    dispatch(
+      updatePostApproval({ postId: post.postId, approvalStatus: newStatus })
+    )
+      .unwrap()
+      .then(() => {
+        setAlert({
+          open: true,
+          message: `상태가 ${newStatus === "APPROVED" ? "승인 완료" : "승인 대기"}로 변경되었습니다.`,
+          severity: "success",
+        });
+      })
+      .catch((err) => {
+        setAlert({
+          open: true,
+          message: "승인 상태 변경에 실패했습니다.",
+          severity: "error",
+        });
+      });
   };
 
   const statusMap = {
-    PENDING: { label: "대기", color: "neutral" },
-    APPROVED: { label: "완료", color: "success" },
+    PENDING: { label: "답변 대기", color: "neutral" },
+    APPROVED: { label: "답변 완료", color: "success" },
   };
-  const stat = statusMap[post?.approval] || {
-    label: post?.approval ?? "-",
+
+  const stat = statusMap[approval] || {
+    label: approval ?? "-",
     color: "neutral",
   };
 
@@ -331,13 +362,11 @@ export default function PostDetailDrawer({ open, post, onClose }) {
                   {post.title}
                 </Typography>
                 <CustomButton
-                  kind={
-                    post.approval === "APPROVED" ? "ghost-success" : "ghost"
-                  }
+                  kind={approval === "APPROVED" ? "ghost-success" : "ghost"}
                   size="small"
                   onClick={handleApprovalToggle}
                   startIcon={
-                    post.approval === "APPROVED" ? (
+                    approval === "APPROVED" ? (
                       <CheckCircleIcon fontSize="small" />
                     ) : (
                       <HourglassBottomIcon fontSize="small" />
