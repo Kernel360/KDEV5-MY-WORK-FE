@@ -36,25 +36,25 @@ export const fetchPosts = createAsyncThunk(
         keyword,
         keywordType,
         projectStepId,
-        deleted: false,      // 무조건 false
+        deleted: false, // 무조건 false
         approval,
       });
-       return {
-         posts: response.data.data.posts,
-         totalCount: response.data.data.totalCount,
-       };
-     } catch (err) {
-       return thunkAPI.rejectWithValue(
-         err.response?.data || "게시글 목록 조회 실패"
-       );
-     }
-   }
- );
+      return {
+        posts: response.data.data.posts,
+        totalCount: response.data.data.totalCount,
+      };
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data || "게시글 목록 조회 실패"
+      );
+    }
+  }
+);
 
 // 3) 게시글 단건 조회
 export const fetchPostById = createAsyncThunk(
   "post/fetchPostById",
-  async (postId , thunkAPI) => {
+  async (postId, thunkAPI) => {
     try {
       const response = await postAPI.getPostDetail(postId);
       return response.data.data;
@@ -74,9 +74,7 @@ export const createPost = createAsyncThunk(
       const response = await postAPI.createPost(projectId, data);
       return response.data.data; // PostCreateWebResponse.data (UUID)
     } catch (err) {
-      return thunkAPI.rejectWithValue(
-        err.response?.data || "게시글 생성 실패"
-      );
+      return thunkAPI.rejectWithValue(err.response?.data || "게시글 생성 실패");
     }
   }
 );
@@ -89,9 +87,7 @@ export const updatePost = createAsyncThunk(
       const response = await postAPI.updatePost(postId, data);
       return response.data.data; // PostUpdateWebResponse.data
     } catch (err) {
-      return thunkAPI.rejectWithValue(
-        err.response?.data || "게시글 수정 실패"
-      );
+      return thunkAPI.rejectWithValue(err.response?.data || "게시글 수정 실패");
     }
   }
 );
@@ -104,9 +100,7 @@ export const deletePost = createAsyncThunk(
       await postAPI.deletePost(postId);
       return postId;
     } catch (err) {
-      return thunkAPI.rejectWithValue(
-        err.response?.data || "게시글 삭제 실패"
-      );
+      return thunkAPI.rejectWithValue(err.response?.data || "게시글 삭제 실패");
     }
   }
 );
@@ -116,7 +110,10 @@ export const issueAttachmentUploadUrl = createAsyncThunk(
   "post/issueAttachmentUploadUrl",
   async ({ postId, fileName }, thunkAPI) => {
     try {
-      const response = await postAPI.issueAttachmentUploadUrl({ postId, fileName });
+      const response = await postAPI.issueAttachmentUploadUrl({
+        postId,
+        fileName,
+      });
       return response.data.data; // { postAttachmentId, uploadUrl }
     } catch (err) {
       return thunkAPI.rejectWithValue(
@@ -137,9 +134,7 @@ export const uploadFileToS3 = createAsyncThunk(
       }
       return { success: true };
     } catch (err) {
-      return thunkAPI.rejectWithValue(
-        err.message || "S3 파일 업로드 실패"
-      );
+      return thunkAPI.rejectWithValue(err.message || "S3 파일 업로드 실패");
     }
   }
 );
@@ -149,7 +144,10 @@ export const setAttachmentActive = createAsyncThunk(
   "post/setAttachmentActive",
   async ({ postAttachmentId, active }, thunkAPI) => {
     try {
-      const response = await postAPI.setAttachmentActive({ postAttachmentId, active });
+      const response = await postAPI.setAttachmentActive({
+        postAttachmentId,
+        active,
+      });
       return response.data.data; // { postAttachmentId, active }
     } catch (err) {
       return thunkAPI.rejectWithValue(
@@ -164,7 +162,10 @@ export const reissueAttachmentUploadUrl = createAsyncThunk(
   "post/reissueAttachmentUploadUrl",
   async ({ postAttachmentId, fileName }, thunkAPI) => {
     try {
-      const response = await postAPI.reissueAttachmentUploadUrl({ postAttachmentId, fileName });
+      const response = await postAPI.reissueAttachmentUploadUrl({
+        postAttachmentId,
+        fileName,
+      });
       return response.data.data; // { postAttachmentId, uploadUrl }
     } catch (err) {
       return thunkAPI.rejectWithValue(
@@ -182,22 +183,24 @@ export const fetchAttachmentImages = createAsyncThunk(
       const imagePromises = postAttachments.map(async (attachment) => {
         try {
           // 1. 다운로드 URL 발급
-          const urlResponse = await postAPI.getAttachmentDownloadUrl(attachment.postAttachmentId);
+          const urlResponse = await postAPI.getAttachmentDownloadUrl(
+            attachment.postAttachmentId
+          );
           const downloadUrl = urlResponse.data.data.downloadUrl;
-          
+
           // 2. S3에서 이미지 다운로드
           const imageBlob = await postAPI.downloadImageFromS3(downloadUrl);
-          
+
           // 3. Blob을 Object URL로 변환
           const imageUrl = URL.createObjectURL(imageBlob);
-          
+
           return {
             id: attachment.postAttachmentId,
             fileName: attachment.fileName,
             fileSize: imageBlob.size,
             fileType: imageBlob.type,
             imageUrl: imageUrl,
-            isImage: imageBlob.type.startsWith('image/')
+            isImage: imageBlob.type.startsWith("image/"),
           };
         } catch (error) {
           console.error(`Failed to load image ${attachment.fileName}:`, error);
@@ -205,14 +208,14 @@ export const fetchAttachmentImages = createAsyncThunk(
             id: attachment.postAttachmentId,
             fileName: attachment.fileName,
             fileSize: 0,
-            fileType: 'unknown',
+            fileType: "unknown",
             imageUrl: null,
             isImage: false,
-            error: error.message
+            error: error.message,
           };
         }
       });
-      
+
       const images = await Promise.all(imagePromises);
       return images;
     } catch (err) {
@@ -268,13 +271,28 @@ export const cleanupPostAttachments = createAsyncThunk(
   }
 );
 
+export const updatePostApproval = createAsyncThunk(
+  "post/updateApproval",
+  async ({ postId, approvalStatus }, { rejectWithValue }) => {
+    try {
+      const res = await postAPI.changePostApprovalStatus(
+        postId,
+        approvalStatus
+      );
+      return res.data.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
 const postSlice = createSlice({
   name: "post",
   initialState: {
-    newId: null,      // createPostId 결과
-    list: [],         // 게시글 배열
-    totalCount: 0,    // 전체 게시글 수
-    detail: null,     // 단건 조회 결과
+    newId: null, // createPostId 결과
+    list: [], // 게시글 배열
+    totalCount: 0, // 전체 게시글 수
+    detail: null, // 단건 조회 결과
     loading: false,
     error: null,
     // 첨부파일 관련 상태
@@ -282,13 +300,14 @@ const postSlice = createSlice({
     attachmentError: null,
     attachmentImages: [], // 첨부파일 이미지 배열
     imagesLoading: false, // 이미지 로딩 상태
-    imagesError: null,    // 이미지 로딩 에러
+    imagesError: null, // 이미지 로딩 에러
+    approval: "PENDING",
   },
   reducers: {
     clearPostDetail(state) {
       state.detail = null;
       // 첨부파일 이미지도 함께 정리
-      state.attachmentImages.forEach(image => {
+      state.attachmentImages.forEach((image) => {
         if (image.imageUrl) {
           URL.revokeObjectURL(image.imageUrl);
         }
@@ -306,7 +325,7 @@ const postSlice = createSlice({
     },
     clearAttachmentImages(state) {
       // 기존 Object URL들 정리 (메모리 누수 방지)
-      state.attachmentImages.forEach(image => {
+      state.attachmentImages.forEach((image) => {
         if (image.imageUrl) {
           URL.revokeObjectURL(image.imageUrl);
         }
@@ -395,7 +414,7 @@ const postSlice = createSlice({
       })
       .addCase(deletePost.fulfilled, (state, action) => {
         state.loading = false;
-        state.list = state.list.filter(post => post.id !== action.payload);
+        state.list = state.list.filter((post) => post.id !== action.payload);
       })
       .addCase(deletePost.rejected, (state, action) => {
         state.loading = false;
@@ -503,9 +522,31 @@ const postSlice = createSlice({
       .addCase(cleanupPostAttachments.rejected, (state, action) => {
         state.attachmentLoading = false;
         state.attachmentError = action.payload;
+      })
+      .addCase(updatePostApproval.pending, (state) => {
+        state.approvalStatus = "loading";
+      })
+      .addCase(updatePostApproval.fulfilled, (state, action) => {
+        const { id, approvalStatus } = action.payload;
+
+        if (state.detail?.postId === id) {
+          console.log("변경 전:", state.detail.approval);
+          state.detail.approval = approvalStatus;
+          console.log("변경 후:", state.detail.approval);
+        }
+      })
+      .addCase(updatePostApproval.rejected, (state, action) => {
+        state.approvalStatus = "error";
+        state.error = action.payload;
       });
   },
 });
 
-export const { clearPostDetail, clearNewPostId, clearAttachmentError, clearImagesError, clearAttachmentImages } = postSlice.actions;
+export const {
+  clearPostDetail,
+  clearNewPostId,
+  clearAttachmentError,
+  clearImagesError,
+  clearAttachmentImages,
+} = postSlice.actions;
 export default postSlice.reducer;
