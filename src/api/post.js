@@ -95,14 +95,16 @@ export function reissueAttachmentUploadUrl(data) {
 }
 
 /**
- * 게시글 파일 업로드 완료 상태 변경
- * POST /api/posts/attachment/active
+ * 게시글 파일 업로드 완료 상태 변경 (개별)
+ * POST /api/posts/attachments/active
  *
  * @param {{ postAttachmentId: string; active: boolean; }} data
  * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<PostAttachmentActiveResponse>
  */
 export function setAttachmentActive(data) {
-  return api.post("/api/posts/attachment/active", data);
+  return api.post("/api/posts/attachments/active", {
+    postAttachments: [data]
+  });
 }
 
 /**
@@ -164,13 +166,16 @@ export function uploadFileToS3(presignedUrl, file) {
 
 /**
  * 게시글 첨부파일 일괄 활성화
- * POST /api/posts/attachment/bulk-active
+ * POST /api/posts/attachments/active
  *
- * @param {{ postId: string; postAttachmentIds: string[]; }} data
+ * @param {{ postId: string; }} data
  * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<PostAttachmentBulkActiveResponse>
  */
 export function bulkActivateAttachments(data) {
-  return api.post("/api/posts/attachment/bulk-active", data);
+  return api.post("/api/posts/attachments/active", {
+    postId: data.postId,
+    active: true
+  });
 }
 
 /**

@@ -241,9 +241,9 @@ export const deleteAttachment = createAsyncThunk(
 // 13) 첨부파일 일괄 활성화
 export const bulkActivateAttachments = createAsyncThunk(
   "post/bulkActivateAttachments",
-  async ({ postId, postAttachmentIds }, thunkAPI) => {
+  async ({ postId }, thunkAPI) => {
     try {
-      const response = await postAPI.bulkActivateAttachments({ postId, postAttachmentIds });
+      const response = await postAPI.bulkActivateAttachments({ postId });
       return response.data.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(
