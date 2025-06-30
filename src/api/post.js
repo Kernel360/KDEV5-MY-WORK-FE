@@ -161,3 +161,25 @@ export function uploadFileToS3(presignedUrl, file) {
     },
   });
 }
+
+/**
+ * 게시글 첨부파일 일괄 활성화
+ * POST /api/posts/attachment/bulk-active
+ *
+ * @param {{ postId: string; postAttachmentIds: string[]; }} data
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<PostAttachmentBulkActiveResponse>
+ */
+export function bulkActivateAttachments(data) {
+  return api.post("/api/posts/attachment/bulk-active", data);
+}
+
+/**
+ * 게시글의 모든 첨부파일 정리 (비활성화된 파일들 삭제)
+ * DELETE /api/posts/{postId}/attachments/cleanup
+ *
+ * @param {string} postId - 게시글 UUID
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<PostAttachmentCleanupResponse>
+ */
+export function cleanupPostAttachments(postId) {
+  return api.delete(`/api/posts/${postId}/attachments/cleanup`);
+}

@@ -238,6 +238,36 @@ export const deleteAttachment = createAsyncThunk(
   }
 );
 
+// 13) 첨부파일 일괄 활성화
+export const bulkActivateAttachments = createAsyncThunk(
+  "post/bulkActivateAttachments",
+  async ({ postId, postAttachmentIds }, thunkAPI) => {
+    try {
+      const response = await postAPI.bulkActivateAttachments({ postId, postAttachmentIds });
+      return response.data.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data || "첨부파일 일괄 활성화 실패"
+      );
+    }
+  }
+);
+
+// 14) 게시글 첨부파일 정리
+export const cleanupPostAttachments = createAsyncThunk(
+  "post/cleanupPostAttachments",
+  async (postId, thunkAPI) => {
+    try {
+      await postAPI.cleanupPostAttachments(postId);
+      return postId;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data || "첨부파일 정리 실패"
+      );
+    }
+  }
+);
+
 const postSlice = createSlice({
   name: "post",
   initialState: {
@@ -434,6 +464,32 @@ const postSlice = createSlice({
         // 삭제된 첨부파일 ID와 일치하는 항목 제거 (필요한 경우)
       })
       .addCase(deleteAttachment.rejected, (state, action) => {
+        state.attachmentLoading = false;
+        state.attachmentError = action.payload;
+      })
+
+      // bulkActivateAttachments
+      .addCase(bulkActivateAttachments.pending, (state) => {
+        state.attachmentLoading = true;
+        state.attachmentError = null;
+      })
+      .addCase(bulkActivateAttachments.fulfilled, (state) => {
+        state.attachmentLoading = false;
+      })
+      .addCase(bulkActivateAttachments.rejected, (state, action) => {
+        state.attachmentLoading = false;
+        state.attachmentError = action.payload;
+      })
+
+      // cleanupPostAttachments
+      .addCase(cleanupPostAttachments.pending, (state) => {
+        state.attachmentLoading = true;
+        state.attachmentError = null;
+      })
+      .addCase(cleanupPostAttachments.fulfilled, (state) => {
+        state.attachmentLoading = false;
+      })
+      .addCase(cleanupPostAttachments.rejected, (state, action) => {
         state.attachmentLoading = false;
         state.attachmentError = action.payload;
       });
