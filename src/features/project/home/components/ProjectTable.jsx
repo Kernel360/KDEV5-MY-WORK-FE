@@ -30,9 +30,9 @@ export default function ProjectTable({
   const filterKey = "step";
   const filterOptions = [
     { label: "전체", value: "" },
-    { label: "계획", value: "NOT_STARTED" },
+    { label: "결제", value: "CONTRACT" },
     { label: "진행", value: "IN_PROGRESS" },
-    { label: "중단", value: "PAUSED" },
+    { label: "검수", value: "PAYMENT" },
     { label: "완료", value: "COMPLETED" },
   ];
 
