@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import ReplyIcon from "@mui/icons-material/Reply";
 import CommentInput from "./CommentInput";
+import CustomButton from "@/components/common/customButton/CustomButton";
 
 // 재귀적으로 리뷰를 렌더링하는 컴포넌트
 function CommentItem({ review, level = 0, postId, onReply }) {
@@ -57,7 +58,7 @@ function CommentItem({ review, level = 0, postId, onReply }) {
 
       {/* 대댓글 입력창 */}
       {replying && (
-        <Box sx={{ ml: (level + 1) * 4 }}>
+        <Box sx={{ ml: (level + 1) * 4, mt: 2 }}>
           <CommentInput
             postId={postId}
             parentId={review.reviewId}
@@ -84,27 +85,24 @@ function CommentItem({ review, level = 0, postId, onReply }) {
         </Box>
       )}
 
-      {/* 최상위 댓글 뒤에 구분선 */}
       {level === 0 && <Divider sx={{ mt: 2 }} />}
     </Box>
   );
 }
 
-// CommentSection: 댓글 입력창을 최상단에, 그 아래 댓글 목록, 더보기 버튼 렌더링
 export default function CommentSection({
   postId,
   comments = [],
   onSubmit,
   onReply,
+  hasMore,
   onLoadMore,
   currentPage = 1,
 }) {
   return (
     <Box sx={{ mt: 3 }}>
-      {/* 최상위 댓글 입력창 */}
       <CommentInput postId={postId} onSubmit={(text) => onSubmit(text)} />
 
-      {/* 댓글 목록 */}
       {comments.map((review) => (
         <CommentItem
           key={review.reviewId}
@@ -114,16 +112,17 @@ export default function CommentSection({
         />
       ))}
 
-      {/* 더보기 버튼 */}
-      {/* <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-        <CustomButton
-          kind="ghost"
-          size="small"
-          onClick={() => onLoadMore({ postId, page: currentPage + 1 })}
-        >
-          더보기
-        </CustomButton>
-      </Box> */}
+      {hasMore && (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+          <CustomButton
+            kind="ghost"
+            size="small"
+            onClick={() => onLoadMore({ postId, page: currentPage + 1 })}
+          >
+            더보기
+          </CustomButton>
+        </Box>
+      )}
     </Box>
   );
 }
