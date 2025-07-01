@@ -22,16 +22,35 @@ import {
   Avatar,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { 
-  InfoOutlined, CloudUpload, Delete, AttachFile, ZoomIn, Refresh,
-  PictureAsPdf, Description, TableChart, Archive, Code, Movie, MusicNote, Image
+import {
+  InfoOutlined,
+  CloudUpload,
+  Delete,
+  AttachFile,
+  ZoomIn,
+  Refresh,
+  PictureAsPdf,
+  Description,
+  TableChart,
+  Archive,
+  Code,
+  Movie,
+  MusicNote,
+  Image,
 } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { createPostId, createPost, deleteAttachment, bulkActivateAttachments, cleanupPostAttachments } from "@/features/project/post/postSlice";
+import {
+  createPostId,
+  createPost,
+  deleteAttachment,
+  bulkActivateAttachments,
+  cleanupPostAttachments,
+} from "@/features/project/post/postSlice";
 import * as postAPI from "@/api/post";
 import CustomButton from "@/components/common/customButton/CustomButton";
+import FilePreviewModal from "./FilePreviewModal";
 
 export default function CreatePostDrawer({ open, onClose, onSubmit }) {
   const theme = useTheme();
@@ -51,57 +70,64 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
   const [files, setFiles] = useState([]); // 첨부 파일 목록
   const [loadingId, setLoadingId] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [previewModal, setPreviewModal] = useState({ open: false, file: null }); // 미리보기 모달
+  const [previewModal, setPreviewModal] = useState({
+    open: false,
+    attachment: null,
+  });
 
   // 파일 크기 포맷팅 함수
   const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   // 파일 타입별 아이콘 반환 함수
   const getFileIcon = (fileName, fileType) => {
-    const extension = fileName.toLowerCase().split('.').pop();
-    
+    const extension = fileName.toLowerCase().split(".").pop();
+
     // 이미지 파일
-    if (fileType.startsWith('image/')) {
+    if (fileType.startsWith("image/")) {
       return <Image color="primary" />;
     }
-    
+
     // 문서 파일
-    if (['pdf'].includes(extension)) {
+    if (["pdf"].includes(extension)) {
       return <PictureAsPdf color="error" />;
     }
-    if (['doc', 'docx', 'txt', 'rtf'].includes(extension)) {
+    if (["doc", "docx", "txt", "rtf"].includes(extension)) {
       return <Description color="primary" />;
     }
-    if (['xls', 'xlsx', 'csv'].includes(extension)) {
+    if (["xls", "xlsx", "csv"].includes(extension)) {
       return <TableChart color="success" />;
     }
-    
+
     // 압축 파일
-    if (['zip', 'rar', '7z', 'tar', 'gz'].includes(extension)) {
+    if (["zip", "rar", "7z", "tar", "gz"].includes(extension)) {
       return <Archive color="warning" />;
     }
-    
+
     // 코드 파일
-    if (['js', 'ts', 'jsx', 'tsx', 'html', 'css', 'json', 'xml'].includes(extension)) {
+    if (
+      ["js", "ts", "jsx", "tsx", "html", "css", "json", "xml"].includes(
+        extension
+      )
+    ) {
       return <Code color="info" />;
     }
-    
+
     // 동영상 파일
-    if (['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv'].includes(extension)) {
+    if (["mp4", "avi", "mov", "wmv", "flv", "mkv"].includes(extension)) {
       return <Movie color="secondary" />;
     }
-    
+
     // 오디오 파일
-    if (['mp3', 'wav', 'flac', 'aac', 'ogg'].includes(extension)) {
+    if (["mp3", "wav", "flac", "aac", "ogg"].includes(extension)) {
       return <MusicNote color="secondary" />;
     }
-    
+
     // 기본 파일 아이콘
     return <AttachFile color="action" />;
   };
@@ -109,12 +135,27 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
   // 파일 타입 검증 함수 (위험한 파일 확장자 차단)
   const isValidFileType = (file) => {
     const dangerousExtensions = [
-      '.exe', '.bat', '.cmd', '.com', '.pif', '.scr', '.vbs', '.js', '.jar',
-      '.app', '.deb', '.pkg', '.rpm', '.dmg', '.msi', '.run', '.sh'
+      ".exe",
+      ".bat",
+      ".cmd",
+      ".com",
+      ".pif",
+      ".scr",
+      ".vbs",
+      ".js",
+      ".jar",
+      ".app",
+      ".deb",
+      ".pkg",
+      ".rpm",
+      ".dmg",
+      ".msi",
+      ".run",
+      ".sh",
     ];
-    
+
     const fileName = file.name.toLowerCase();
-    return !dangerousExtensions.some(ext => fileName.endsWith(ext));
+    return !dangerousExtensions.some((ext) => fileName.endsWith(ext));
   };
 
   // 파일 검증 함수
@@ -124,12 +165,16 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
     // 파일 크기 검증 (5MB)
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
-      errors.push(`파일 크기가 5MB를 초과합니다. (${formatFileSize(file.size)})`);
+      errors.push(
+        `파일 크기가 5MB를 초과합니다. (${formatFileSize(file.size)})`
+      );
     }
 
     // 파일 타입 검증 (위험한 파일 차단)
     if (!isValidFileType(file)) {
-      errors.push('보안상 위험한 파일 형식입니다. (실행 파일, 스크립트 등은 업로드할 수 없습니다)');
+      errors.push(
+        "보안상 위험한 파일 형식입니다. (실행 파일, 스크립트 등은 업로드할 수 없습니다)"
+      );
     }
 
     return errors;
@@ -139,74 +184,87 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
   const uploadFileWithPresignedUrl = async (fileItem) => {
     try {
       // 1. 파일 상태를 uploading으로 변경
-      setFiles(prev => prev.map(file => 
-        file.id === fileItem.id 
-          ? { ...file, status: 'uploading', progress: 0, error: null }
-          : file
-      ));
+      setFiles((prev) =>
+        prev.map((file) =>
+          file.id === fileItem.id
+            ? { ...file, status: "uploading", progress: 0, error: null }
+            : file
+        )
+      );
 
       // 2. 업로드 URL 발급 요청
       const uploadUrlResponse = await postAPI.issueAttachmentUploadUrl({
         postId: form.id,
-        fileName: fileItem.file.name
+        fileName: fileItem.file.name,
       });
 
       const { postAttachmentId, uploadUrl } = uploadUrlResponse.data.data;
 
       // 3. 진행률 10% 업데이트
-      setFiles(prev => prev.map(file => 
-        file.id === fileItem.id 
-          ? { ...file, progress: 10, postAttachmentId }
-          : file
-      ));
+      setFiles((prev) =>
+        prev.map((file) =>
+          file.id === fileItem.id
+            ? { ...file, progress: 10, postAttachmentId }
+            : file
+        )
+      );
 
       // 4. S3에 파일 업로드
-      const uploadResponse = await postAPI.uploadFileToS3(uploadUrl, fileItem.file);
-      
+      const uploadResponse = await postAPI.uploadFileToS3(
+        uploadUrl,
+        fileItem.file
+      );
+
       if (!uploadResponse.ok) {
         throw new Error(`파일 업로드 실패: ${uploadResponse.status}`);
       }
 
       // 5. 진행률 80% 업데이트
-      setFiles(prev => prev.map(file => 
-        file.id === fileItem.id 
-          ? { ...file, progress: 80 }
-          : file
-      ));
+      setFiles((prev) =>
+        prev.map((file) =>
+          file.id === fileItem.id ? { ...file, progress: 80 } : file
+        )
+      );
 
       // 6. 업로드 완료 (Active API는 게시글 생성 후 일괄 처리)
-      setFiles(prev => prev.map(file => 
-        file.id === fileItem.id 
-          ? { ...file, status: 'success', progress: 100, postAttachmentId }
-          : file
-      ));
-
+      setFiles((prev) =>
+        prev.map((file) =>
+          file.id === fileItem.id
+            ? { ...file, status: "success", progress: 100, postAttachmentId }
+            : file
+        )
+      );
     } catch (error) {
-      console.error('파일 업로드 실패:', error);
-      
+      console.error("파일 업로드 실패:", error);
+
       // 업로드 실패 상태로 변경
-      setFiles(prev => prev.map(file => 
-        file.id === fileItem.id 
-          ? { 
-              ...file, 
-              status: 'error', 
-              progress: 0,
-              error: error.response?.data?.error?.message || error.message || '파일 업로드에 실패했습니다.'
-            }
-          : file
-      ));
+      setFiles((prev) =>
+        prev.map((file) =>
+          file.id === fileItem.id
+            ? {
+                ...file,
+                status: "error",
+                progress: 0,
+                error:
+                  error.response?.data?.error?.message ||
+                  error.message ||
+                  "파일 업로드에 실패했습니다.",
+              }
+            : file
+        )
+      );
     }
   };
 
   // 파일 선택 핸들러
   const handleFileSelect = async (event) => {
     const selectedFiles = Array.from(event.target.files);
-    
+
     // 파일 검증
     const validFiles = [];
     const invalidFiles = [];
 
-    selectedFiles.forEach(file => {
+    selectedFiles.forEach((file) => {
       const errors = validateFile(file);
       if (errors.length === 0) {
         validFiles.push(file);
@@ -217,16 +275,16 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
 
     // 검증 실패한 파일들 알림
     if (invalidFiles.length > 0) {
-      const errorMessages = invalidFiles.map(({ file, errors }) => 
-        `${file.name}: ${errors.join(', ')}`
-      ).join('\n');
-      
+      const errorMessages = invalidFiles
+        .map(({ file, errors }) => `${file.name}: ${errors.join(", ")}`)
+        .join("\n");
+
       alert(`다음 파일들의 업로드가 실패했습니다:\n\n${errorMessages}`);
     }
 
     // 중복 파일 체크
-    const newFiles = validFiles.filter(file => 
-      !files.some(existingFile => existingFile.name === file.name)
+    const newFiles = validFiles.filter(
+      (file) => !files.some((existingFile) => existingFile.name === file.name)
     );
 
     if (newFiles.length !== validFiles.length) {
@@ -239,19 +297,19 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
     }
 
     // 새 파일들을 pending 상태로 추가
-    const newFileItems = newFiles.map(file => ({
+    const newFileItems = newFiles.map((file) => ({
       id: Date.now() + Math.random(), // 임시 ID
       file,
       name: file.name,
       size: file.size,
       type: file.type,
-      status: 'pending', // pending, uploading, success, error
+      status: "pending", // pending, uploading, success, error
       progress: 0,
       error: null,
-      postAttachmentId: null
+      postAttachmentId: null,
     }));
 
-    setFiles(prev => [...prev, ...newFileItems]);
+    setFiles((prev) => [...prev, ...newFileItems]);
 
     // 파일들을 순차적으로 업로드 시작
     for (const fileItem of newFileItems) {
@@ -261,7 +319,7 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
 
   // 파일 삭제 핸들러
   const handleFileDelete = async (fileId) => {
-    const fileToDelete = files.find(file => file.id === fileId);
+    const fileToDelete = files.find((file) => file.id === fileId);
     if (!fileToDelete) return;
 
     // 확인 대화상자
@@ -271,28 +329,32 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
 
     try {
       // 업로드가 완료된 파일인 경우 서버에서도 삭제
-      if (fileToDelete.status === 'success' && fileToDelete.postAttachmentId) {
-        await dispatch(deleteAttachment(fileToDelete.postAttachmentId)).unwrap();
-        console.log('서버에서 첨부파일 삭제 완료:', fileToDelete.postAttachmentId);
+      if (fileToDelete.status === "success" && fileToDelete.postAttachmentId) {
+        await dispatch(
+          deleteAttachment(fileToDelete.postAttachmentId)
+        ).unwrap();
+        console.log(
+          "서버에서 첨부파일 삭제 완료:",
+          fileToDelete.postAttachmentId
+        );
       }
-      
+
       // 로컬 상태에서 파일 제거
-      setFiles(prev => prev.filter(file => file.id !== fileId));
-      
+      setFiles((prev) => prev.filter((file) => file.id !== fileId));
+
       // Object URL 정리 (메모리 누수 방지)
       if (fileToDelete.file) {
         URL.revokeObjectURL(URL.createObjectURL(fileToDelete.file));
       }
-      
     } catch (error) {
-      console.error('파일 삭제 실패:', error);
-      alert('파일 삭제에 실패했습니다. 다시 시도해주세요.');
+      console.error("파일 삭제 실패:", error);
+      alert("파일 삭제에 실패했습니다. 다시 시도해주세요.");
     }
   };
 
   // 파일 재업로드 핸들러
   const handleFileRetry = async (fileId) => {
-    const fileItem = files.find(file => file.id === fileId);
+    const fileItem = files.find((file) => file.id === fileId);
     if (fileItem) {
       await uploadFileWithPresignedUrl(fileItem);
     }
@@ -327,16 +389,20 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
     if (!projectStepId || !title.trim() || !content.trim()) return;
 
     // 파일 업로드가 완료되지 않은 파일이 있는지 확인
-    const hasUnfinishedUploads = files.some(file => file.status === 'uploading' || file.status === 'pending');
+    const hasUnfinishedUploads = files.some(
+      (file) => file.status === "uploading" || file.status === "pending"
+    );
     if (hasUnfinishedUploads) {
-      alert('파일 업로드가 완료될 때까지 기다려주세요.');
+      alert("파일 업로드가 완료될 때까지 기다려주세요.");
       return;
     }
 
     // 실패한 파일이 있는지 확인
-    const hasFailedUploads = files.some(file => file.status === 'error');
+    const hasFailedUploads = files.some((file) => file.status === "error");
     if (hasFailedUploads) {
-      const confirmSubmit = window.confirm('업로드에 실패한 파일이 있습니다. 그래도 게시글을 등록하시겠습니까?');
+      const confirmSubmit = window.confirm(
+        "업로드에 실패한 파일이 있습니다. 그래도 게시글을 등록하시겠습니까?"
+      );
       if (!confirmSubmit) {
         return;
       }
@@ -359,24 +425,32 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
         const result = await onSubmit(payload);
         createdPostId = result?.id || id;
       } else {
-        const result = await dispatch(createPost({ projectId, data: payload })).unwrap();
+        const result = await dispatch(
+          createPost({ projectId, data: payload })
+        ).unwrap();
         createdPostId = result?.id || id;
       }
 
       // 2. 업로드 성공한 파일들을 일괄 활성화
-      const successfulFiles = files.filter(file => file.status === 'success' && file.postAttachmentId);
+      const successfulFiles = files.filter(
+        (file) => file.status === "success" && file.postAttachmentId
+      );
       if (successfulFiles.length > 0) {
         console.log(`${successfulFiles.length}개 파일 일괄 활성화 시작...`);
-        const postAttachmentIds = successfulFiles.map(file => file.postAttachmentId);
-        
+        const postAttachmentIds = successfulFiles.map(
+          (file) => file.postAttachmentId
+        );
+
         try {
-          await dispatch(bulkActivateAttachments({ 
-            postId: createdPostId,
-            postAttachmentIds
-          })).unwrap();
-          console.log('파일 일괄 활성화 완료');
+          await dispatch(
+            bulkActivateAttachments({
+              postId: createdPostId,
+              postAttachmentIds,
+            })
+          ).unwrap();
+          console.log("파일 일괄 활성화 완료");
         } catch (activateError) {
-          console.error('파일 활성화 실패:', activateError);
+          console.error("파일 활성화 실패:", activateError);
           // 파일 활성화 실패는 게시글 생성 성공에 영향을 주지 않음
         }
       }
@@ -385,11 +459,11 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
       setForm({ id: "", projectStepId: "", title: "", content: "" });
       setFiles([]);
       onClose();
-      
-      console.log('게시글 생성 완료:', createdPostId);
+
+      console.log("게시글 생성 완료:", createdPostId);
     } catch (e) {
-      console.error('게시글 생성 실패:', e);
-      alert('게시글 등록에 실패했습니다.');
+      console.error("게시글 생성 실패:", e);
+      alert("게시글 등록에 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -397,19 +471,21 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
 
   const handleCancel = async () => {
     // 업로드된 파일이 있는 경우 정리
-    const hasUploadedFiles = files.some(file => file.status === 'success' && file.postAttachmentId);
-    
+    const hasUploadedFiles = files.some(
+      (file) => file.status === "success" && file.postAttachmentId
+    );
+
     if (hasUploadedFiles && form.id) {
       try {
-        console.log('게시글 취소 - 업로드된 파일 정리 시작:', form.id);
+        console.log("게시글 취소 - 업로드된 파일 정리 시작:", form.id);
         await dispatch(cleanupPostAttachments(form.id)).unwrap();
-        console.log('업로드된 파일 정리 완료');
+        console.log("업로드된 파일 정리 완료");
       } catch (error) {
-        console.error('파일 정리 실패:', error);
+        console.error("파일 정리 실패:", error);
         // 정리 실패해도 창은 닫음
       }
     }
-    
+
     setForm((prev) => ({ ...prev, projectStepId: "", title: "", content: "" }));
     setFiles([]);
     onClose();
@@ -417,12 +493,21 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
 
   // 미리보기 모달 열기
   const handlePreviewOpen = (file) => {
-    setPreviewModal({ open: true, file });
+    setPreviewModal({
+      open: true,
+      attachment: {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        imageUrl: URL.createObjectURL(file.file),
+      },
+    });
   };
 
   // 미리보기 모달 닫기
   const handlePreviewClose = () => {
-    setPreviewModal({ open: false, file: null });
+    URL.revokeObjectURL(previewModal.attachment?.imageUrl);
+    setPreviewModal({ open: false, attachment: null });
   };
 
   return (
@@ -576,12 +661,12 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
                       type="file"
                       multiple
                       onChange={handleFileSelect}
-                      style={{ display: 'none' }}
+                      style={{ display: "none" }}
                       id="file-upload"
                       accept="*"
                     />
                     <label htmlFor="file-upload">
-                      <CustomButton 
+                      <CustomButton
                         kind="ghost"
                         component="span"
                         startIcon={<CloudUpload />}
@@ -607,74 +692,112 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
                           key={file.id}
                           sx={{
                             p: 2,
-                            border: '1px solid',
-                            borderColor: file.status === 'error' ? 'error.main' : 'grey.300',
+                            border: "1px solid",
+                            borderColor:
+                              file.status === "error"
+                                ? "error.main"
+                                : "grey.300",
                             borderRadius: 1,
-                            bgcolor: file.status === 'success' ? 'success.50' : 'background.paper',
+                            bgcolor:
+                              file.status === "success"
+                                ? "success.50"
+                                : "background.paper",
                           }}
                         >
-                          <Stack direction="row" alignItems="center" spacing={2}>
+                          <Stack
+                            direction="row"
+                            alignItems="center"
+                            spacing={2}
+                          >
                             {/* 파일 아이콘/썸네일 */}
                             <Box
                               sx={{
                                 width: 48,
                                 height: 48,
                                 borderRadius: 1,
-                                overflow: 'hidden',
-                                border: '1px solid',
-                                borderColor: 'grey.300',
-                                bgcolor: 'grey.100',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                cursor: file.type.startsWith('image/') ? 'pointer' : 'default',
-                                '&:hover': file.type.startsWith('image/') ? {
-                                  borderColor: 'primary.main',
-                                  opacity: 0.8
-                                } : {}
+                                overflow: "hidden",
+                                border: "1px solid",
+                                borderColor: "grey.300",
+                                bgcolor: "grey.100",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                cursor: file.type.startsWith("image/")
+                                  ? "pointer"
+                                  : "default",
+                                "&:hover": file.type.startsWith("image/")
+                                  ? {
+                                      borderColor: "primary.main",
+                                      opacity: 0.8,
+                                    }
+                                  : {},
                               }}
-                              onClick={() => file.type.startsWith('image/') && handlePreviewOpen(file)}
+                              onClick={() =>
+                                file.type.startsWith("image/") &&
+                                handlePreviewOpen(file)
+                              }
                             >
-                              {file.type.startsWith('image/') ? (
+                              {file.type.startsWith("image/") ? (
                                 <img
                                   src={URL.createObjectURL(file.file)}
                                   alt={file.name}
                                   style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    objectFit: 'cover'
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
                                   }}
                                 />
                               ) : (
                                 getFileIcon(file.name, file.type)
                               )}
                             </Box>
-                            
+
                             <Box sx={{ flex: 1, minWidth: 0 }}>
                               <Typography variant="body2" noWrap>
                                 {file.name}
                               </Typography>
-                              <Typography variant="caption" color="text.secondary">
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
                                 {formatFileSize(file.size)}
                               </Typography>
                             </Box>
 
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              {file.status === 'pending' && (
-                                <Chip label="대기중" size="small" color="default" />
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                              }}
+                            >
+                              {file.status === "pending" && (
+                                <Chip
+                                  label="대기중"
+                                  size="small"
+                                  color="default"
+                                />
                               )}
-                              {file.status === 'uploading' && (
-                                <Chip label="업로드중" size="small" color="warning" />
+                              {file.status === "uploading" && (
+                                <Chip
+                                  label="업로드중"
+                                  size="small"
+                                  color="warning"
+                                />
                               )}
-                              {file.status === 'success' && (
-                                <Chip label="완료" size="small" color="success" />
+                              {file.status === "success" && (
+                                <Chip
+                                  label="완료"
+                                  size="small"
+                                  color="success"
+                                />
                               )}
-                              {file.status === 'error' && (
+                              {file.status === "error" && (
                                 <Chip label="오류" size="small" color="error" />
                               )}
-                              
+
                               {/* 재시도 버튼 (에러 상태인 경우만) */}
-                              {file.status === 'error' && (
+                              {file.status === "error" && (
                                 <Tooltip title="다시 업로드">
                                   <IconButton
                                     size="small"
@@ -685,9 +808,9 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
                                   </IconButton>
                                 </Tooltip>
                               )}
-                              
+
                               {/* 미리보기 버튼 (이미지인 경우만) */}
-                              {file.type.startsWith('image/') && (
+                              {file.type.startsWith("image/") && (
                                 <Tooltip title="미리보기">
                                   <IconButton
                                     size="small"
@@ -698,7 +821,7 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
                                   </IconButton>
                                 </Tooltip>
                               )}
-                              
+
                               <IconButton
                                 size="small"
                                 onClick={() => handleFileDelete(file.id)}
@@ -709,14 +832,17 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
                             </Box>
                           </Stack>
 
-                          {file.status === 'uploading' && (
+                          {file.status === "uploading" && (
                             <Box sx={{ mt: 1 }}>
-                              <LinearProgress 
-                                variant="determinate" 
-                                value={file.progress} 
+                              <LinearProgress
+                                variant="determinate"
+                                value={file.progress}
                                 sx={{ height: 4, borderRadius: 2 }}
                               />
-                              <Typography variant="caption" color="text.secondary">
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
                                 {file.progress}% 완료
                               </Typography>
                             </Box>
@@ -752,94 +878,11 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
       </Drawer>
 
       {/* 이미지 미리보기 모달 */}
-      <Modal
+      <FilePreviewModal
         open={previewModal.open}
+        attachment={previewModal.attachment}
         onClose={handlePreviewClose}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          p: 2
-        }}
-      >
-        <Box
-          sx={{
-            position: 'relative',
-            maxWidth: '90vw',
-            maxHeight: '90vh',
-            bgcolor: 'background.paper',
-            borderRadius: 2,
-            boxShadow: 24,
-            overflow: 'hidden'
-          }}
-        >
-          {/* 헤더 */}
-          <Box
-            sx={{
-              p: 2,
-              borderBottom: '1px solid',
-              borderColor: 'divider',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              bgcolor: 'background.paper'
-            }}
-          >
-            <Typography variant="h6" noWrap>
-              {previewModal.file?.name}
-            </Typography>
-            <IconButton onClick={handlePreviewClose} size="small">
-              <CloseIcon />
-            </IconButton>
-          </Box>
-
-          {/* 이미지 */}
-          {previewModal.file && (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                p: 2,
-                maxHeight: 'calc(90vh - 80px)',
-                overflow: 'auto'
-              }}
-            >
-              <img
-                src={URL.createObjectURL(previewModal.file.file)}
-                alt={previewModal.file.name}
-                style={{
-                  maxWidth: '100%',
-                  maxHeight: '100%',
-                  objectFit: 'contain'
-                }}
-              />
-            </Box>
-          )}
-
-          {/* 파일 정보 */}
-          <Box
-            sx={{
-              p: 2,
-              borderTop: '1px solid',
-              borderColor: 'divider',
-              bgcolor: 'grey.50'
-            }}
-          >
-            <Stack direction="row" spacing={2} alignItems="center">
-              <Typography variant="body2" color="text.secondary">
-                파일명: {previewModal.file?.name}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                크기: {previewModal.file ? formatFileSize(previewModal.file.size) : ''}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                타입: {previewModal.file?.type}
-              </Typography>
-            </Stack>
-          </Box>
-        </Box>
-      </Modal>
+      />
     </>
   );
 }
