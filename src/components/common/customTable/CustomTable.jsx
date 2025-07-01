@@ -27,8 +27,6 @@ import { useTheme } from "@mui/material/styles";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
 import CustomButton from "../customButton/CustomButton";
-import EditRoundedIcon from "@mui/icons-material/EditRounded";
-import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 
 export default function CustomTable({
   columns,
@@ -38,8 +36,8 @@ export default function CustomTable({
   search = null,
   filter = null,
   secondaryFilter = null,
-  onDelete, // (row) => void
-  hideDeleteButton = false, // 삭제 버튼 숨김 옵션 추가
+  onDelete,
+  hideDeleteButton = false,
 }) {
   const { companyListOnlyIdName: companies = [] } = useSelector(
     (state) => state.company
@@ -47,7 +45,6 @@ export default function CustomTable({
   const userRole = useSelector((state) => state.auth.user.role);
   const theme = useTheme();
 
-  // 정렬 설정
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const handleSort = (key) =>
     setSortConfig((prev) => ({
@@ -55,65 +52,11 @@ export default function CustomTable({
       direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
     }));
 
-  // 검색 설정
   const [searchKey, setSearchKey] = useState(search?.key || "");
   const [searchText, setSearchText] = useState(search?.value || "");
 
-  // 필터와 검색을 조합한 행 목록
-  const filteredRows = useMemo(() => {
-    let result = rows;
-    if (search && searchKey) {
-      const kw = searchText.toLowerCase();
-      result = result.filter((row) => {
-        let cell = row[searchKey];
-        if (cell && typeof cell === "object") {
-          if ("name" in cell) {
-            cell = cell.name;
-          } else {
-            cell = JSON.stringify(cell);
-          }
-        }
-        return cell?.toString().toLowerCase().includes(kw);
-      });
-    }
-    if (filter && filter.key) {
-      const { key, value } = filter;
-      if (value !== "") {
-        result = result.filter(
-          (row) =>
-            row[key] ===
-            (value === "true" ? true : value === "false" ? false : value)
-        );
-      }
-    }
-    if (secondaryFilter && secondaryFilter.key) {
-      const { key, value } = secondaryFilter;
-      if (value !== "") {
-        result = result.filter(
-          (row) =>
-            row[key] ===
-            (value === "true" ? true : value === "false" ? false : value)
-        );
-      }
-    }
-    return result;
-  }, [rows, searchKey, searchText, search, filter, secondaryFilter]);
-
-  // 정렬 적용
-  const sortedRows = useMemo(() => {
-    if (!sortConfig.key) return filteredRows;
-    return [...filteredRows].sort((a, b) => {
-      const aVal = a[sortConfig.key];
-      const bVal = b[sortConfig.key];
-      if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
-      if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
-      return 0;
-    });
-  }, [filteredRows, sortConfig]);
-
   const pageCount = pagination ? Math.ceil(pagination.total / 10) : 1;
 
-  // columns에 action 컬럼 추가
   const fullColumns = [
     ...columns,
     {
@@ -145,7 +88,6 @@ export default function CustomTable({
           overflow: "hidden",
         }}
       >
-        {/* 검색 & 필터 */}
         <Box p={2} bgcolor={theme.palette.background.default}>
           <Stack direction="row" spacing={2} alignItems="center">
             {filter && filter.key && (
@@ -234,7 +176,6 @@ export default function CustomTable({
           </Stack>
         </Box>
 
-        {/* 테이블 컨테이너 (스크롤) */}
         <Box
           sx={{
             flex: 1,
@@ -270,7 +211,7 @@ export default function CustomTable({
             </TableHead>
 
             <TableBody>
-              {sortedRows.map((row, idx) => (
+              {rows.map((row, idx) => (
                 <TableRow
                   key={idx}
                   hover
@@ -282,7 +223,6 @@ export default function CustomTable({
                       {renderCell(col, row[col.key], row, theme, companies)}
                     </TableCell>
                   ))}
-                  {/* 액션 컬럼 */}
                   {userRole === "ROLE_SYSTEM_ADMIN" &&
                     !hideDeleteButton &&
                     !row.deleted && (
@@ -430,11 +370,13 @@ function renderCell(col, value, row, theme, companies) {
     case "company": {
       const comp = companies.find((c) => c.id === value);
       const name = comp?.name ?? "-";
-      const displayName = name.startsWith("주식회사 ") ? name.slice(5) : name;
+      const displayNameComp = name.startsWith("주식회사 ")
+        ? name.slice(5)
+        : name;
       return name !== "-" ? (
         <Stack direction="row" spacing={1} alignItems="center">
           <Avatar sx={{ width: 28, height: 28 }}>
-            {displayName?.[0] || "?"}
+            {displayNameComp?.[0] || "?"}
           </Avatar>
           <Typography variant="body2" noWrap>
             {name}
