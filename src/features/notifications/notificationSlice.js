@@ -1,5 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getNotifications, readNotification } from "@/api/notification";
+import {
+  getNotifications,
+  readNotification,
+  getUnreadNotificationCount,
+} from "@/api/notification";
 
 export const fetchNotifications = createAsyncThunk(
   "notifications/fetch",
@@ -37,6 +41,18 @@ export const markNotificationsAsRead = createAsyncThunk(
   }
 );
 
+export const fetchUnreadNotificationCount = createAsyncThunk(
+  "notifications/fetchUnreadCount",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await getUnreadNotificationCount();
+      return res.data.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
 const notificationSlice = createSlice({
   name: "notifications",
   initialState: {
@@ -46,6 +62,7 @@ const notificationSlice = createSlice({
     page: 1,
     hasMore: true,
     readStatus: null,
+    unreadCount: 0,
   },
   reducers: {
     clearNotifications(state) {
@@ -94,7 +111,18 @@ const notificationSlice = createSlice({
       })
 
       .addCase(refreshNotifications.fulfilled, () => {})
-      .addCase(refreshNotifications.rejected, () => {});
+      .addCase(refreshNotifications.rejected, () => {})
+      .addCase(fetchUnreadNotificationCount.pending, (state) => {
+        state.unreadCountStatus = "loading";
+      })
+      .addCase(fetchUnreadNotificationCount.fulfilled, (state, action) => {
+        state.unreadCount = action.payload;
+        state.unreadCountStatus = "success";
+      })
+      .addCase(fetchUnreadNotificationCount.rejected, (state, action) => {
+        state.unreadCountStatus = "error";
+        state.error = action.payload;
+      });
   },
 });
 
