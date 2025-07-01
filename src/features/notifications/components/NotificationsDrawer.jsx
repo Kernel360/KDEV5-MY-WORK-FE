@@ -85,9 +85,9 @@ export default function NotificationsDrawer({ open, onClose }) {
 
     const navigationStrategies = {
       PROJECT_CHECK_LIST: () => {
-        navigate(`/projects/${notif.projectId}/approvals`, {
-          state: { openTargetId: notif.targetId },
-        });
+        navigate(
+          `/projects/${notif.projectId}/approvals?checklistId=${notif.targetId}`
+        );
       },
       POST: () => {
         navigate(`/projects/${notif.projectId}/posts?postId=${notif.targetId}`);
