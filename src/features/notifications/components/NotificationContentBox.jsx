@@ -9,7 +9,7 @@ const iconComponentMap = {
   FeedRounded: FeedRoundedIcon,
 };
 
-export default function NotificationContentBox({ targetType, content }) {
+export default function NotificationContentBox({ targetType, content, isUnread = false }) {
   if (!content) return null;
 
   const IconComponent = iconComponentMap[typeIconKeyMap[targetType]];
@@ -23,28 +23,30 @@ export default function NotificationContentBox({ targetType, content }) {
         px: 1.5,
         py: 1.25,
         borderRadius: 2,
-        backgroundColor: "background.default",
+        backgroundColor: isUnread ? "#fafafa" : "background.default",
         border: "1px solid",
-        borderColor: "divider",
+        borderColor: isUnread ? "#e8e8e8" : "divider",
+        boxShadow: isUnread ? "0 1px 3px rgba(0, 0, 0, 0.04)" : "none",
       }}
     >
       {IconComponent && (
         <IconComponent
           fontSize="small"
           sx={{
-            color: "text.secondary",
+            color: isUnread ? "text.primary" : "text.secondary",
             flexShrink: 0,
           }}
         />
       )}
       <Typography
         variant="body2"
-        color="text.primary"
+        color={isUnread ? "text.primary" : "text.secondary"}
         sx={{
           fontSize: 13,
           lineHeight: 1.6,
           wordBreak: "keep-all",
           whiteSpace: "pre-wrap",
+          fontWeight: isUnread ? 500 : 400,
         }}
       >
         {content}

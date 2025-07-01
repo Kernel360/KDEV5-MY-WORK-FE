@@ -173,33 +173,65 @@ export default function NotificationsDrawer({ open, onClose }) {
                     py: 2,
                     bgcolor: notif.isRead
                       ? theme.palette.background.default
-                      : theme.palette.grey[100],
-                    border: `1px solid ${theme.palette.divider}`,
+                      : "#fff",
+                    border: notif.isRead
+                      ? `1px solid ${theme.palette.divider}`
+                      : `1px solid rgba(26, 26, 26, 0.15)`,
                     transition: "all 0.2s ease",
+                    position: "relative",
+                    boxShadow: !notif.isRead 
+                      ? "0 2px 8px rgba(26, 26, 26, 0.08)"
+                      : "none",
                     "&:hover": {
-                      backgroundColor: theme.palette.grey[200],
+                      backgroundColor: notif.isRead 
+                        ? theme.palette.grey[200]
+                        : "#f8f8f8",
+                      transform: "translateY(-1px)",
+                      boxShadow: !notif.isRead 
+                        ? "0 4px 12px rgba(26, 26, 26, 0.12)"
+                        : "0 2px 4px rgba(0, 0, 0, 0.1)",
                     },
                   }}
                 >
                   <Stack spacing={1}>
-                    <Box display="flex" alignItems="flex-start" gap={1}>
+                    <Box display="flex" alignItems="flex-start" gap={1.5}>
                       {!notif.isRead && (
                         <Box
                           sx={{
-                            width: 8,
-                            height: 8,
-                            mt: "6px",
+                            width: 12,
+                            height: 12,
+                            mt: "4px",
                             borderRadius: "50%",
-                            bgcolor: "text.primary",
+                            bgcolor: "#ff6b6b",
                             flexShrink: 0,
+                            boxShadow: "0 0 0 4px rgba(255, 107, 107, 0.2)",
+                            animation: !notif.isRead ? "pulse 1.33s infinite" : "none",
+                            "@keyframes pulse": {
+                              "0%": {
+                                boxShadow: "0 0 0 0 rgba(255, 107, 107, 0.7)",
+                                transform: "scale(0.8)",
+                              },
+                              "70%": {
+                                boxShadow: "0 0 0 6px rgba(255, 107, 107, 0)",
+                                transform: "scale(1)",
+                              },
+                              "100%": {
+                                boxShadow: "0 0 0 0 rgba(255, 107, 107, 0)",
+                                transform: "scale(0.8)",
+                              },
+                            },
                           }}
                         />
                       )}
                       <Typography
                         variant="body2"
-                        fontWeight={500}
-                        color="text.primary"
-                        sx={{ wordBreak: "keep-all", lineHeight: 1.6 }}
+                        fontWeight={notif.isRead ? 400 : 600}
+                        color={notif.isRead ? "text.secondary" : "text.primary"}
+                        sx={{ 
+                          wordBreak: "keep-all", 
+                          lineHeight: 1.6,
+                          flex: 1,
+                        }}
                       >
                         {`${notif.actorName}님이 ${getTargetLabel(
                           notif.targetType
@@ -209,18 +241,33 @@ export default function NotificationsDrawer({ open, onClose }) {
                       </Typography>
                     </Box>
 
-                    <NotificationContentBox
-                      targetType={notif.targetType}
-                      content={notif.content}
-                    />
+                    <Box sx={{ pl: !notif.isRead ? 2.5 : 0 }}>
+                      <NotificationContentBox
+                        targetType={notif.targetType}
+                        content={notif.content}
+                        isUnread={!notif.isRead}
+                      />
+                    </Box>
 
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      textAlign="right"
+                    <Box 
+                      sx={{ 
+                        display: "flex", 
+                        justifyContent: "space-between", 
+                        alignItems: "center",
+                        pl: !notif.isRead ? 2.5 : 0 
+                      }}
                     >
-                      {formatNotificationDate(notif.createdAt)}
-                    </Typography>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ 
+                          ml: "auto",
+                          fontWeight: !notif.isRead ? 500 : 400 
+                        }}
+                      >
+                        {formatNotificationDate(notif.createdAt)}
+                      </Typography>
+                    </Box>
                   </Stack>
                 </Paper>
               ))
