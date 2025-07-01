@@ -1,4 +1,3 @@
-// src/features/project/approval/pages/ProjectApprovalsPage.jsx
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -12,7 +11,12 @@ import {
   Stack,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams, useLocation } from "react-router-dom";
+import {
+  useParams,
+  useLocation,
+  useSearchParams,
+  useNavigate,
+} from "react-router-dom";
 import { fetchChecklistProgress, fetchChecklistItems } from "../checklistSlice";
 import StepCardList from "@/components/common/stepCardList/StepCardList";
 import ProjectApprovalDetailDrawer from "../components/ProjectApprovalDetailDrawer";
@@ -28,8 +32,12 @@ export default function ProjectApprovalsPage() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const dispatch = useDispatch();
 
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const checklistIdFromQuery = searchParams.get("checklistId");
+
+  const [selectedChecklistId, setSelectedChecklistId] = useState(null);
   const [selected, setSelected] = useState("전체");
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
 
@@ -38,23 +46,27 @@ export default function ProjectApprovalsPage() {
   );
 
   useEffect(() => {
+    if (checklistIdFromQuery) {
+      setSelectedChecklistId(checklistIdFromQuery);
+    }
+  }, [checklistIdFromQuery]);
+
+  const handleDrawerClose = () => {
+    setSelectedChecklistId(null);
+    searchParams.delete("checklistId");
+    navigate(
+      {
+        pathname: location.pathname,
+        search: searchParams.toString(),
+      },
+      { replace: true }
+    );
+  };
+
+  useEffect(() => {
     dispatch(fetchChecklistProgress(projectId));
     dispatch(fetchChecklistItems({ projectId }));
   }, [projectId, dispatch]);
-
-  useEffect(() => {
-    const openTargetId = location.state?.openTargetId;
-
-    if (openTargetId && checklistItems.length > 0) {
-      const target = checklistItems.find(
-        (item) => String(item.id) === String(openTargetId)
-      );
-      if (target) {
-        setSelectedItem(target);
-        setDrawerOpen(true);
-      }
-    }
-  }, [location.state?.openTargetId, checklistItems]);
 
   const handleStepChange = (id, title) => {
     setSelected(title);
@@ -64,13 +76,7 @@ export default function ProjectApprovalsPage() {
   };
 
   const handleCardClick = (item) => {
-    setSelectedItem(item);
-    setDrawerOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setDrawerOpen(false);
-    setSelectedItem(null);
+    setSelectedChecklistId(item.id);
   };
 
   const filteredTasks = Array.isArray(checklistItems)
@@ -241,8 +247,8 @@ export default function ProjectApprovalsPage() {
       </Box>
 
       <ProjectApprovalDetailDrawer
-        open={drawerOpen}
-        checkListId={selectedItem?.id}
+        open={Boolean(selectedChecklistId)}
+        checkListId={selectedChecklistId}
         onClose={handleDrawerClose}
       />
 
