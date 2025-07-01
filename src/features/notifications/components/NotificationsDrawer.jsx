@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Box,
   Typography,
@@ -8,7 +8,11 @@ import {
   useTheme,
   useMediaQuery,
   CircularProgress,
+  Menu,
+  MenuItem,
+  Button,
 } from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CloseIcon from "@mui/icons-material/Close";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useDispatch, useSelector } from "react-redux";
@@ -42,15 +46,29 @@ export default function NotificationsDrawer({ open, onClose }) {
     hasMore,
   } = useSelector((state) => state.notification);
 
+  const [filter, setFilter] = useState("ALL");
+  const [anchorEl, setAnchorEl] = useState(null);
+
   const SIDEBAR_WIDTH = 216;
   const DRAWER_WIDTH = 360;
 
+  const getIsReadParam = (value) => {
+    if (value === "READ") return true;
+    if (value === "UNREAD") return false;
+    return undefined;
+  };
+
   useEffect(() => {
-    if (open) {
-      dispatch(clearNotifications());
-      dispatch(fetchNotifications(1));
-    }
-  }, [open, dispatch]);
+    if (!open) return;
+
+    dispatch(clearNotifications());
+    dispatch(
+      fetchNotifications({
+        page: 1,
+        isRead: getIsReadParam(filter),
+      })
+    );
+  }, [open, filter, dispatch]);
 
   useEffect(() => {
     const target = bottomRef.current;
@@ -64,7 +82,12 @@ export default function NotificationsDrawer({ open, onClose }) {
         if (entry.isIntersecting && !fetching && !loading) {
           fetching = true;
           try {
-            await dispatch(fetchNotifications(page)).unwrap();
+            await dispatch(
+              fetchNotifications({
+                page,
+                isRead: getIsReadParam(filter),
+              })
+            ).unwrap();
           } catch (e) {
             console.error("Failed to fetch notifications:", e);
           } finally {
@@ -81,7 +104,7 @@ export default function NotificationsDrawer({ open, onClose }) {
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [notifications, hasMore, open, dispatch, loading, page]);
+  }, [notifications, hasMore, open, dispatch, loading, page, filter]);
 
   const handleNotificationClick = (notif) => {
     if (!notif.isRead) {
@@ -104,6 +127,21 @@ export default function NotificationsDrawer({ open, onClose }) {
       navigateToTarget();
       onClose();
     }
+  };
+
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleFilterSelect = (value) => {
+    if (value !== null) {
+      setFilter(value);
+    }
+    handleMenuClose();
   };
 
   return (
@@ -150,9 +188,29 @@ export default function NotificationsDrawer({ open, onClose }) {
               알림
             </Typography>
           </Box>
-          <IconButton onClick={onClose}>
-            <CloseIcon />
-          </IconButton>
+          <Box>
+            <IconButton onClick={handleMenuClick}>
+              <MoreVertIcon />
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl}
+              open={!!anchorEl}
+              onClose={handleMenuClose}
+            >
+              <MenuItem onClick={() => handleFilterSelect("ALL")}>
+                전체
+              </MenuItem>
+              <MenuItem onClick={() => handleFilterSelect("UNREAD")}>
+                읽지 않음
+              </MenuItem>
+              <MenuItem onClick={() => handleFilterSelect("READ")}>
+                읽음
+              </MenuItem>
+            </Menu>
+            <IconButton onClick={onClose}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </Box>
 
         <Box
