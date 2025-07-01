@@ -172,13 +172,14 @@ export function uploadFileToS3(presignedUrl, file) {
  * 게시글 첨부파일 일괄 활성화
  * POST /api/posts/attachments/active
  *
- * @param {{ postId: string; }} data
+ * @param {{ postId: string; postAttachmentIds: string[]; }} data
  * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<PostAttachmentBulkActiveResponse>
  */
 export function bulkActivateAttachments(data) {
   return api.post("/api/posts/attachments/active", {
     postId: data.postId,
-    active: true,
+    postAttachmentIds: data.postAttachmentIds,
+    active: true
   });
 }
 
