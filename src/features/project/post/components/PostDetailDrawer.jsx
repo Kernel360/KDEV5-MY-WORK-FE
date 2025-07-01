@@ -22,6 +22,7 @@ import * as postAPI from "@/api/post";
 import FileAttachmentViewer from "./FileAttachmentViewer";
 import FilePreviewModal from "./FilePreviewModal";
 import PostDetailTopSection from "./PostDetailTopSection";
+import { downloadAttachment } from "@/utils/downloadUtils";
 
 export default function PostDetailDrawer({
   open,
@@ -78,44 +79,8 @@ export default function PostDetailDrawer({
   };
 
   // 파일 다운로드
-  const handleDownload = async (attachment) => {
-    try {
-      // 다운로드 URL 발급 API 호출
-      const response = await postAPI.getAttachmentDownloadUrl(attachment.id);
-
-      if (response.data.result === "SUCCESS") {
-        const downloadUrl = response.data.data.downloadUrl;
-
-        // S3에서 파일 다운로드 후 브라우저에서 다운로드
-        const fileResponse = await fetch(downloadUrl);
-        if (!fileResponse.ok) {
-          throw new Error(`파일 다운로드 실패: ${fileResponse.status}`);
-        }
-
-        // Blob으로 변환
-        const blob = await fileResponse.blob();
-
-        // Blob URL 생성하여 다운로드
-        const blobUrl = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = blobUrl;
-        link.download = attachment.fileName; // 파일명 지정
-        link.style.display = "none";
-
-        // DOM에 추가 후 클릭하여 다운로드 실행
-        document.body.appendChild(link);
-        link.click();
-
-        // 정리
-        document.body.removeChild(link);
-        URL.revokeObjectURL(blobUrl); // 메모리 정리
-      } else {
-        throw new Error("다운로드 URL 발급 실패");
-      }
-    } catch (error) {
-      console.error("파일 다운로드 실패:", error);
-      alert("파일 다운로드에 실패했습니다.");
-    }
+  const handleDownload = (attachment) => {
+    downloadAttachment(attachment, postAPI.getAttachmentDownloadUrl);
   };
 
   useEffect(() => {
