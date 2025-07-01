@@ -367,10 +367,12 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
       const successfulFiles = files.filter(file => file.status === 'success' && file.postAttachmentId);
       if (successfulFiles.length > 0) {
         console.log(`${successfulFiles.length}개 파일 일괄 활성화 시작...`);
+        const postAttachmentIds = successfulFiles.map(file => file.postAttachmentId);
         
         try {
           await dispatch(bulkActivateAttachments({ 
-            postId: createdPostId 
+            postId: createdPostId,
+            postAttachmentIds
           })).unwrap();
           console.log('파일 일괄 활성화 완료');
         } catch (activateError) {
