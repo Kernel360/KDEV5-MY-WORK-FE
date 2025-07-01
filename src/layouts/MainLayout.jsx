@@ -15,10 +15,12 @@ import useNotificationPolling from "@/hooks/useNotificationPolling";
 
 export default function MainLayout() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-
-  useNotificationPolling(!notificationsOpen);
   const isMobile = useMediaQuery("(max-width:600px)");
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const unreadCount = useSelector((state) => state?.notification.unreadCount);
+
+  useNotificationPolling(!notificationsOpen);
 
   const handleDrawerToggle = () => {
     setMobileOpen((prev) => !prev);
@@ -35,6 +37,7 @@ export default function MainLayout() {
           <MenuIcon />
         </MobileToggleButton>
       )}
+
       {isMobile ? (
         <StyledDrawer
           variant="temporary"
@@ -45,17 +48,21 @@ export default function MainLayout() {
           <Sidebar
             onClose={handleDrawerToggle}
             onNotificationsClick={handleNotificationsToggle}
+            unreadCount={unreadCount}
           />
         </StyledDrawer>
       ) : (
         <Sidebar
           onClose={() => {}}
           onNotificationsClick={handleNotificationsToggle}
+          unreadCount={unreadCount}
         />
       )}
+
       <Main>
         <Outlet />
       </Main>
+
       <NotificationsDrawer
         open={notificationsOpen}
         onClose={handleNotificationsToggle}
