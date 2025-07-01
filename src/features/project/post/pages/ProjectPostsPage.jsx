@@ -53,7 +53,15 @@ export default function ProjectPostsPage() {
         dispatch(fetchProjectStages(projectId));
       }
     }
-  }, [selectedPost, dispatch, projectId, page, searchText, searchKey, selectedStepId]);
+  }, [
+    selectedPost,
+    dispatch,
+    projectId,
+    page,
+    searchText,
+    searchKey,
+    selectedStepId,
+  ]);
 
   const handleDrawerClose = () => {
     setSelectedPost(null);
@@ -90,8 +98,8 @@ export default function ProjectPostsPage() {
       sortable: true,
       type: "status",
       statusMap: {
-        PENDING: { label: "대기", color: "neutral" },
-        APPROVED: { label: "완료", color: "success" },
+        PENDING: { label: "답변 대기", color: "neutral" },
+        APPROVED: { label: "답변 완료", color: "success" },
       },
     },
     {
