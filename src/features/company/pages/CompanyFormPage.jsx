@@ -42,17 +42,11 @@ export default function CompanyFormPage() {
   useEffect(() => {
     const generateNewCompanyId = async () => {
       if (!isEdit) {
-        const storedId = localStorage.getItem("newCompanyId");
-        if (!storedId) {
-          try {
-            const result = await dispatch(createCompanyId()).unwrap();
-            localStorage.setItem("newCompanyId", result.data.companyId);
-            setForm((prev) => ({ ...prev, id: result.data.companyId }));
-          } catch (err) {
-            console.error("회사 ID 생성 실패:", err);
-          }
-        } else {
-          setForm((prev) => ({ ...prev, id: storedId }));
+        try {
+          const result = await dispatch(createCompanyId()).unwrap();
+          setForm((prev) => ({ ...prev, id: result.data.companyId }));
+        } catch (err) {
+          console.error("회사 ID 생성 실패:", err);
         }
       }
     };
@@ -97,7 +91,6 @@ export default function CompanyFormPage() {
         navigate(`/companies/${id}`);
       } else {
         await dispatch(createCompany(form)).unwrap();
-        localStorage.removeItem("newCompanyId");
         navigate("/companies");
       }
     } catch (err) {
