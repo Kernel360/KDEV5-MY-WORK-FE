@@ -200,12 +200,22 @@ export default function SectionTable({
                 key={`${row[rowKey] ?? idx}`}
                 hover
                 onClick={() => onRowClick?.(row)}
-                sx={{ cursor: onRowClick ? "pointer" : "default" }}
+                sx={{
+                  cursor: onRowClick ? "pointer" : "default",
+                  background: "white",
+                  border: "1px solid",
+                  borderColor: "grey.100",
+                }}
               >
                 {columns.map((col) => (
                   <TableCell
                     key={`${row[rowKey] ?? idx}-${col.key}`}
-                    sx={{ whiteSpace: "nowrap" }}
+                    sx={{
+                      whiteSpace: "nowrap",
+                      borderTop: "1px solid",
+                      borderBottom: "1px solid",
+                      borderColor: "grey.100",
+                    }}
                   >
                     {col.renderCell
                       ? col.renderCell(row)
