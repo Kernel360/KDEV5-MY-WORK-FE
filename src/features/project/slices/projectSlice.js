@@ -6,18 +6,11 @@ import * as projectAPI from "@/api/project";
 export const fetchProjects = createAsyncThunk(
   "project/fetchProjects",
   async (
-    {
-      page,
-      size = 10,
-      keyword = null,
-      keywordType = null,
-      step = null,
-      userRole = null,
-    },
+    { page, keyword = null, keywordType = null, step = null, userRole = null },
     thunkAPI
   ) => {
     try {
-      const params = { page, size };
+      const params = { page };
       if (keyword) {
         params.keyword = keyword;
         params.keywordType = keywordType;
@@ -26,7 +19,6 @@ export const fetchProjects = createAsyncThunk(
         params.step = step;
       }
 
-      // 역할에 따른 API 분기
       const isSystemAdmin = userRole === "ROLE_SYSTEM_ADMIN";
       const response = isSystemAdmin
         ? await projectAPI.getProjects(params) // 시스템 어드민: 전체 프로젝트 조회
@@ -44,7 +36,6 @@ export const fetchProjects = createAsyncThunk(
         projects,
         totalCount: totalCount || 0,
         currentPage: page,
-        pageSize: size,
       };
     } catch (err) {
       return thunkAPI.rejectWithValue(
@@ -137,7 +128,6 @@ const projectSlice = createSlice({
     list: [],
     totalCount: 0,
     currentPage: 1,
-    pageSize: 10,
     current: null,
     loading: false,
     error: null,
@@ -169,7 +159,6 @@ const projectSlice = createSlice({
         }));
         state.totalCount = action.payload.totalCount;
         state.currentPage = action.payload.currentPage;
-        state.pageSize = action.payload.pageSize;
       })
       .addCase(fetchProjects.rejected, (state, action) => {
         state.loading = false;
