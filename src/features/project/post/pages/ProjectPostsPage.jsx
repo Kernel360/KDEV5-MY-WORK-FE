@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Box } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import SectionTable from "@/components/common/sectionTable/SectionTable";
 import PostDetailDrawer from "../components/PostDetailDrawer";
 import CreatePostDrawer from "../components/CreatePostDrawer";
@@ -23,6 +23,29 @@ export default function ProjectPostsPage() {
   const [searchKey, setSearchKey] = useState("");
   const [searchText, setSearchText] = useState("");
   const [selectedPost, setSelectedPost] = useState(null);
+
+  const navigate = useNavigate();
+
+  const [searchParams] = useSearchParams();
+  const postIdFromQuery = searchParams.get("postId");
+
+  useEffect(() => {
+    if (postIdFromQuery) {
+      dispatch(fetchPostById(postIdFromQuery)).then((res) => {
+        setSelectedPost(res.payload);
+      });
+    }
+  }, [postIdFromQuery]);
+
+  const handleDrawerClose = () => {
+    setSelectedPost(null);
+
+    searchParams.delete("postId");
+    navigate(
+      { pathname: location.pathname, search: searchParams.toString() },
+      { replace: true }
+    );
+  };
 
   useEffect(() => {
     if (projectId) dispatch(fetchProjectStages(projectId));
@@ -124,7 +147,7 @@ export default function ProjectPostsPage() {
       <PostDetailDrawer
         open={Boolean(selectedPost)}
         post={selectedPost}
-        onClose={() => setSelectedPost(null)}
+        onClose={handleDrawerClose}
       />
 
       <CreatePostDrawer
