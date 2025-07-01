@@ -9,7 +9,7 @@ import AlertMessage from "@/components/common/alertMessage/AlertMessage";
 const columns = [
   { key: "name", label: "이름", type: "avatar", searchable: true },
   { key: "email", label: "이메일", type: "text", searchable: true },
-  { key: "companyName", label: "회사", type: "text", searchable: true },
+  { key: "companyName", label: "회사", type: "text", searchable: false },
   { key: "position", label: "직책", type: "text", searchable: true },
   { key: "department", label: "부서", type: "text", searchable: true },
   { key: "phoneNumber", label: "연락처", type: "text", searchable: true },
