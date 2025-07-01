@@ -33,22 +33,6 @@ export default function ProjectPage() {
     }
   }, [dispatch, userRole]);
 
-  const handleDelete = useCallback(
-    (row) => {
-      dispatch(deleteProject({ id: row.id })).then(() => {
-        dispatch(fetchProjects({ page: 1, size: 10, userRole }));
-      });
-    },
-    [dispatch, userRole]
-  );
-
-  const handlePageChange = useCallback(
-    (page) => {
-      dispatch(fetchProjects({ page, size: 10, userRole }));
-    },
-    [dispatch, userRole]
-  );
-
   return (
     <PageWrapper>
       <Box
@@ -65,14 +49,7 @@ export default function ProjectPage() {
         />
         <Box sx={{ flex: 1, minHeight: 0, overflow: "auto", mb: 0.3 }}>
           {isSystemAdmin ? (
-            <ProjectTable
-              projects={projects}
-              totalCount={totalCount}
-              loading={status === "loading"}
-              error={error}
-              onDelete={handleDelete}
-              onPageChange={handlePageChange}
-            />
+            <ProjectTable />
           ) : (
             <Box
               sx={{
