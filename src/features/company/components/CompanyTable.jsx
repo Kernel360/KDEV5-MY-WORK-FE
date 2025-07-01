@@ -40,7 +40,7 @@ export default function CompanyTable() {
   } = useSelector((state) => state.company);
 
   const [page, setPage] = useState(1);
-  const [searchKey, setSearchKey] = useState("companyName");
+  const [searchKey, setSearchKey] = useState("");
   const [searchText, setSearchText] = useState("");
   const [filterValue, setFilterValue] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
