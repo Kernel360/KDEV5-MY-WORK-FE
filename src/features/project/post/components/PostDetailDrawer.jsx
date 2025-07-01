@@ -53,11 +53,22 @@ import {
   fetchPostById,
 } from "../postSlice";
 import * as postAPI from "@/api/post";
+import FileAttachmentViewer from "./FileAttachmentViewer";
 
-export default function PostDetailDrawer({ open, post, onClose, onDeleteSuccess }) {
+export default function PostDetailDrawer({
+  open,
+  post,
+  onClose,
+  onDeleteSuccess,
+}) {
   const theme = useTheme();
   const dispatch = useDispatch();
-  const reviews = useSelector((state) => state.review.items || []);
+  const {
+    items: reviews,
+    page: reviewPage,
+    hasMore,
+  } = useSelector((state) => state.review);
+
   const approval = useSelector((state) => state.post.detail?.approval);
 
   const [alert, setAlert] = useState({
@@ -86,54 +97,6 @@ export default function PostDetailDrawer({ open, post, onClose, onDeleteSuccess 
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
-
-  // 파일 확장자에 따른 아이콘 반환
-  const getFileIcon = (fileName, fileType) => {
-    const extension = fileName.toLowerCase().split(".").pop();
-
-    // 이미지 파일
-    if (fileType.startsWith("image/")) {
-      return <ImageIcon color="primary" />;
-    }
-
-    // 문서 파일
-    if (["pdf"].includes(extension)) {
-      return <PictureAsPdf color="error" />;
-    }
-    if (["doc", "docx", "txt", "rtf"].includes(extension)) {
-      return <Description color="primary" />;
-    }
-    if (["xls", "xlsx", "csv"].includes(extension)) {
-      return <TableChart color="success" />;
-    }
-
-    // 압축 파일
-    if (["zip", "rar", "7z", "tar", "gz"].includes(extension)) {
-      return <Archive color="warning" />;
-    }
-
-    // 코드 파일
-    if (
-      ["js", "ts", "jsx", "tsx", "html", "css", "json", "xml"].includes(
-        extension
-      )
-    ) {
-      return <Code color="info" />;
-    }
-
-    // 동영상 파일
-    if (["mp4", "avi", "mov", "wmv", "flv", "mkv"].includes(extension)) {
-      return <Movie color="secondary" />;
-    }
-
-    // 오디오 파일
-    if (["mp3", "wav", "flac", "aac", "ogg"].includes(extension)) {
-      return <MusicNote color="secondary" />;
-    }
-
-    // 기본 파일 아이콘
-    return <InsertDriveFileIcon color="action" />;
   };
 
   // 미리보기 모달 열기
@@ -240,6 +203,10 @@ export default function PostDetailDrawer({ open, post, onClose, onDeleteSuccess 
           severity: "error",
         });
       });
+  };
+
+  const handleLoadMoreReviews = ({ postId, page }) => {
+    dispatch(fetchReviews({ postId, page }));
   };
 
   const statusMap = {
@@ -399,116 +366,22 @@ export default function PostDetailDrawer({ open, post, onClose, onDeleteSuccess 
 
               {/* 첨부파일 섹션 */}
               {(attachmentImages.length > 0 || imagesLoading) && (
-                <Box>
-                  <Stack direction="row" alignItems="center" spacing={1} mb={2}>
-                    <AttachFileIcon color="action" />
-                    <Typography variant="h6" fontWeight={600}>
-                      첨부파일 ({attachmentImages.length}개)
-                      {imagesLoading && " (로딩 중...)"}
-                    </Typography>
-                  </Stack>
-                  <Divider sx={{ mb: 3 }} />
-
-                  {imagesError && (
-                    <Alert severity="error" sx={{ mb: 2 }}>
-                      파일 로드 실패: {imagesError}
-                    </Alert>
-                  )}
-
-                  {/* 파일 리스트 */}
-                  <Stack spacing={1}>
-                    {attachmentImages.map((attachment) => (
-                      <Box
-                        key={attachment.id}
-                        sx={{
-                          p: 2,
-                          border: "1px solid",
-                          borderColor: "grey.300",
-                          borderRadius: 1,
-                          bgcolor: "background.paper",
-                          transition: "all 0.2s ease-in-out",
-                          "&:hover": {
-                            borderColor: "primary.main",
-                            bgcolor: "grey.50",
-                          },
-                        }}
-                      >
-                        <Stack direction="row" alignItems="center" spacing={2}>
-                          {/* 파일 아이콘 */}
-                          <Box
-                            sx={{
-                              width: 40,
-                              height: 40,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              bgcolor: "grey.100",
-                              borderRadius: 1,
-                            }}
-                          >
-                            {getFileIcon(
-                              attachment.fileName,
-                              attachment.fileType
-                            )}
-                          </Box>
-
-                          {/* 파일 정보 */}
-                          <Box sx={{ flex: 1, minWidth: 0 }}>
-                            <Typography variant="body2" fontWeight={600} noWrap>
-                              {attachment.fileName}
-                            </Typography>
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
-                              {formatFileSize(attachment.fileSize)}
-                              {attachment.fileType &&
-                                ` • ${attachment.fileType}`}
-                            </Typography>
-                          </Box>
-
-                          {/* 액션 버튼들 */}
-                          <Stack direction="row" spacing={1}>
-                            {/* 이미지인 경우 미리보기 버튼 */}
-                            {attachment.isImage && attachment.imageUrl && (
-                              <Tooltip title="미리보기">
-                                <IconButton
-                                  size="small"
-                                  onClick={() => handlePreviewOpen(attachment)}
-                                  color="primary"
-                                >
-                                  <ZoomInIcon />
-                                </IconButton>
-                              </Tooltip>
-                            )}
-
-                            {/* 다운로드 버튼 */}
-                            <Tooltip title="다운로드">
-                              <IconButton
-                                size="small"
-                                onClick={() => handleDownload(attachment)}
-                                color="primary"
-                              >
-                                <DownloadIcon />
-                              </IconButton>
-                            </Tooltip>
-                          </Stack>
-                        </Stack>
-
-                        {/* 로딩/에러 상태 */}
-                        {attachment.error && (
-                          <Alert severity="error" sx={{ mt: 1 }}>
-                            파일 로드 실패: {attachment.error}
-                          </Alert>
-                        )}
-                      </Box>
-                    ))}
-                  </Stack>
-                </Box>
+                <FileAttachmentViewer
+                  attachments={attachmentImages}
+                  loading={imagesLoading}
+                  error={imagesError}
+                  onPreview={handlePreviewOpen}
+                  onDownload={handleDownload}
+                />
               )}
 
               {/* 댓글 섹션 */}
-              <CommentSection postId={post.postId} comments={reviews} />
+              <CommentSection
+                postId={post.postId}
+                comments={reviews}
+                onLoadMore={handleLoadMoreReviews}
+                hasMore={hasMore}
+              />
             </Stack>
           ) : (
             <Typography variant="body2" color="text.secondary">

@@ -1,15 +1,13 @@
-// src/features/review/reviewSlice.js
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
   createReview,
   modifyReview,
   deleteReview,
   fetchReviewsByPost,
-} from '@/api/review'; // api 모듈 경로에 맞춰 조정
+} from "@/api/review";
 
-// 게시글별 리뷰 조회
 export const fetchReviews = createAsyncThunk(
-  'review/fetchByPost',
+  "review/fetchByPost",
   async ({ postId, page }, thunkAPI) => {
     try {
       const response = await fetchReviewsByPost(postId, page);
@@ -20,9 +18,8 @@ export const fetchReviews = createAsyncThunk(
   }
 );
 
-// 리뷰 생성
 export const addReview = createAsyncThunk(
-  'review/create',
+  "review/create",
   async (payload, thunkAPI) => {
     try {
       const response = await createReview(payload);
@@ -33,9 +30,8 @@ export const addReview = createAsyncThunk(
   }
 );
 
-// 리뷰 수정
 export const updateReview = createAsyncThunk(
-  'review/update',
+  "review/update",
   async ({ reviewId, comment }, thunkAPI) => {
     try {
       const response = await modifyReview(reviewId, { comment });
@@ -46,9 +42,8 @@ export const updateReview = createAsyncThunk(
   }
 );
 
-// 리뷰 삭제
 export const removeReview = createAsyncThunk(
-  'review/delete',
+  "review/delete",
   async (reviewId, thunkAPI) => {
     try {
       const response = await deleteReview(reviewId);
@@ -60,34 +55,42 @@ export const removeReview = createAsyncThunk(
 );
 
 const initialState = {
-  items: [],       // 현재 페이지 리뷰 목록
+  items: [],
   page: 1,
+  hasMore: true,
   loading: false,
   error: null,
 };
 
 const reviewSlice = createSlice({
-  name: 'review',
+  name: "review",
   initialState,
   reducers: {
-    // 필요 시 동기 액션 추가
     clearReviews(state) {
       state.items = [];
       state.page = 1;
       state.error = null;
+      state.hasMore = true;
     },
   },
   extraReducers: (builder) => {
     builder
-      // fetchReviews
       .addCase(fetchReviews.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchReviews.fulfilled, (state, { payload }) => {
+        const { page, data } = payload;
         state.loading = false;
-        state.items = payload.data;
-        state.page = payload.page;
+
+        if (page === 1) {
+          state.items = data;
+        } else {
+          state.items = [...state.items, ...data];
+        }
+
+        state.page = page;
+        state.hasMore = data.length === 10;
       })
       .addCase(fetchReviews.rejected, (state, { payload }) => {
         state.loading = false;
@@ -116,7 +119,9 @@ const reviewSlice = createSlice({
       })
       .addCase(updateReview.fulfilled, (state, { payload }) => {
         state.loading = false;
-        const idx = state.items.findIndex(r => r.reviewId === payload.reviewId);
+        const idx = state.items.findIndex(
+          (r) => r.reviewId === payload.reviewId
+        );
         if (idx !== -1) state.items[idx] = payload;
       })
       .addCase(updateReview.rejected, (state, { payload }) => {
@@ -131,7 +136,7 @@ const reviewSlice = createSlice({
       })
       .addCase(removeReview.fulfilled, (state, { payload: deletedId }) => {
         state.loading = false;
-        state.items = state.items.filter(r => r.reviewId !== deletedId);
+        state.items = state.items.filter((r) => r.reviewId !== deletedId);
       })
       .addCase(removeReview.rejected, (state, { payload }) => {
         state.loading = false;
