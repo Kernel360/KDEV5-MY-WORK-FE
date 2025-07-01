@@ -79,7 +79,10 @@ export default function Sidebar({
             <Typography variant="subtitle1">{memberName || ""}</Typography>
           </div>
           <IconButton size="small" onClick={onNotificationsClick}>
-            <Badge badgeContent={unreadCount} color="error">
+            <Badge
+              badgeContent={unreadCount > 0 ? unreadCount : null}
+              color="error"
+            >
               <NotificationsRoundedIcon
                 fontSize="small"
                 sx={{ color: "grey.400" }}
