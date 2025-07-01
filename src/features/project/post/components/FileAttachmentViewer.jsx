@@ -1,4 +1,3 @@
-// src/components/common/attachment/AttachmentList.jsx
 import React from "react";
 import {
   Box,
@@ -6,7 +5,6 @@ import {
   Typography,
   IconButton,
   Tooltip,
-  Alert,
   Divider,
 } from "@mui/material";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
@@ -22,7 +20,7 @@ import {
   Movie,
   MusicNote,
 } from "@mui/icons-material";
-
+import AlertMessage from "@/components/common/alertMessage/AlertMessage";
 function formatFileSize(bytes) {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
@@ -56,6 +54,22 @@ export default function FileAttachmentViewer({
   onPreview,
   onDownload,
 }) {
+  const [alert, setAlert] = React.useState({
+    open: false,
+    message: "",
+    severity: "error",
+  });
+
+  React.useEffect(() => {
+    if (error) {
+      setAlert({
+        open: true,
+        message: `파일 로드 실패: ${error}`,
+        severity: "error",
+      });
+    }
+  }, [error]);
+
   if (!attachments.length && !loading) return null;
 
   return (
@@ -67,11 +81,7 @@ export default function FileAttachmentViewer({
         </Typography>
       </Stack>
       <Divider sx={{ mb: 3 }} />
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          파일 로드 실패: {error}
-        </Alert>
-      )}
+
       <Stack spacing={1}>
         {attachments.map((file) => (
           <Box
@@ -128,14 +138,27 @@ export default function FileAttachmentViewer({
                 )}
               </Stack>
             </Stack>
+
             {file.error && (
-              <Alert severity="error" sx={{ mt: 1 }}>
-                파일 로드 실패: {file.error}
-              </Alert>
+              <Box mt={1}>
+                <AlertMessage
+                  open={true}
+                  message={`파일 로드 실패: ${file.error}`}
+                  severity="error"
+                  onClose={() => {}}
+                />
+              </Box>
             )}
           </Box>
         ))}
       </Stack>
+
+      <AlertMessage
+        open={alert.open}
+        message={alert.message}
+        severity={alert.severity}
+        onClose={() => setAlert((prev) => ({ ...prev, open: false }))}
+      />
     </Box>
   );
 }
