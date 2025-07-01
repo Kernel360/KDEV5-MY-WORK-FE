@@ -13,8 +13,11 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getCheckListByIdThunk,
   approveCheckListThunk,
+  fetchChecklistItems,
+  fetchChecklistProgress,
 } from "../checklistSlice";
 import { fetchCheckListHistories } from "../checklistHistorySlice"; // ✅ 추가
+import { useParams } from "react-router-dom";
 import ApprovalDetailHeader from "./ApprovalDetailHeader";
 import ApprovalDetailContent from "./ApprovalDetailContent";
 import ApprovalActionInput from "./ApprovalActionInput";
@@ -28,6 +31,7 @@ export default function ProjectApprovalDetailDrawer({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const dispatch = useDispatch();
+  const { id: projectId } = useParams();
 
   const { current: checkList, error } = useSelector((state) => state.checklist);
   const { items: histories, loading: historyLoading } = useSelector(
@@ -54,6 +58,10 @@ export default function ProjectApprovalDetailDrawer({
       ).unwrap();
       setReasonText("");
       setApprovalType(null);
+      if (projectId) {
+        dispatch(fetchChecklistItems({ projectId }));
+        dispatch(fetchChecklistProgress(projectId));
+      }
       onClose();
     } catch (err) {
       console.error("결재 처리 실패", err);
