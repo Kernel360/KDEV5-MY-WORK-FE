@@ -8,6 +8,7 @@ import {
   Divider,
   Grid,
   Tooltip,
+  MenuItem,
 } from "@mui/material";
 import { InfoOutlined } from "@mui/icons-material";
 
@@ -69,7 +70,21 @@ export default function CompanyForm({
               value={form.detail || ""}
               onChange={handleChange("detail")}
               fullWidth
+              sx={{ mb: 2 }}
             />
+            {/* 회사 타입 선택 */}
+            <TextField
+              select
+              label="회사 타입"
+              value={form.type || "DEV"}
+              onChange={handleChange("type")}
+              fullWidth
+              required
+              sx={{ mb: 2 }}
+            >
+              <MenuItem value="DEV">개발사</MenuItem>
+              <MenuItem value="CLIENT">고객사</MenuItem>
+            </TextField>
           </Box>
 
           {/* 2) 사업자 정보 */}
