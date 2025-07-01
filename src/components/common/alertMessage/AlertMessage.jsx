@@ -13,6 +13,7 @@ export default function AlertMessage({
       autoHideDuration={3000}
       onClose={onClose}
       anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      sx={{ zIndex: 3000 }}
     >
       <Alert
         onClose={onClose}
