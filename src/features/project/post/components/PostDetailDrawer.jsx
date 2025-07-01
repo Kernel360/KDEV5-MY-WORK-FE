@@ -6,41 +6,16 @@ import {
   IconButton,
   Stack,
   Paper,
-  Chip,
   Avatar,
-  Grid,
-  Card,
-  CardMedia,
-  CardContent,
-  Button,
-  Modal,
-  Divider,
-  Tooltip,
-  Alert,
-  CircularProgress,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
-import AttachFileIcon from "@mui/icons-material/AttachFile";
-import DownloadIcon from "@mui/icons-material/Download";
-import ZoomInIcon from "@mui/icons-material/ZoomIn";
-import ImageIcon from "@mui/icons-material/Image";
 import CustomButton from "@/components/common/customButton/CustomButton";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
-import {
-  PictureAsPdf,
-  Description,
-  TableChart,
-  Archive,
-  Code,
-  Movie,
-  MusicNote,
-} from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
 import CommentSection from "./CommentSection";
@@ -50,10 +25,10 @@ import {
   fetchAttachmentImages,
   clearAttachmentImages,
   updatePostApproval,
-  fetchPostById,
 } from "../postSlice";
 import * as postAPI from "@/api/post";
 import FileAttachmentViewer from "./FileAttachmentViewer";
+import FilePreviewModal from "./FilePreviewModal";
 
 export default function PostDetailDrawer({
   open,
@@ -392,120 +367,11 @@ export default function PostDetailDrawer({
       </Drawer>
 
       {/* 이미지 미리보기 모달 */}
-      <Modal
+      <FilePreviewModal
         open={previewModal.open}
+        attachment={previewModal.attachment}
         onClose={handlePreviewClose}
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          p: { xs: 1, sm: 2 },
-        }}
-      >
-        <Box
-          sx={{
-            position: "relative",
-            width: { xs: "95vw", sm: "90vw", md: "80vw" },
-            maxHeight: { xs: "95vh", sm: "90vh" },
-            bgcolor: "background.paper",
-            borderRadius: 3,
-            boxShadow: 24,
-            overflow: "hidden",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          {/* 모달 헤더 */}
-          <Box
-            sx={{
-              p: 2,
-              borderBottom: "1px solid",
-              borderColor: "divider",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              bgcolor: "rgba(0, 0, 0, 0.03)",
-              backdropFilter: "blur(10px)",
-            }}
-          >
-            <Typography variant="h6" noWrap sx={{ fontWeight: 600 }}>
-              {previewModal.attachment?.fileName}
-            </Typography>
-            <IconButton
-              onClick={handlePreviewClose}
-              size="small"
-              sx={{
-                bgcolor: "rgba(0, 0, 0, 0.1)",
-                "&:hover": {
-                  bgcolor: "rgba(0, 0, 0, 0.2)",
-                },
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-          </Box>
-
-          {/* 이미지 */}
-          {previewModal.attachment && (
-            <Box
-              sx={{
-                flex: 1,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                p: 3,
-                bgcolor: "grey.50",
-                minHeight: 0,
-                position: "relative",
-              }}
-            >
-              <img
-                src={previewModal.attachment.imageUrl}
-                alt={previewModal.attachment.fileName}
-                style={{
-                  maxWidth: "100%",
-                  maxHeight: "100%",
-                  objectFit: "contain",
-                  borderRadius: "8px",
-                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-                }}
-              />
-            </Box>
-          )}
-
-          {/* 파일 정보 */}
-          <Box
-            sx={{
-              p: 2,
-              borderTop: "1px solid",
-              borderColor: "divider",
-              bgcolor: "background.paper",
-            }}
-          >
-            <Stack direction="row" spacing={3} alignItems="center">
-              <Box>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mb: 0.5 }}
-                >
-                  <strong>크기:</strong>{" "}
-                  {previewModal.attachment
-                    ? formatFileSize(previewModal.attachment.fileSize)
-                    : ""}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  <strong>타입:</strong> {previewModal.attachment?.fileType}
-                </Typography>
-              </Box>
-              <Box sx={{ flex: 1 }} />
-              <Typography variant="caption" color="text.secondary">
-                클릭하여 닫기 또는 ESC 키 사용
-              </Typography>
-            </Stack>
-          </Box>
-        </Box>
-      </Modal>
+      />
     </>
   );
 }
