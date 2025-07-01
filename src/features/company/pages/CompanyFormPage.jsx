@@ -11,6 +11,7 @@ import { Box, Button, Stack } from "@mui/material";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
 import CompanyForm from "../components/CompanyForm";
+import AlertMessage from "@/components/common/alertMessage/AlertMessage";
 
 export default function CompanyFormPage() {
   const { id } = useParams();
@@ -35,6 +36,8 @@ export default function CompanyFormPage() {
   });
 
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   useEffect(() => {
     const generateNewCompanyId = async () => {
@@ -98,8 +101,18 @@ export default function CompanyFormPage() {
         navigate("/companies");
       }
     } catch (err) {
+      const errorData = err?.error || err;
+      if (
+        errorData?.code === "ERROR_COMPANY06" &&
+        errorData?.message
+      ) {
+        setAlertMessage(errorData.message);
+        setAlertOpen(true);
+      } else {
+        setAlertMessage("업체 등록에 실패했습니다.");
+        setAlertOpen(true);
+      }
       console.error(err);
-      // TODO: 에러 발생 시 스낵바/토스트 표시
     }
   };
 
@@ -136,6 +149,12 @@ export default function CompanyFormPage() {
         handleChange={handleChange}
         isEdit={isEdit}
         isSubmitted={isSubmitted}
+      />
+      <AlertMessage
+        open={alertOpen}
+        onClose={() => setAlertOpen(false)}
+        message={alertMessage}
+        severity="error"
       />
     </PageWrapper>
   );
