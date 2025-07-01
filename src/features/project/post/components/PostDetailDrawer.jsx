@@ -8,14 +8,6 @@ import {
   Paper,
   Avatar,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import DeleteIcon from "@mui/icons-material/Delete";
-import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
-import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
-import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
-import CustomButton from "@/components/common/customButton/CustomButton";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
 import CommentSection from "./CommentSection";
@@ -29,6 +21,7 @@ import {
 import * as postAPI from "@/api/post";
 import FileAttachmentViewer from "./FileAttachmentViewer";
 import FilePreviewModal from "./FilePreviewModal";
+import PostDetailTopSection from "./PostDetailTopSection";
 
 export default function PostDetailDrawer({
   open,
@@ -224,104 +217,16 @@ export default function PostDetailDrawer({
         >
           {post ? (
             <Stack spacing={4}>
-              {/* 작성자 + 상태 */}
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
+              <PostDetailTopSection
+                post={post}
+                onDelete={handleDelete}
+                onClose={() => {
+                  dispatch(clearAttachmentImages());
+                  onClose();
                 }}
-              >
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <Avatar sx={{ width: 40, height: 40 }}>
-                    {post.companyName?.[0] || "?"}
-                  </Avatar>
-
-                  <Box>
-                    {/* 이름 + 회사 한 줄에 */}
-                    <Stack
-                      direction="row"
-                      spacing={2}
-                      alignItems="center"
-                      flexWrap="wrap"
-                    >
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <AccountCircleRoundedIcon
-                          sx={{ fontSize: 16, color: "text.secondary" }}
-                        />
-                        <Typography fontWeight={600}>
-                          {post.authorName}
-                        </Typography>
-                      </Stack>
-
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <BusinessRoundedIcon
-                          sx={{ fontSize: 16, color: "text.secondary" }}
-                        />
-                        <Typography variant="body2" color="text.secondary">
-                          {post.companyName}
-                        </Typography>
-                      </Stack>
-                    </Stack>
-
-                    {/* 작성일 */}
-                    <Stack
-                      direction="row"
-                      spacing={1}
-                      alignItems="center"
-                      mt={0.5}
-                    >
-                      <AccessTimeRoundedIcon
-                        sx={{ fontSize: 16, color: "text.secondary" }}
-                      />
-                      <Typography variant="caption" color="text.secondary">
-                        {post.createdAt}
-                      </Typography>
-                    </Stack>
-                  </Box>
-                </Stack>
-
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <IconButton onClick={handleDelete}>
-                    <DeleteIcon />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => {
-                      dispatch(clearAttachmentImages());
-                      onClose();
-                    }}
-                  >
-                    <CloseIcon />
-                  </IconButton>
-                </Stack>
-              </Box>
-
-              {/* 제목 + 상태 */}
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Typography variant="h5" fontWeight={700}>
-                  {post.title}
-                </Typography>
-                <CustomButton
-                  kind={approval === "APPROVED" ? "ghost-success" : "ghost"}
-                  size="small"
-                  onClick={handleApprovalToggle}
-                  startIcon={
-                    approval === "APPROVED" ? (
-                      <CheckCircleIcon fontSize="small" />
-                    ) : (
-                      <HourglassBottomIcon fontSize="small" />
-                    )
-                  }
-                >
-                  {stat.label}
-                </CustomButton>
-              </Box>
+                onApprovalToggle={handleApprovalToggle}
+                approval={approval}
+              />
 
               {/* 본문 */}
               <Box
