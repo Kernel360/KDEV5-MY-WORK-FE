@@ -37,32 +37,35 @@ export default function ProjectPostsPage() {
     }
   }, [postIdFromQuery]);
 
+  useEffect(() => {
+    if (selectedPost === null) {
+      dispatch(
+        fetchPosts({
+          projectId,
+          page,
+          keyword: searchText || null,
+          keywordType: searchKey ? searchKey.toUpperCase() : null,
+          projectStepId: selectedStepId,
+          approval: null,
+        })
+      );
+      if (projectId) {
+        dispatch(fetchProjectStages(projectId));
+      }
+    }
+  }, [selectedPost, dispatch, projectId, page, searchText, searchKey, selectedStepId]);
+
   const handleDrawerClose = () => {
     setSelectedPost(null);
-
+    setTimeout(() => {
+      if (document && document.body) document.body.focus();
+    }, 0);
     searchParams.delete("postId");
     navigate(
       { pathname: location.pathname, search: searchParams.toString() },
       { replace: true }
     );
   };
-
-  useEffect(() => {
-    if (projectId) dispatch(fetchProjectStages(projectId));
-  }, [dispatch, projectId]);
-
-  useEffect(() => {
-    dispatch(
-      fetchPosts({
-        projectId,
-        page,
-        keyword: searchText || null,
-        keywordType: searchKey ? searchKey.toUpperCase() : null,
-        projectStepId: selectedStepId,
-        approval: null,
-      })
-    );
-  }, [dispatch, projectId, page, selectedStepId, searchKey, searchText]);
 
   const handleRowClick = (row) => {
     dispatch(fetchPostById(row.postId))
@@ -169,6 +172,9 @@ export default function ProjectPostsPage() {
                   approval: null,
                 })
               );
+              if (projectId) {
+                dispatch(fetchProjectStages(projectId));
+              }
             })
             .catch(console.error);
         }}

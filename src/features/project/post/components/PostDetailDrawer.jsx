@@ -54,7 +54,7 @@ import {
 } from "../postSlice";
 import * as postAPI from "@/api/post";
 
-export default function PostDetailDrawer({ open, post, onClose }) {
+export default function PostDetailDrawer({ open, post, onClose, onDeleteSuccess }) {
   const theme = useTheme();
   const dispatch = useDispatch();
   const reviews = useSelector((state) => state.review.items || []);
@@ -205,11 +205,15 @@ export default function PostDetailDrawer({ open, post, onClose }) {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
     try {
       await dispatch(deletePost({ postId: post.postId })).unwrap();
-      alert("삭제되었습니다.");
-      onClose();
+      window.alert("삭제되었습니다.");
+      if (onDeleteSuccess) {
+        onDeleteSuccess(); // 목록만 갱신, 전체 새로고침 X
+      } else {
+        onClose();
+      }
     } catch (err) {
       console.error(err);
-      alert("삭제 실패");
+      window.alert("삭제 실패");
     }
   };
 
