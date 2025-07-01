@@ -246,7 +246,10 @@ export const bulkActivateAttachments = createAsyncThunk(
   "post/bulkActivateAttachments",
   async ({ postId, postAttachmentIds }, thunkAPI) => {
     try {
-      const response = await postAPI.bulkActivateAttachments({ postId, postAttachmentIds });
+      const response = await postAPI.bulkActivateAttachments({
+        postId,
+        postAttachmentIds,
+      });
       return response.data.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(
@@ -377,7 +380,7 @@ const postSlice = createSlice({
       })
       .addCase(fetchPostById.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload.error;
       })
 
       // createPost
