@@ -7,9 +7,9 @@ import {
 
 export const fetchNotifications = createAsyncThunk(
   "notifications/fetch",
-  async (page, { rejectWithValue }) => {
+  async ({ page, isRead }, { rejectWithValue }) => {
     try {
-      const res = await getNotifications(page);
+      const res = await getNotifications(page, isRead);
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -63,6 +63,7 @@ const notificationSlice = createSlice({
     hasMore: true,
     readStatus: null,
     unreadCount: 0,
+    filter: "ALL",
   },
   reducers: {
     clearNotifications(state) {
@@ -72,7 +73,14 @@ const notificationSlice = createSlice({
       state.loading = false;
       state.error = null;
     },
+    setNotificationFilter(state, action) {
+      state.filter = action.payload;
+      state.page = 1;
+      state.hasMore = true;
+      state.notifications = [];
+    },
   },
+
   extraReducers: (builder) => {
     builder
       .addCase(fetchNotifications.pending, (state) => {
