@@ -1,10 +1,14 @@
-// src/features/project/home/components/ProjectTable.jsx
-import React, { useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import CustomTable from "@/components/common/customTable/CustomTable";
 import { Box } from "@mui/material";
+import CustomTable from "@/components/common/customTable/CustomTable";
+import ConfirmDialog from "@/components/common/confirmDialog/ConfirmDialog";
+import {
+  fetchProjects,
+  deleteProject,
+} from "@/features/project/slices/projectSlice";
 
-// 컬럼 정의
 const columns = [
   { key: "name", label: "제목", type: "text", searchable: true },
   { key: "startAt", label: "시작일", type: "date" },
@@ -13,82 +17,108 @@ const columns = [
   { key: "devCompanyId", label: "개발사", type: "company" },
 ];
 
-export default function ProjectTable({
-  projects = [],
-  totalCount = 0,
-  loading = false,
-  error = null,
-  onDelete,
-  onPageChange,
-}) {
+const filterKey = "step";
+const filterOptions = [
+  { label: "전체", value: "" },
+  { label: "결제", value: "CONTRACT" },
+  { label: "진행", value: "IN_PROGRESS" },
+  { label: "검수", value: "PAYMENT" },
+  { label: "완료", value: "COMPLETED" },
+];
+
+export default function ProjectTable() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const {
+    list: projects = [],
+    totalCount = 0,
+    loading,
+    error,
+  } = useSelector((state) => state.project);
 
   const [page, setPage] = useState(1);
   const [searchText, setSearchText] = useState("");
   const [filterValue, setFilterValue] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const userRole = useSelector((state) => state.auth.user?.role);
 
-  const filterKey = "step";
-  const filterOptions = [
-    { label: "전체", value: "" },
-    { label: "결제", value: "CONTRACT" },
-    { label: "진행", value: "IN_PROGRESS" },
-    { label: "검수", value: "PAYMENT" },
-    { label: "완료", value: "COMPLETED" },
-  ];
+  const loadProjects = useCallback(() => {
+    const params = { page };
 
-  const handleDelete = (row) => {
-    if (window.confirm(`프로젝트 "${row.name}"을 삭제하시겠습니까?`)) {
-      onDelete?.(row);
+    if (searchText.trim()) {
+      params.keyword = searchText.trim();
+      params.keywordType = "PROJECT_NAME";
+    }
+
+    if (filterValue) {
+      params[filterKey] = filterValue;
+    }
+
+    dispatch(fetchProjects({ ...params, userRole }));
+  }, [dispatch, page, searchText, filterValue, userRole]);
+
+  useEffect(() => {
+    loadProjects();
+  }, [loadProjects]);
+
+  const handleDelete = async () => {
+    try {
+      await dispatch(deleteProject({ id: selectedProject.id })).unwrap();
+      setConfirmOpen(false);
+      loadProjects();
+    } catch (err) {
+      console.error("삭제 실패:", err);
+      alert("삭제에 실패했습니다.");
     }
   };
 
-  const handlePageChange = (newPage) => {
-    setPage(newPage);
-    onPageChange?.(newPage);
-  };
-
-  const enrichedProjects = projects.map((p, idx) => ({
-    ...p,
-    progress: Math.min((idx + 1) * 10, 100),
-    manager: {
-      name: `담당자 ${p.id?.slice(0, 4)}`,
-      src: `https://i.pravatar.cc/40?u=${p.id}`,
-    },
-  }));
-
   return (
-    <CustomTable
-      columns={columns}
-      rows={enrichedProjects}
-      pagination={{
-        page,
-        total: totalCount,
-        onPageChange: handlePageChange,
-        pageSize: 10,
-      }}
-      onRowClick={(row) => navigate(`/projects/${row.id}/posts`)}
-      search={{
-        key: "name",
-        placeholder: "프로젝트 제목을 입력하세요",
-        value: searchText,
-        onChange: (newText) => {
-          setPage(1);
-          setSearchText(newText);
-        },
-      }}
-      filter={{
-        key: filterKey,
-        label: "상태",
-        value: filterValue,
-        options: filterOptions,
-        onChange: (val) => {
-          setPage(1);
-          setFilterValue(val);
-        },
-      }}
-      loading={loading}
-      error={error}
-      onDelete={handleDelete}
-    />
+    <Box>
+      <CustomTable
+        columns={columns}
+        rows={projects}
+        pagination={{
+          page,
+          total: totalCount,
+          onPageChange: setPage,
+        }}
+        onRowClick={(row) => navigate(`/projects/${row.id}/posts`)}
+        onDelete={(row) => {
+          setSelectedProject(row);
+          setConfirmOpen(true);
+        }}
+        search={{
+          placeholder: "프로젝트 제목을 입력하세요",
+          onChange: (newText) => {
+            setPage(1);
+            setSearchText(newText);
+          },
+        }}
+        filter={{
+          key: filterKey,
+          value: filterValue,
+          label: "상태",
+          options: filterOptions,
+          onChange: (val) => {
+            setPage(1);
+            setFilterValue(val);
+          },
+        }}
+        loading={loading}
+        error={error}
+      />
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="프로젝트를 삭제하시겠습니까?"
+        description="삭제 후에는 복구할 수 없습니다."
+        isDelete
+        confirmKind="danger"
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleDelete}
+      />
+    </Box>
   );
 }
