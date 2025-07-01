@@ -18,9 +18,14 @@ import {
   markNotificationsAsRead,
   clearNotifications,
 } from "@/features/notifications/notificationSlice";
-import { getActionLabel, getTargetLabel } from "@/utils/notificationLabelMap";
+import {
+  getChecklistLabel,
+  getPostLabel,
+  getTargetLabel,
+} from "@/utils/notificationLabelMap";
 import NotificationContentBox from "../components/NotificationContentBox";
 import { formatNotificationDate } from "@/utils/dateUtils";
+import { alpha } from "@mui/material/styles";
 
 export default function NotificationsDrawer({ open, onClose }) {
   const theme = useTheme();
@@ -106,8 +111,8 @@ export default function NotificationsDrawer({ open, onClose }) {
       sx={{
         position: "fixed",
         top: 0,
-        left: SIDEBAR_WIDTH,
-        width: DRAWER_WIDTH,
+        left: isMobile ? 0 : SIDEBAR_WIDTH,
+        width: isMobile ? "100vw" : DRAWER_WIDTH,
         height: "100vh",
         overflow: "hidden",
         zIndex: 201,
@@ -128,7 +133,6 @@ export default function NotificationsDrawer({ open, onClose }) {
           flexDirection: "column",
         }}
       >
-        {/* 헤더 */}
         <Box
           sx={{
             display: "flex",
@@ -139,7 +143,10 @@ export default function NotificationsDrawer({ open, onClose }) {
         >
           <Box display="flex" alignItems="center" gap={1}>
             <NotificationsIcon sx={{ fontSize: 20, color: "text.primary" }} />
-            <Typography variant="h6" fontWeight={600}>
+            <Typography
+              variant="h6"
+              fontWeight={theme.typography.fontWeightBold}
+            >
               알림
             </Typography>
           </Box>
@@ -148,7 +155,6 @@ export default function NotificationsDrawer({ open, onClose }) {
           </IconButton>
         </Box>
 
-        {/* 알림 목록 */}
         <Box
           ref={scrollBoxRef}
           sx={{ overflowY: "auto", flex: 1, px: 2, pb: 2 }}
@@ -164,7 +170,7 @@ export default function NotificationsDrawer({ open, onClose }) {
               notifications?.map((notif) => (
                 <Paper
                   key={notif.id}
-                  elevation={0}
+                  elevation={notif.isRead ? 0 : 1}
                   onClick={() => handleNotificationClick(notif)}
                   sx={{
                     cursor: "pointer",
@@ -173,23 +179,23 @@ export default function NotificationsDrawer({ open, onClose }) {
                     py: 2,
                     bgcolor: notif.isRead
                       ? theme.palette.background.default
-                      : "#fff",
-                    border: notif.isRead
-                      ? `1px solid ${theme.palette.divider}`
-                      : `1px solid rgba(26, 26, 26, 0.15)`,
+                      : "#ffffff",
+                    border: `1px solid ${
+                      notif.isRead
+                        ? theme.palette.divider
+                        : alpha(theme.palette.primary.main, 0.15)
+                    }`,
                     transition: "all 0.2s ease",
-                    position: "relative",
-                    boxShadow: !notif.isRead 
-                      ? "0 2px 8px rgba(26, 26, 26, 0.08)"
-                      : "none",
+                    boxShadow: "none",
+
                     "&:hover": {
-                      backgroundColor: notif.isRead 
-                        ? theme.palette.grey[200]
+                      backgroundColor: notif.isRead
+                        ? theme.palette.grey[100]
                         : "#f8f8f8",
                       transform: "translateY(-1px)",
-                      boxShadow: !notif.isRead 
-                        ? "0 4px 12px rgba(26, 26, 26, 0.12)"
-                        : "0 2px 4px rgba(0, 0, 0, 0.1)",
+                      boxShadow: notif.isRead
+                        ? "0 2px 4px rgba(0, 0, 0, 0.1)"
+                        : "0 4px 12px rgba(26, 26, 26, 0.12)",
                     },
                   }}
                 >
@@ -202,21 +208,33 @@ export default function NotificationsDrawer({ open, onClose }) {
                             height: 12,
                             mt: "4px",
                             borderRadius: "50%",
-                            bgcolor: "#ff6b6b",
+                            bgcolor: theme.palette.status.error.main,
                             flexShrink: 0,
-                            boxShadow: "0 0 0 4px rgba(255, 107, 107, 0.2)",
-                            animation: !notif.isRead ? "pulse 1.33s infinite" : "none",
+                            boxShadow: `0 0 0 4px ${alpha(
+                              theme.palette.status.error.main,
+                              0.2
+                            )}`,
+                            animation: "pulse 1.33s infinite",
                             "@keyframes pulse": {
                               "0%": {
-                                boxShadow: "0 0 0 0 rgba(255, 107, 107, 0.7)",
+                                boxShadow: `0 0 0 0 ${alpha(
+                                  theme.palette.status.error.main,
+                                  0.7
+                                )}`,
                                 transform: "scale(0.8)",
                               },
                               "70%": {
-                                boxShadow: "0 0 0 6px rgba(255, 107, 107, 0)",
+                                boxShadow: `0 0 0 6px ${alpha(
+                                  theme.palette.status.error.main,
+                                  0
+                                )}`,
                                 transform: "scale(1)",
                               },
                               "100%": {
-                                boxShadow: "0 0 0 0 rgba(255, 107, 107, 0)",
+                                boxShadow: `0 0 0 0 ${alpha(
+                                  theme.palette.status.error.main,
+                                  0
+                                )}`,
                                 transform: "scale(0.8)",
                               },
                             },
@@ -225,23 +243,31 @@ export default function NotificationsDrawer({ open, onClose }) {
                       )}
                       <Typography
                         variant="body2"
-                        fontWeight={notif.isRead ? 400 : 600}
+                        fontWeight={
+                          notif.isRead
+                            ? theme.typography.fontWeightRegular
+                            : theme.typography.fontWeightMedium
+                        }
                         color={notif.isRead ? "text.secondary" : "text.primary"}
-                        sx={{ 
-                          wordBreak: "keep-all", 
+                        sx={{
+                          wordBreak: "keep-all",
                           lineHeight: 1.6,
                           flex: 1,
+                          ml: !notif.isRead ? 0 : 2,
                         }}
                       >
-                        {`${notif.actorName}님이 ${getTargetLabel(
-                          notif.targetType
-                        )}에 대해 ${getActionLabel(
-                          notif.actionType
-                        )}을(를) 남겼습니다.`}
+                        {notif.targetType === "POST" &&
+                        notif.actionType !== "REVIEW"
+                          ? `${notif.actorName}님이 ${getTargetLabel(notif.targetType)}의 상태를 ${getPostLabel(
+                              notif.actionType
+                            )}로 변경하였습니다.`
+                          : `${notif.actorName}님이 ${getTargetLabel(notif.targetType)}에 대해 ${getChecklistLabel(
+                              notif.actionType
+                            )}을(를) 남겼습니다.`}
                       </Typography>
                     </Box>
 
-                    <Box sx={{ pl: !notif.isRead ? 2.5 : 0 }}>
+                    <Box sx={{ pl: !notif.isRead ? 2.5 : 3 }}>
                       <NotificationContentBox
                         targetType={notif.targetType}
                         content={notif.content}
@@ -249,23 +275,24 @@ export default function NotificationsDrawer({ open, onClose }) {
                       />
                     </Box>
 
-                    <Box 
-                      sx={{ 
-                        display: "flex", 
-                        justifyContent: "space-between", 
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
                         alignItems: "center",
-                        pl: !notif.isRead ? 2.5 : 0 
                       }}
                     >
                       <Typography
                         variant="caption"
                         color="text.secondary"
-                        sx={{ 
-                          ml: "auto",
-                          fontWeight: !notif.isRead ? 500 : 400 
-                        }}
+                        fontWeight={
+                          notif.isRead
+                            ? theme.typography.fontWeightRegular
+                            : theme.typography.fontWeightMedium
+                        }
+                        sx={{ ml: "auto" }}
                       >
-                        {formatNotificationDate(notif.createdAt)}
+                        {formatNotificationDate(notif.actionTime)}
                       </Typography>
                     </Box>
                   </Stack>
