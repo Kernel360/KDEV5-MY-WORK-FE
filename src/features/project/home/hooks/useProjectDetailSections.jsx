@@ -87,7 +87,8 @@ export default function useProjectDetailSections(
     {
       key: "devMembers",
       roles: [ROLE_SYSTEM_ADMIN, ROLE_DEV_ADMIN],
-      title: "개발사 직원 관리",
+      title: "개발사 정보 및 직원 관리",
+      tooltip: "개발사 기본 정보와 참여할 개발사 직원을 확인하거나 선택하세요.",
       content: (
         <CompanyMemberSectionContent
           companyLabel="개발사"
