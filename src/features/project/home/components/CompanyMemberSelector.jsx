@@ -19,6 +19,8 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
 import CompanyMemberList from "./CompanyMemberList";
+import CustomButton from '@/components/common/customButton/CustomButton';
+import { updateProjectManager } from '@/api/projectMember';
 /**
  * @param {string} companyId
  * @param {'고객사'|'개발사'} companyType
@@ -41,10 +43,16 @@ export default function CompanyMemberSelector({
     if (companyId && projectId) {
       dispatch(fetchCompanyMembersInProject({ projectId, companyId })).then(
         (action) => {
+          let members;
           if (Array.isArray(action.payload)) {
             setAssigned(action.payload);
+            members = action.payload;
           } else if (action.payload?.members) {
             setAssigned(action.payload.members);
+            members = action.payload.members;
+          }
+          if (members) {
+            console.log('프로젝트 직원 memberRole 목록:', members.map(m => m.memberRole));
           }
         }
       );
@@ -159,8 +167,29 @@ export default function CompanyMemberSelector({
             id: emp.memberId,
             name: emp.memberName,
             email: emp.email,
+            isManager: emp.isManager,
+            memberRole: emp.memberRole,
           }))}
           onRemove={handleRemove}
+          onToggleManager={async (emp) => {
+            const confirmMsg = emp.isManager
+              ? '매니저를 해임 하시겠습니까?'
+              : '매니저를 임명 하시겠습니까?';
+            if (window.confirm(confirmMsg)) {
+              try {
+                await updateProjectManager({ memberId: emp.id, projectId });
+                setAssigned((prev) =>
+                  prev.map((e) =>
+                    e.memberId === emp.id
+                      ? { ...e, isManager: !e.isManager }
+                      : e
+                  )
+                );
+              } catch (err) {
+                alert('매니저 상태 변경에 실패했습니다.');
+              }
+            }
+          }}
         />
       </Box>
     </Box>

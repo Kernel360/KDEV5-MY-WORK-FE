@@ -60,3 +60,13 @@ export function getProjectMemberList(companyId, projectId) {
     { params: { companyId, projectId } }
   );
 }
+
+/**
+ * 프로젝트 매니저 임명/해임
+ * PUT /api/project-member/manager
+ * @param {{ memberId: string, projectId: string }} data
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<ProjectManagerUpdateWebResponse>
+ */
+export function updateProjectManager(data) {
+  return api.put("/api/project-member/manager", data);
+}
