@@ -67,3 +67,15 @@ export function deleteProject({ id }) {
 export function getProjectMembers(params) {
   return api.get("/api/projects/members", { params });
 }
+
+/**
+ * 프로젝트 상태 변경
+ * @param {string} projectId - 프로젝트 UUID
+ * @param {string} status - 변경할 상태(CONTRACT, IN_PROGRESS, PAYMENT, COMPLETED)
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<ProjectStatusUpdateWebResponse>
+ */
+export function updateProjectStatus(projectId, status) {
+  return api.post("/api/projects/project-status", null, {
+    params: { projectId, status },
+  });
+}
