@@ -14,8 +14,13 @@ const columns = [
   { key: "name", label: "제목", type: "text", searchable: true },
   { key: "startAt", label: "시작일", type: "date" },
   { key: "endAt", label: "종료일", type: "date" },
-  { key: "clientCompanyId", label: "고객사", type: "company" },
-  { key: "devCompanyId", label: "개발사", type: "company" },
+  {
+    key: "clientCompanyName",
+    label: "고객사",
+    type: "text",
+    searchable: true,
+  },
+  { key: "devCompanyName", label: "개발사", type: "text", searchable: true },
 ];
 
 const filterKey = "step";
@@ -33,18 +38,32 @@ export default function ProjectTable() {
   } = useSelector((state) => state.project);
 
   const [page, setPage] = useState(1);
+  const [searchKey, setSearchKey] = useState("name");
   const [searchText, setSearchText] = useState("");
   const [filterValue, setFilterValue] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const userRole = useSelector((state) => state.auth.user?.role);
 
+  const getKeywordType = (key) => {
+    switch (key) {
+      case "name":
+        return "PROJECT_NAME";
+      case "devCompanyName":
+        return "DEV_COMPANY_NAME";
+      case "clientCompanyName":
+        return "CLIENT_COMPANY_NAME";
+      default:
+        return "PROJECT_NAME";
+    }
+  };
+
   const loadProjects = useCallback(() => {
     const params = { page };
 
     if (searchText.trim()) {
       params.keyword = searchText.trim();
-      params.keywordType = "PROJECT_NAME";
+      params.keywordType = getKeywordType(searchKey);
     }
 
     if (filterValue) {
@@ -52,7 +71,7 @@ export default function ProjectTable() {
     }
 
     dispatch(fetchProjects({ ...params, userRole }));
-  }, [dispatch, page, searchText, filterValue, userRole]);
+  }, [dispatch, page, searchText, searchKey, filterValue, userRole]);
 
   useEffect(() => {
     loadProjects();
@@ -85,7 +104,14 @@ export default function ProjectTable() {
           setConfirmOpen(true);
         }}
         search={{
-          placeholder: "프로젝트 제목을 입력하세요",
+          key: searchKey,
+          value: searchText,
+          placeholder: "검색어를 입력하세요",
+          onKeyChange: (newKey) => {
+            setPage(1);
+            setSearchKey(newKey);
+            setSearchText("");
+          },
           onChange: (newText) => {
             setPage(1);
             setSearchText(newText);

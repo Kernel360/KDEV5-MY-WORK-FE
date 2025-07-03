@@ -18,9 +18,10 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
+import CustomButton from "@/components/common/customButton/CustomButton";
 import CompanyMemberList from "./CompanyMemberList";
-import CustomButton from '@/components/common/customButton/CustomButton';
-import { updateProjectManager } from '@/api/projectMember';
+import { updateProjectManager } from "@/api/projectMember";
+
 /**
  * @param {string} companyId
  * @param {'고객사'|'개발사'} companyType
@@ -39,49 +40,36 @@ export default function CompanyMemberSelector({
   const [inputValue, setInputValue] = useState("");
   const [open, setOpen] = useState(false);
 
+  const extractMembers = (payload) =>
+    Array.isArray(payload) ? payload : payload?.members || [];
+
   useEffect(() => {
-    if (companyId && projectId) {
-      dispatch(fetchCompanyMembersInProject({ projectId, companyId })).then(
-        (action) => {
-          let members;
-          if (Array.isArray(action.payload)) {
-            setAssigned(action.payload);
-            members = action.payload;
-          } else if (action.payload?.members) {
-            setAssigned(action.payload.members);
-            members = action.payload.members;
-          }
-          if (members) {
-            console.log('프로젝트 직원 memberRole 목록:', members.map(m => m.memberRole));
-          }
-        }
-      );
-    }
+    if (!companyId || !projectId) return;
+    dispatch(fetchCompanyMembersInProject({ projectId, companyId })).then(
+      (action) => {
+        const members = extractMembers(action.payload);
+        setAssigned(members);
+      }
+    );
   }, [companyId, projectId, dispatch]);
 
   const handleOpen = () => {
     setOpen(true);
-    if (companyId && projectId) {
-      setLoading(true);
-      dispatch(fetchProjectMemberList({ companyId, projectId }))
-        .then((action) => {
-          if (Array.isArray(action.payload)) {
-            setOptions(action.payload);
-          } else if (action.payload?.members) {
-            setOptions(action.payload.members);
-          }
-        })
-        .finally(() => setLoading(false));
-    }
+    if (!companyId || !projectId) return;
+
+    setLoading(true);
+    dispatch(fetchProjectMemberList({ companyId, projectId }))
+      .then((action) => setOptions(extractMembers(action.payload)))
+      .finally(() => setLoading(false));
   };
 
   const handleChange = (_e, newValue) => {
     const additions = newValue.filter(
       (nv) => !assigned.some((a) => a.memberId === nv.memberId)
     );
-    additions.forEach((emp) => {
-      dispatch(addMemberToProject({ projectId, memberId: emp.memberId }));
-    });
+    additions.forEach((emp) =>
+      dispatch(addMemberToProject({ projectId, memberId: emp.memberId }))
+    );
     setAssigned(newValue);
     setOpen(false);
   };
@@ -91,7 +79,25 @@ export default function CompanyMemberSelector({
     setAssigned((prev) => prev.filter((emp) => emp.memberId !== memberId));
   };
 
-  const getInitial = (name) => (name && name.length ? name[0] : "?");
+  const toggleManager = async (emp) => {
+    const confirmMsg = emp.isManager
+      ? "매니저를 해임 하시겠습니까?"
+      : "매니저를 임명 하시겠습니까?";
+    if (!window.confirm(confirmMsg)) return;
+
+    try {
+      await updateProjectManager({ memberId: emp.id, projectId });
+      setAssigned((prev) =>
+        prev.map((e) =>
+          e.memberId === emp.id ? { ...e, isManager: !e.isManager } : e
+        )
+      );
+    } catch {
+      alert("매니저 상태 변경에 실패했습니다.");
+    }
+  };
+
+  const getInitial = (name) => (name?.length ? name[0] : "?");
 
   return (
     <Box>
@@ -99,38 +105,34 @@ export default function CompanyMemberSelector({
         multiple
         open={open}
         onOpen={handleOpen}
-        disableClearable
-        clearIcon={null}
         onClose={() => setOpen(false)}
         options={options}
         loading={loading}
+        value={assigned}
+        inputValue={inputValue}
+        disableClearable
+        clearIcon={null}
         getOptionLabel={(opt) => opt.memberName}
         isOptionEqualToValue={(opt, val) => opt.memberId === val.memberId}
-        value={assigned}
         onChange={handleChange}
-        inputValue={inputValue}
-        onInputChange={(_, newInput) => setInputValue(newInput)}
-        renderOption={(props, option, { selected }) => {
-          const { key, ...rest } = props;
-          return (
-            <Box
-              component="li"
-              key={key}
-              {...rest}
-              sx={{ display: "flex", alignItems: "center", py: 0.5 }}
-            >
-              <Avatar sx={{ width: 30, height: 30, mr: 1 }}>
-                {getInitial(option.memberName)}
-              </Avatar>
-              <Typography sx={{ flexGrow: 1 }}>{option.memberName}</Typography>
-              {selected && (
-                <Typography variant="caption" color="primary">
-                  선택됨
-                </Typography>
-              )}
-            </Box>
-          );
-        }}
+        onInputChange={(_, val) => setInputValue(val)}
+        renderOption={(props, option, { selected }) => (
+          <Box
+            component="li"
+            {...props}
+            sx={{ display: "flex", alignItems: "center", py: 0.5 }}
+          >
+            <Avatar sx={{ width: 30, height: 30, mr: 1 }}>
+              {getInitial(option.memberName)}
+            </Avatar>
+            <Typography sx={{ flexGrow: 1 }}>{option.memberName}</Typography>
+            {selected && (
+              <Typography variant="caption" color="primary">
+                선택됨
+              </Typography>
+            )}
+          </Box>
+        )}
         renderTags={() => null}
         renderInput={(params) => (
           <TextField
@@ -171,25 +173,7 @@ export default function CompanyMemberSelector({
             memberRole: emp.memberRole,
           }))}
           onRemove={handleRemove}
-          onToggleManager={async (emp) => {
-            const confirmMsg = emp.isManager
-              ? '매니저를 해임 하시겠습니까?'
-              : '매니저를 임명 하시겠습니까?';
-            if (window.confirm(confirmMsg)) {
-              try {
-                await updateProjectManager({ memberId: emp.id, projectId });
-                setAssigned((prev) =>
-                  prev.map((e) =>
-                    e.memberId === emp.id
-                      ? { ...e, isManager: !e.isManager }
-                      : e
-                  )
-                );
-              } catch (err) {
-                alert('매니저 상태 변경에 실패했습니다.');
-              }
-            }
-          }}
+          onToggleManager={toggleManager}
         />
       </Box>
     </Box>
