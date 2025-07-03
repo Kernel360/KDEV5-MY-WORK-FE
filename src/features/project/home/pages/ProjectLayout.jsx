@@ -16,6 +16,7 @@ import SummaryCard from "@/components/common/summaryCard/SummaryCard";
 import ConfirmDialog from "@/components/common/confirmDialog/ConfirmDialog";
 import dayjs from "dayjs";
 import { fetchProjectById, deleteProject } from "../../slices/projectSlice";
+import { STATUS_OPTIONS } from "@/utils/statusMaps";
 
 export default function ProjectLayout() {
   const { id } = useParams();
@@ -72,13 +73,6 @@ export default function ProjectLayout() {
     );
   }
 
-  const statusMap = {
-    CONTRACT: { color: "neutral", label: "결제" },
-    IN_PROGRESS: { color: "info", label: "진행" },
-    PAYMENT: { color: "warning", label: "검수" },
-    COMPLETED: { color: "success", label: "완료" },
-  };
-
   return (
     <PageWrapper>
       <Box display="flex" flexDirection="column" height="100vh" width="100%">
@@ -124,10 +118,10 @@ export default function ProjectLayout() {
                 label: "상태",
                 type: "status",
                 colorMap: Object.fromEntries(
-                  Object.entries(statusMap).map(([k, v]) => [k, v.color])
+                  STATUS_OPTIONS.map(({ value, color }) => [value, color])
                 ),
                 labelMap: Object.fromEntries(
-                  Object.entries(statusMap).map(([k, v]) => [k, v.label])
+                  STATUS_OPTIONS.map(({ value, label }) => [value, label])
                 ),
               },
               { key: "period", label: "기간", type: "text" },

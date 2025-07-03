@@ -23,6 +23,7 @@ import FileAttachmentViewer from "./FileAttachmentViewer";
 import FilePreviewModal from "./FilePreviewModal";
 import PostDetailTopSection from "./PostDetailTopSection";
 import { downloadAttachment } from "@/utils/downloadUtils";
+import { getStatusMeta, POST_APPROVAL_STATUS } from "@/utils/statusMaps";
 
 export default function PostDetailDrawer({
   open,
@@ -133,15 +134,7 @@ export default function PostDetailDrawer({
     dispatch(fetchReviews({ postId, page }));
   };
 
-  const statusMap = {
-    PENDING: { label: "답변 대기", color: "neutral" },
-    APPROVED: { label: "답변 완료", color: "success" },
-  };
-
-  const stat = statusMap[approval] || {
-    label: approval ?? "-",
-    color: "neutral",
-  };
+  const stat = getStatusMeta(approval, POST_APPROVAL_STATUS);
 
   return (
     <>
