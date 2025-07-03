@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
 import {
   updateFileItem,
-  hasUnfinishedUploads,
-  hasFailedUploads,
-  getSuccessfulPostAttachmentIds,
   getUniqueFiles,
   convertToFileItems,
 } from "@/utils/fileUploadUtils";
@@ -12,7 +9,6 @@ import { uploadFileWithPresignedUrl } from "@/utils/uploadFileWithPresignedUrl";
 import {
   createPostId,
   deleteAttachment,
-  cleanupPostAttachments,
 } from "@/features/project/post/postSlice";
 
 export default function usePostForm({ dispatch, open }) {

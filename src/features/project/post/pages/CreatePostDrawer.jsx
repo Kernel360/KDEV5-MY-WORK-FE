@@ -63,6 +63,22 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmCallback, setConfirmCallback] = useState(() => () => {});
 
+  const handleCancel = async () => {
+    const hasUploadedFiles = files.some(
+      (file) => file.status === "success" && file.postAttachmentId
+    );
+
+    if (hasUploadedFiles && form.id) {
+      try {
+        await dispatch(cleanupPostAttachments(form.id)).unwrap();
+      } catch (error) {}
+    }
+
+    setForm((prev) => ({ ...prev, projectStepId: "", title: "", content: "" }));
+    setFiles([]);
+    onClose();
+  };
+
   const handleSubmit = async () => {
     const { id, projectStepId, title, content } = form;
     if (!projectStepId || !title.trim() || !content.trim()) return;
@@ -136,7 +152,7 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
       <Drawer
         anchor="right"
         open={open}
-        onClose={onClose}
+        onClose={handleCancel}
         PaperProps={{
           sx: { width: { xs: "100%", sm: "50vw" }, bgcolor: "transparent" },
         }}
@@ -165,7 +181,7 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
                 <Typography variant="h3" fontWeight={600}>
                   게시글 작성
                 </Typography>
-                <IconButton onClick={onClose}>
+                <IconButton onClick={handleCancel}>
                   <CloseIcon />
                 </IconButton>
               </Box>
@@ -272,7 +288,7 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
                 />
 
                 <Stack direction="row" justifyContent="flex-end" spacing={2}>
-                  <CustomButton kind="ghost" onClick={onClose}>
+                  <CustomButton kind="ghost" onClick={handleCancel}>
                     취소
                   </CustomButton>
                   <CustomButton
