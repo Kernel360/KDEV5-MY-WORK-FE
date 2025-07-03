@@ -2,29 +2,21 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
-// tsconfigPaths는 TS 쓸 때만 필요하므로 JS에서는 제외
-// import tsconfigPaths from 'vite-tsconfig-paths';
+import { dirname, resolve } from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export default defineConfig({
-  plugins: [
-    react(), // React 기본 플러그인
-    svgr(), // SVG → React 컴포넌트로 import 가능
-  ],
+  plugins: [react(), svgr()],
   server: {
-    port: 3000, // 개발 서버 포트 (원하면 변경)
-    open: true, // dev 서버 실행 시 브라우저 자동 오픈
+    port: 3000,
+    open: true,
   },
   resolve: {
     alias: {
-      // 경로 별칭 예시
-      "@": "/src",
-      "@components": "/src/components",
-      "@pages": "/src/pages",
-      "@assets": "/src/assets",
-      "@layouts": "/src/layouts",
-      "@styles": "/src/styles",
-      "@theme": "/src/theme",
-      "@features": "/src/features",
+      "@": resolve(__dirname, "src"),
     },
   },
 });

@@ -6,10 +6,13 @@ module.exports = {
   extends: [
     "eslint:recommended",
     "plugin:react/recommended",
-    "plugin:tailwindcss/recommended",
-    "prettier",
+    "plugin:import/recommended",
+    "prettier"
   ],
-  plugins: ["react", "tailwindcss"],
+  plugins: [
+    "react",
+        "import"    
+  ],
   parserOptions: {
     ecmaVersion: "latest",
     sourceType: "module",
@@ -21,5 +24,6 @@ module.exports = {
   },
   rules: {
     "react/prop-types": "off",
+     "import/no-unresolved": "error", 
   },
 };

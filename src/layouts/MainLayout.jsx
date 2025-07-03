@@ -1,18 +1,72 @@
-// src/layouts/MainLayout.jsx
+import React, { useState } from "react";
+import { useMediaQuery } from "@mui/material";
+import { useSelector } from "react-redux";
+import MenuIcon from "@mui/icons-material/Menu";
+import Sidebar from "./Sidebar";
+import {
+  Root,
+  MobileToggleButton,
+  StyledDrawer,
+  Main,
+} from "./MainLayout.styles";
 import { Outlet } from "react-router-dom";
-// import Sidebar from "@components/Sidebar";
-// import Header from "@components/Header";
+import NotificationsDrawer from "@/features/notifications/components/NotificationsDrawer";
+import useNotificationPolling from "@/hooks/useNotificationPolling";
 
 export default function MainLayout() {
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const isMobile = useMediaQuery("(max-width:600px)");
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const unreadCount = useSelector((state) => state?.notification.unreadCount);
+
+  useNotificationPolling(!notificationsOpen);
+
+  const handleDrawerToggle = () => {
+    setMobileOpen((prev) => !prev);
+  };
+
+  const handleNotificationsToggle = () => {
+    setNotificationsOpen((prev) => !prev);
+  };
+
   return (
-    <div className="flex flex-col h-screen">
-      {/* <Header /> */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* <Sidebar /> */}
-        <main className="flex-1 overflow-auto p-4">
-          <Outlet />
-        </main>
-      </div>
-    </div>
+    <Root>
+      {isMobile && (
+        <MobileToggleButton onClick={handleDrawerToggle}>
+          <MenuIcon />
+        </MobileToggleButton>
+      )}
+
+      {isMobile ? (
+        <StyledDrawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{ keepMounted: true }}
+        >
+          <Sidebar
+            onClose={handleDrawerToggle}
+            onNotificationsClick={handleNotificationsToggle}
+            unreadCount={unreadCount}
+          />
+        </StyledDrawer>
+      ) : (
+        <Sidebar
+          onClose={() => {}}
+          onNotificationsClick={handleNotificationsToggle}
+          unreadCount={unreadCount}
+        />
+      )}
+
+      <Main>
+        <Outlet />
+      </Main>
+
+      <NotificationsDrawer
+        open={notificationsOpen}
+        onClose={handleNotificationsToggle}
+      />
+    </Root>
   );
 }
