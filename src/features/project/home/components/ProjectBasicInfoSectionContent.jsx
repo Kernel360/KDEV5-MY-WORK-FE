@@ -7,6 +7,7 @@ import dayjs from "dayjs";
 import { useParams } from "react-router-dom";
 import { updateProjectStatus } from "@/api/project";
 import { STATUS_OPTIONS, getStatusLabel } from "@/utils/statusMaps";
+import { useSelector } from "react-redux";
 
 export default function ProjectBasicInfoSectionContent({
   isEditable,
@@ -27,6 +28,12 @@ export default function ProjectBasicInfoSectionContent({
   const [statusLoading, setStatusLoading] = React.useState(false);
   const [statusError, setStatusError] = React.useState("");
   const { id: projectId } = useParams();
+  const userRole = useSelector(state => state.auth.user?.role);
+  const canEditStep = [
+    "ROLE_SYSTEM_ADMIN",
+    "ROLE_DEV_ADMIN",
+    "ROLE_CLIENT_ADMIN"
+  ].includes(userRole);
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -90,12 +97,11 @@ export default function ProjectBasicInfoSectionContent({
           )}
         </Grid>
 
-        {/* 상태 드롭다운: 수정 모드에서만 */}
-        {isEditable && (
+        {canEditStep && (
           <Grid item xs={12} sm={12}>
             <TextField
               select
-              label="프로젝트 상태 (프로젝트 관리자만 수정 가능 합니다.)"
+              label="프로젝트 상태"
               value={projectStep}
               onChange={async (e) => {
                 const newStatus = e.target.value;
@@ -111,6 +117,7 @@ export default function ProjectBasicInfoSectionContent({
                 }
               }}
               fullWidth
+              sx={{ minWidth: 100 }}
               required
               helperText={statusError || undefined}
               error={!!statusError}
