@@ -136,7 +136,20 @@ export default function FileAttachmentCard({
 
       {/* 에러 메시지 */}
       {file.error && (
-        <Alert severity="error" sx={{ mt: 1 }}>
+        <Alert
+          severity="error"
+          variant="filled"
+          sx={{
+            mt: 1,
+            borderRadius: 2,
+            fontSize: "0.9rem",
+            px: 2,
+            py: 1,
+            bgcolor: (theme) => theme.palette.status?.error?.bg || "",
+            color: (theme) => theme.palette.status?.error?.main || "",
+            boxShadow: 1,
+          }}
+        >
           {file.error}
         </Alert>
       )}
