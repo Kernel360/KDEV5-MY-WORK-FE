@@ -11,14 +11,7 @@ import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import DownloadIcon from "@mui/icons-material/Download";
 import AlertMessage from "@/components/common/alertMessage/AlertMessage";
 import { getFileIcon } from "@/utils/getFileIcon";
-
-function formatFileSize(bytes) {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-}
+import { formatFileSize } from "@/utils/formatFileSize";
 
 export default function FileAttachmentViewer({
   attachments = [],

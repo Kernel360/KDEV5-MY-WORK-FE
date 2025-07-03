@@ -26,17 +26,8 @@ import {
   InfoOutlined,
   CloudUpload,
   Delete,
-  AttachFile,
   ZoomIn,
   Refresh,
-  PictureAsPdf,
-  Description,
-  TableChart,
-  Archive,
-  Code,
-  Movie,
-  MusicNote,
-  Image,
 } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
@@ -52,6 +43,7 @@ import * as postAPI from "@/api/post";
 import CustomButton from "@/components/common/customButton/CustomButton";
 import FilePreviewModal from "./FilePreviewModal";
 import { getFileIcon } from "@/utils/getFileIcon";
+import { formatFileSize } from "@/utils/formatFileSize";
 
 export default function CreatePostDrawer({ open, onClose, onSubmit }) {
   const theme = useTheme();
@@ -75,15 +67,6 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
     open: false,
     attachment: null,
   });
-
-  // 파일 크기 포맷팅 함수
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
 
   // 파일 타입 검증 함수 (위험한 파일 확장자 차단)
   const isValidFileType = (file) => {
