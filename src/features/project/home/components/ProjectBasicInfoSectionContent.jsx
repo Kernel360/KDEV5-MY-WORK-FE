@@ -12,6 +12,8 @@ import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { CalendarTodayRounded, InfoOutlined } from "@mui/icons-material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
+import { useParams } from "react-router-dom";
+import { updateProjectStatus } from "@/api/project";
 
 const STATUS_OPTIONS = [
   { value: "CONTRACT", label: "결제" },
@@ -41,6 +43,10 @@ export default function ProjectBasicInfoSectionContent({
   setProjectStep,
   project,
 }) {
+  const [statusLoading, setStatusLoading] = React.useState(false);
+  const [statusError, setStatusError] = React.useState("");
+  const { id: projectId } = useParams();
+
   return (
     <>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -85,12 +91,48 @@ export default function ProjectBasicInfoSectionContent({
           <Grid item xs={12} sm={isEditable ? 12 : 6}>
             {isEditable ? (
               <TextField
+                label="프로젝트 금액(만원)"
+                value={projectAmount}
+                onChange={(e) => setProjectAmount(e.target.value)}
+                fullWidth
+                type="number"
+                inputProps={{ min: 0 }}
+              />
+            ) : (
+              <>
+                <Typography variant="body2" color="text.secondary">
+                  프로젝트 금액(만원)
+                </Typography>
+                <Typography variant="body1">{project?.projectAmount ?? "-"}</Typography>
+              </>
+            )}
+          </Grid>
+
+          {/* 프로젝트 상태: 금액 바로 아래, 수정 모드에서만 노출 */}
+          {isEditable && (
+            <Grid item xs={12} sm={isEditable ? 12 : 6}>
+              <TextField
                 select
-                label="프로젝트 상태"
+                label="프로젝트 상태 (프로젝트 관리자만 수정 가능 합니다.)"
                 value={projectStep}
-                onChange={(e) => setProjectStep(e.target.value)}
+                onChange={async (e) => {
+                  const newStatus = e.target.value;
+                  setStatusLoading(true);
+                  setStatusError("");
+                  try {
+                    await updateProjectStatus(projectId, newStatus);
+                    setProjectStep(newStatus);
+                  } catch (err) {
+                    setStatusError("상태 변경에 실패했습니다.");
+                  } finally {
+                    setStatusLoading(false);
+                  }
+                }}
                 fullWidth
                 required
+                helperText={statusError || undefined}
+                error={!!statusError}
+                disabled={statusLoading}
               >
                 {STATUS_OPTIONS.map((opt) => (
                   <MenuItem key={opt.value} value={opt.value}>
@@ -98,15 +140,8 @@ export default function ProjectBasicInfoSectionContent({
                   </MenuItem>
                 ))}
               </TextField>
-            ) : (
-              <>
-                <Typography variant="body2" color="text.secondary">
-                  프로젝트 상태
-                </Typography>
-                <Typography variant="body1">{getStatusLabel(project?.step)}</Typography>
-              </>
-            )}
-          </Grid>
+            </Grid>
+          )}
 
           <Grid item xs={12} sm={isEditable ? 12 : 6}>
             {isEditable ? (
@@ -154,26 +189,6 @@ export default function ProjectBasicInfoSectionContent({
                   종료일
                 </Typography>
                 <Typography variant="body1">{periodEnd || "-"}</Typography>
-              </>
-            )}
-          </Grid>
-
-          <Grid item xs={12} sm={isEditable ? 12 : 6}>
-            {isEditable ? (
-              <TextField
-                label="프로젝트 금액(만원)"
-                value={projectAmount}
-                onChange={(e) => setProjectAmount(e.target.value)}
-                fullWidth
-                type="number"
-                inputProps={{ min: 0 }}
-              />
-            ) : (
-              <>
-                <Typography variant="body2" color="text.secondary">
-                  프로젝트 금액(만원)
-                </Typography>
-                <Typography variant="body1">{project?.projectAmount ?? "-"}</Typography>
               </>
             )}
           </Grid>

@@ -98,7 +98,6 @@ export default function ProjectDetailPage() {
           ...(periodStart && { startAt: `${periodStart}T09:00:00` }),
           ...(periodEnd && { endAt: `${periodEnd}T18:00:00` }),
           projectAmount: projectAmount === "" ? null : Number(projectAmount),
-          step: projectStep,
           deleted: false,
         };
         await dispatch(updateProject(payload)).unwrap();
