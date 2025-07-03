@@ -26,13 +26,13 @@ import {
 } from "@/features/project/post/postSlice";
 import CustomButton from "@/components/common/customButton/CustomButton";
 import FilePreviewModal from "../components/FilePreviewModal";
-import FileAttachmentCard from "../components/FileAttachmentCard";
 import usePostForm from "@/hooks/usePostForm";
 import {
   hasUnfinishedUploads,
   hasFailedUploads,
   getSuccessfulPostAttachmentIds,
 } from "@/utils/fileUploadUtils";
+import FileUploadSection from "../components/FileUploadSection";
 
 export default function CreatePostDrawer({ open, onClose, onSubmit }) {
   const theme = useTheme();
@@ -255,60 +255,13 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
                   />
                 </Box>
 
-                <Box>
-                  <Stack direction="row" alignItems="center" spacing={1}>
-                    <Typography variant="subtitle1" fontWeight={600}>
-                      4. 파일 첨부
-                    </Typography>
-                    <Tooltip title="모든 파일 형식 첨부 가능합니다. (최대 5MB, 실행파일 제외)">
-                      <InfoOutlined fontSize="small" color="action" />
-                    </Tooltip>
-                  </Stack>
-                  <Divider sx={{ mt: 1, mb: 2 }} />
-
-                  <Stack spacing={2}>
-                    <input
-                      type="file"
-                      multiple
-                      onChange={handleFileSelect}
-                      style={{ display: "none" }}
-                      id="file-upload"
-                      accept="*"
-                    />
-                    <label htmlFor="file-upload">
-                      <CustomButton
-                        kind="ghost"
-                        component="span"
-                        startIcon={<CloudUpload />}
-                      >
-                        파일 선택
-                      </CustomButton>
-                    </label>
-                  </Stack>
-                </Box>
-
-                {files.length > 0 && (
-                  <Box>
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <Typography variant="subtitle1" fontWeight={600}>
-                        첨부 파일 목록 ({files.length}개)
-                      </Typography>
-                    </Stack>
-                    <Divider sx={{ mt: 1, mb: 2 }} />
-
-                    <Stack spacing={1}>
-                      {files.map((file) => (
-                        <FileAttachmentCard
-                          key={file.id}
-                          file={file}
-                          onPreview={handlePreviewOpen}
-                          onDelete={handleFileDelete}
-                          onRetry={handleFileRetry}
-                        />
-                      ))}
-                    </Stack>
-                  </Box>
-                )}
+                <FileUploadSection
+                  files={files}
+                  onSelect={handleFileSelect}
+                  onDelete={handleFileDelete}
+                  onRetry={handleFileRetry}
+                  onPreview={handlePreviewOpen}
+                />
 
                 <Stack direction="row" justifyContent="flex-end" spacing={2}>
                   <CustomButton kind="text" onClick={handleCancel}>
