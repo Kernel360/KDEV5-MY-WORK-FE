@@ -12,18 +12,7 @@ import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { CalendarTodayRounded, InfoOutlined } from "@mui/icons-material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-
-const STATUS_OPTIONS = [
-  { value: "CONTRACT", label: "결제" },
-  { value: "IN_PROGRESS", label: "진행" },
-  { value: "PAYMENT", label: "검수" },
-  { value: "COMPLETED", label: "완료" },
-];
-
-const getStatusLabel = (status) => {
-  const option = STATUS_OPTIONS.find(opt => opt.value === status);
-  return option ? option.label : status || "-";
-};
+import { STATUS_OPTIONS, getStatusLabel } from "@/utils/statusMaps";
 
 export default function ProjectBasicInfoSectionContent({
   isEditable,
@@ -103,7 +92,9 @@ export default function ProjectBasicInfoSectionContent({
                 <Typography variant="body2" color="text.secondary">
                   프로젝트 상태
                 </Typography>
-                <Typography variant="body1">{getStatusLabel(project?.step)}</Typography>
+                <Typography variant="body1">
+                  {getStatusLabel(project?.step)}
+                </Typography>
               </>
             )}
           </Grid>
@@ -173,7 +164,9 @@ export default function ProjectBasicInfoSectionContent({
                 <Typography variant="body2" color="text.secondary">
                   프로젝트 금액(만원)
                 </Typography>
-                <Typography variant="body1">{project?.projectAmount ?? "-"}</Typography>
+                <Typography variant="body1">
+                  {project?.projectAmount ?? "-"}
+                </Typography>
               </>
             )}
           </Grid>

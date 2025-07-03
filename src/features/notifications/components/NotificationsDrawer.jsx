@@ -23,10 +23,11 @@ import {
   clearNotifications,
 } from "@/features/notifications/notificationSlice";
 import {
-  getChecklistLabel,
-  getPostLabel,
-  getTargetLabel,
-} from "@/utils/notificationLabelMap";
+  getStatusLabel,
+  TARGET_TYPE_LABELS,
+  CHECKLIST_STATUS,
+  POST_APPROVAL_STATUS,
+} from "@/utils/statusMaps";
 import NotificationContentBox from "../components/NotificationContentBox";
 import { formatNotificationDate } from "@/utils/dateUtils";
 import { alpha } from "@mui/material/styles";
@@ -363,12 +364,14 @@ export default function NotificationsDrawer({
                         >
                           {notif.targetType === "POST" &&
                           notif.actionType !== "REVIEW"
-                            ? `${notif.actorName}님이 ${getTargetLabel(notif.targetType)}의 상태를 ${getPostLabel(
-                                notif.actionType
-                              )}로 변경하였습니다.`
-                            : `${notif.actorName}님이 ${getTargetLabel(notif.targetType)}에 대해 ${getChecklistLabel(
-                                notif.actionType
-                              )}을(를) 남겼습니다.`}
+                            ? `${notif.actorName}님이 ${getStatusLabel(
+                                notif.targetType,
+                                TARGET_TYPE_LABELS
+                              )}의 상태를 ${getStatusLabel(notif.actionType, POST_APPROVAL_STATUS)}로 변경하였습니다.`
+                            : `${notif.actorName}님이 ${getStatusLabel(
+                                notif.targetType,
+                                TARGET_TYPE_LABELS
+                              )}에 대해 ${getStatusLabel(notif.actionType, CHECKLIST_STATUS)}을(를) 남겼습니다.`}
                         </Typography>
                       </Box>
 

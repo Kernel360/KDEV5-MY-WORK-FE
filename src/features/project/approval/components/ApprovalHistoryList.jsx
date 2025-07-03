@@ -9,40 +9,20 @@ import {
 } from "@mui/material";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-
-const getApprovalLabel = (approval) => {
-  switch (approval) {
-    case "APPROVED":
-      return "승인";
-    case "REJECTED":
-      return "반려";
-    case "REQUEST_CHANGES":
-      return "수정 요청";
-    case "PENDING":
-      return "체크리스트를 새로 작성";
-    default:
-      return approval;
-  }
-};
-
-const getColorByApproval = (approval, theme) => {
-  switch (approval) {
-    case "APPROVED":
-      return theme.palette.success.main;
-    case "REJECTED":
-      return theme.palette.error.main;
-    case "REQUEST_CHANGES":
-      return theme.palette.info.main;
-    case "PENDING":
-      return theme.palette.warning.main;
-    default:
-      return theme.palette.text.secondary;
-  }
-};
+import { CHECKLIST_STATUS } from "@/utils/statusMaps";
 
 export default function ApprovalHistoryList({ histories }) {
   const [expanded, setExpanded] = useState(true);
   const theme = useTheme();
+
+  const getStatus = (approval) => {
+    const status = CHECKLIST_STATUS?.[approval];
+    const paletteColor = theme.palette?.[status?.color]?.main;
+    return {
+      label: status?.label ?? approval,
+      color: paletteColor || theme.palette.text.secondary,
+    };
+  };
 
   if (!histories || histories.length === 0) return null;
 
@@ -67,8 +47,7 @@ export default function ApprovalHistoryList({ histories }) {
       {expanded && (
         <Stack spacing={1.5}>
           {histories.map((history) => {
-            const label = getApprovalLabel(history.approval);
-            const color = getColorByApproval(history.approval, theme);
+            const { label, color } = getStatus(history.approval);
             const isPending = history.approval === "PENDING";
 
             return (
@@ -94,39 +73,24 @@ export default function ApprovalHistoryList({ histories }) {
                     <Typography component="span" fontWeight={600}>
                       {history.memberName}
                     </Typography>
-                    {isPending ? (
-                      <>
-                        {" "}
-                        님이{" "}
-                        <Typography
-                          component="span"
-                          fontWeight={600}
-                          sx={{ color }}
-                        >
-                          {label}
-                        </Typography>
-                        하였습니다.
-                      </>
-                    ) : (
-                      <>
-                        {" "}
-                        님이{" "}
-                        <Typography
-                          component="span"
-                          fontWeight={600}
-                          sx={{ color }}
-                        >
-                          {label}
-                        </Typography>
-                        하였습니다.
-                      </>
-                    )}
+                    님이{" "}
+                    <Typography
+                      component="span"
+                      fontWeight={600}
+                      sx={{ color: color }}
+                    >
+                      {label}
+                    </Typography>
+                    하였습니다.
                   </Typography>
 
                   {!isPending && history.reason && (
                     <Typography
                       variant="body2"
-                      sx={{ color: theme.palette.text.secondary, fontSize: 13 }}
+                      sx={{
+                        color: theme.palette.text.secondary,
+                        fontSize: 13,
+                      }}
                     >
                       사유: {history.reason}
                     </Typography>

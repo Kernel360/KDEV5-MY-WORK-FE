@@ -8,6 +8,7 @@ import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import CustomButton from "@/components/common/customButton/CustomButton";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
+import { getStatusMeta, POST_APPROVAL_STATUS } from "@/utils/statusMaps";
 
 export default function PostDetailTopSection({
   post,
@@ -16,16 +17,6 @@ export default function PostDetailTopSection({
   onApprovalToggle,
   approval,
 }) {
-  const statusMap = {
-    PENDING: { label: "답변 대기", color: "neutral" },
-    APPROVED: { label: "답변 완료", color: "success" },
-  };
-
-  const stat = statusMap[approval] || {
-    label: approval ?? "-",
-    color: "neutral",
-  };
-
   return (
     <>
       <Box
@@ -107,7 +98,7 @@ export default function PostDetailTopSection({
             )
           }
         >
-          {stat.label}
+          {getStatusMeta(approval, POST_APPROVAL_STATUS).label}
         </CustomButton>
       </Box>
     </>
