@@ -51,6 +51,7 @@ import {
 import * as postAPI from "@/api/post";
 import CustomButton from "@/components/common/customButton/CustomButton";
 import FilePreviewModal from "./FilePreviewModal";
+import { getFileIcon } from "@/utils/getFileIcon";
 
 export default function CreatePostDrawer({ open, onClose, onSubmit }) {
   const theme = useTheme();
@@ -82,54 +83,6 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
-
-  // 파일 타입별 아이콘 반환 함수
-  const getFileIcon = (fileName, fileType) => {
-    const extension = fileName.toLowerCase().split(".").pop();
-
-    // 이미지 파일
-    if (fileType.startsWith("image/")) {
-      return <Image color="primary" />;
-    }
-
-    // 문서 파일
-    if (["pdf"].includes(extension)) {
-      return <PictureAsPdf color="error" />;
-    }
-    if (["doc", "docx", "txt", "rtf"].includes(extension)) {
-      return <Description color="primary" />;
-    }
-    if (["xls", "xlsx", "csv"].includes(extension)) {
-      return <TableChart color="success" />;
-    }
-
-    // 압축 파일
-    if (["zip", "rar", "7z", "tar", "gz"].includes(extension)) {
-      return <Archive color="warning" />;
-    }
-
-    // 코드 파일
-    if (
-      ["js", "ts", "jsx", "tsx", "html", "css", "json", "xml"].includes(
-        extension
-      )
-    ) {
-      return <Code color="info" />;
-    }
-
-    // 동영상 파일
-    if (["mp4", "avi", "mov", "wmv", "flv", "mkv"].includes(extension)) {
-      return <Movie color="secondary" />;
-    }
-
-    // 오디오 파일
-    if (["mp3", "wav", "flac", "aac", "ogg"].includes(extension)) {
-      return <MusicNote color="secondary" />;
-    }
-
-    // 기본 파일 아이콘
-    return <AttachFile color="action" />;
   };
 
   // 파일 타입 검증 함수 (위험한 파일 확장자 차단)
