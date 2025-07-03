@@ -9,43 +9,9 @@ import {
 } from "@mui/material";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import DownloadIcon from "@mui/icons-material/Download";
-import ImageIcon from "@mui/icons-material/Image";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import {
-  PictureAsPdf,
-  Description,
-  TableChart,
-  Archive,
-  Code,
-  Movie,
-  MusicNote,
-} from "@mui/icons-material";
 import AlertMessage from "@/components/common/alertMessage/AlertMessage";
-function formatFileSize(bytes) {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-}
-
-function getFileIcon(fileName, fileType) {
-  const ext = fileName.toLowerCase().split(".").pop();
-  if (fileType.startsWith("image/")) return <ImageIcon color="primary" />;
-  if (["pdf"].includes(ext)) return <PictureAsPdf color="error" />;
-  if (["doc", "docx", "txt", "rtf"].includes(ext)) return <Description />;
-  if (["xls", "xlsx", "csv"].includes(ext))
-    return <TableChart color="success" />;
-  if (["zip", "rar", "7z", "tar", "gz"].includes(ext))
-    return <Archive color="warning" />;
-  if (["js", "ts", "jsx", "tsx", "html", "css", "json", "xml"].includes(ext))
-    return <Code color="info" />;
-  if (["mp4", "avi", "mov", "wmv", "flv", "mkv"].includes(ext))
-    return <Movie color="secondary" />;
-  if (["mp3", "wav", "flac", "aac", "ogg"].includes(ext))
-    return <MusicNote color="secondary" />;
-  return <InsertDriveFileIcon color="action" />;
-}
+import { getFileIcon } from "@/utils/getFileIcon";
+import { formatFileSize } from "@/utils/formatFileSize";
 
 export default function FileAttachmentViewer({
   attachments = [],

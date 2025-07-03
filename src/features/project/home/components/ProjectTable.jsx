@@ -8,6 +8,7 @@ import {
   fetchProjects,
   deleteProject,
 } from "@/features/project/slices/projectSlice";
+import { STATUS_OPTIONS } from "@/utils/statusMaps";
 
 const columns = [
   { key: "name", label: "제목", type: "text", searchable: true },
@@ -18,13 +19,7 @@ const columns = [
 ];
 
 const filterKey = "step";
-const filterOptions = [
-  { label: "전체", value: "" },
-  { label: "결제", value: "CONTRACT" },
-  { label: "진행", value: "IN_PROGRESS" },
-  { label: "검수", value: "PAYMENT" },
-  { label: "완료", value: "COMPLETED" },
-];
+const filterOptions = [{ label: "전체", value: "" }, ...STATUS_OPTIONS];
 
 export default function ProjectTable() {
   const dispatch = useDispatch();
