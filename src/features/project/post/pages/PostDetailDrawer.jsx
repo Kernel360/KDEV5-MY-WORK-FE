@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
-import CommentSection from "./CommentSection";
+import CommentSection from "../components/CommentSection";
 import { fetchReviews } from "../reviewSlice";
 import {
   deletePost,
@@ -19,9 +19,9 @@ import {
   updatePostApproval,
 } from "../postSlice";
 import * as postAPI from "@/api/post";
-import FileAttachmentViewer from "./FileAttachmentViewer";
-import FilePreviewModal from "./FilePreviewModal";
-import PostDetailTopSection from "./PostDetailTopSection";
+import FileAttachmentViewer from "../components/FileAttachmentViewer";
+import FilePreviewModal from "../components/FilePreviewModal";
+import PostDetailTopSection from "../components/PostDetailTopSection";
 import { downloadAttachment } from "@/utils/downloadUtils";
 import { getStatusMeta, POST_APPROVAL_STATUS } from "@/utils/statusMaps";
 
