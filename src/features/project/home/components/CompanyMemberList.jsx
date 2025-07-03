@@ -2,14 +2,16 @@ import React from "react";
 import { Box, Typography, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useTheme } from "@mui/material/styles";
+import CustomButton from "@/components/common/customButton/CustomButton";
 
 /**
  * @param {{
- *   selectedEmployees: { id: string, name: string, email?: string }[],
- *   onRemove: (id: string) => void
+ *   selectedEmployees: { id: string, name: string, email?: string, isManager?: boolean, memberRole?: string }[],
+ *   onRemove: (id: string) => void,
+ *   onToggleManager?: (emp: any) => void
  * }} props
  */
-export default function CompanyMemberList({ selectedEmployees, onRemove }) {
+export default function CompanyMemberList({ selectedEmployees, onRemove, onToggleManager }) {
   const theme = useTheme();
 
   return (
@@ -40,10 +42,22 @@ export default function CompanyMemberList({ selectedEmployees, onRemove }) {
             boxSizing: "border-box",
           }}
         >
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-            <Typography variant="body2" fontWeight={600} noWrap>
-              {emp.name}
-            </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, flex: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2" fontWeight={600} noWrap>
+                {emp.name}
+              </Typography>
+              {['DEV_ADMIN', 'CLIENT_ADMIN', 'SYSTEM_ADMIN', 'ROLE_SYSTEM_ADMIN'].includes(emp.memberRole) && onToggleManager && (
+                <CustomButton
+                  kind={emp.isManager ? 'danger' : 'ghost'}
+                  size="small"
+                  onClick={() => onToggleManager(emp)}
+                  sx={{ minWidth: 64 }}
+                >
+                  매니저
+                </CustomButton>
+              )}
+            </Box>
             {emp.email && (
               <Typography variant="caption" color="text.secondary" noWrap>
                 {emp.email}
