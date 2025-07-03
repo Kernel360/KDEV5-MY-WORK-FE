@@ -16,7 +16,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { InfoOutlined, CloudUpload } from "@mui/icons-material";
+import { InfoOutlined } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -33,6 +33,7 @@ import {
   getSuccessfulPostAttachmentIds,
 } from "@/utils/fileUploadUtils";
 import FileUploadSection from "../components/FileUploadSection";
+import ConfirmDialog from "@/components/common/ConfirmDialog/ConfirmDialog";
 
 export default function CreatePostDrawer({ open, onClose, onSubmit }) {
   const theme = useTheme();
@@ -60,6 +61,8 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
   } = usePostForm({ dispatch, open });
 
   const [loading, setLoading] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmCallback, setConfirmCallback] = useState(() => () => {});
 
   const handleSubmit = async () => {
     const { id, projectStepId, title, content } = form;
@@ -71,31 +74,38 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
     }
 
     if (hasFailedUploads(files)) {
-      const confirmSubmit = window.confirm(
-        "업로드에 실패한 파일이 있습니다. 그래도 게시글을 등록하시겠습니까?"
-      );
-      if (!confirmSubmit) return;
+      setConfirmCallback(() => () => {
+        setConfirmOpen(false);
+        submitPost();
+      });
+      setConfirmOpen(true);
+      return;
     }
 
+    await submitPost();
+  };
+
+  const submitPost = async () => {
     setLoading(true);
     try {
       const payload = {
-        id,
-        projectStepId,
-        title,
-        content,
+        id: form.id,
+        projectStepId: form.projectStepId,
+        title: form.title,
+        content: form.content,
         companyName,
         authorName: userName,
       };
+
       let createdPostId;
       if (onSubmit) {
         const result = await onSubmit(payload);
-        createdPostId = result?.id || id;
+        createdPostId = result?.id || form.id;
       } else {
         const result = await dispatch(
           createPost({ projectId, data: payload })
         ).unwrap();
-        createdPostId = result?.id || id;
+        createdPostId = result?.id || form.id;
       }
 
       const postAttachmentIds = getSuccessfulPostAttachmentIds(files);
@@ -116,7 +126,6 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
       setFiles([]);
       onClose();
     } catch (e) {
-      console.error("게시글 생성 실패:", e);
       alert("게시글 등록에 실패했습니다.");
     } finally {
       setLoading(false);
@@ -280,11 +289,19 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
           </Stack>
         </Paper>
       </Drawer>
-
       <FilePreviewModal
         open={previewModal.open}
         attachment={previewModal.attachment}
         onClose={handlePreviewClose}
+      />
+      <ConfirmDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={confirmCallback}
+        title="업로드 실패 파일이 있습니다"
+        description="일부 파일 업로드에 실패했습니다. 그래도 게시글을 등록하시겠습니까?"
+        confirmText="그래도 등록"
+        confirmKind="primary"
       />
     </>
   );
