@@ -59,15 +59,6 @@ export default function PostDetailDrawer({
     attachment: null,
   });
 
-  // 파일 크기 포맷팅
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
-
   // 미리보기 모달 열기
   const handlePreviewOpen = (attachment) => {
     setPreviewModal({ open: true, attachment });
@@ -209,7 +200,6 @@ export default function PostDetailDrawer({
                 </Typography>
               </Box>
 
-              {/* 첨부파일 섹션 */}
               {(attachmentImages.length > 0 || imagesLoading) && (
                 <FileAttachmentViewer
                   attachments={attachmentImages}
@@ -220,7 +210,6 @@ export default function PostDetailDrawer({
                 />
               )}
 
-              {/* 댓글 섹션 */}
               <CommentSection
                 postId={post.postId}
                 comments={reviews}
@@ -236,7 +225,6 @@ export default function PostDetailDrawer({
         </Paper>
       </Drawer>
 
-      {/* 이미지 미리보기 모달 */}
       <FilePreviewModal
         open={previewModal.open}
         attachment={previewModal.attachment}
