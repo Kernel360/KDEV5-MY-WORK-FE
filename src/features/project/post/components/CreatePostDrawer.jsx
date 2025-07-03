@@ -44,6 +44,7 @@ import CustomButton from "@/components/common/customButton/CustomButton";
 import FilePreviewModal from "./FilePreviewModal";
 import { formatFileSize } from "@/utils/formatFileSize";
 import FileAttachmentCard from "./FileAttachmentCard";
+import { validateFile } from "@/utils/validateFile";
 
 export default function CreatePostDrawer({ open, onClose, onSubmit }) {
   const theme = useTheme();
@@ -67,54 +68,6 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
     open: false,
     attachment: null,
   });
-
-  // 파일 타입 검증 함수 (위험한 파일 확장자 차단)
-  const isValidFileType = (file) => {
-    const dangerousExtensions = [
-      ".exe",
-      ".bat",
-      ".cmd",
-      ".com",
-      ".pif",
-      ".scr",
-      ".vbs",
-      ".js",
-      ".jar",
-      ".app",
-      ".deb",
-      ".pkg",
-      ".rpm",
-      ".dmg",
-      ".msi",
-      ".run",
-      ".sh",
-    ];
-
-    const fileName = file.name.toLowerCase();
-    return !dangerousExtensions.some((ext) => fileName.endsWith(ext));
-  };
-
-  // 파일 검증 함수
-  const validateFile = (file) => {
-    const errors = [];
-
-    // 파일 크기 검증 (5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-      errors.push(
-        `파일 크기가 5MB를 초과합니다. (${formatFileSize(file.size)})`
-      );
-    }
-
-    // 파일 타입 검증 (위험한 파일 차단)
-    if (!isValidFileType(file)) {
-      errors.push(
-        "보안상 위험한 파일 형식입니다. (실행 파일, 스크립트 등은 업로드할 수 없습니다)"
-      );
-    }
-
-    return errors;
-  };
 
   // 실제 파일 업로드 함수 (프리사인드 URL 방식)
   const uploadFileWithPresignedUrl = async (fileItem) => {
