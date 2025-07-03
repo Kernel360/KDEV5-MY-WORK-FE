@@ -42,9 +42,9 @@ import {
 import * as postAPI from "@/api/post";
 import CustomButton from "@/components/common/customButton/CustomButton";
 import FilePreviewModal from "./FilePreviewModal";
-import { formatFileSize } from "@/utils/formatFileSize";
 import FileAttachmentCard from "./FileAttachmentCard";
 import { validateFile } from "@/utils/validateFile";
+import { uploadFileWithPresignedUrl } from "@/utils/uploadFileWithPresignedUrl";
 
 export default function CreatePostDrawer({ open, onClose, onSubmit }) {
   const theme = useTheme();
@@ -68,82 +68,6 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
     open: false,
     attachment: null,
   });
-
-  // 실제 파일 업로드 함수 (프리사인드 URL 방식)
-  const uploadFileWithPresignedUrl = async (fileItem) => {
-    try {
-      // 1. 파일 상태를 uploading으로 변경
-      setFiles((prev) =>
-        prev.map((file) =>
-          file.id === fileItem.id
-            ? { ...file, status: "uploading", progress: 0, error: null }
-            : file
-        )
-      );
-
-      // 2. 업로드 URL 발급 요청
-      const uploadUrlResponse = await postAPI.issueAttachmentUploadUrl({
-        postId: form.id,
-        fileName: fileItem.file.name,
-      });
-
-      const { postAttachmentId, uploadUrl } = uploadUrlResponse.data.data;
-
-      // 3. 진행률 10% 업데이트
-      setFiles((prev) =>
-        prev.map((file) =>
-          file.id === fileItem.id
-            ? { ...file, progress: 10, postAttachmentId }
-            : file
-        )
-      );
-
-      // 4. S3에 파일 업로드
-      const uploadResponse = await postAPI.uploadFileToS3(
-        uploadUrl,
-        fileItem.file
-      );
-
-      if (!uploadResponse.ok) {
-        throw new Error(`파일 업로드 실패: ${uploadResponse.status}`);
-      }
-
-      // 5. 진행률 80% 업데이트
-      setFiles((prev) =>
-        prev.map((file) =>
-          file.id === fileItem.id ? { ...file, progress: 80 } : file
-        )
-      );
-
-      // 6. 업로드 완료 (Active API는 게시글 생성 후 일괄 처리)
-      setFiles((prev) =>
-        prev.map((file) =>
-          file.id === fileItem.id
-            ? { ...file, status: "success", progress: 100, postAttachmentId }
-            : file
-        )
-      );
-    } catch (error) {
-      console.error("파일 업로드 실패:", error);
-
-      // 업로드 실패 상태로 변경
-      setFiles((prev) =>
-        prev.map((file) =>
-          file.id === fileItem.id
-            ? {
-                ...file,
-                status: "error",
-                progress: 0,
-                error:
-                  error.response?.data?.error?.message ||
-                  error.message ||
-                  "파일 업로드에 실패했습니다.",
-              }
-            : file
-        )
-      );
-    }
-  };
 
   // 파일 선택 핸들러
   const handleFileSelect = async (event) => {
@@ -202,7 +126,17 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
 
     // 파일들을 순차적으로 업로드 시작
     for (const fileItem of newFileItems) {
-      await uploadFileWithPresignedUrl(fileItem);
+      await uploadFileWithPresignedUrl({
+        fileItem,
+        postId: form.id,
+        updateFile: (id, updated) => {
+          setFiles((prev) =>
+            prev.map((file) =>
+              file.id === id ? { ...file, ...updated } : file
+            )
+          );
+        },
+      });
     }
   };
 
@@ -245,7 +179,17 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
   const handleFileRetry = async (fileId) => {
     const fileItem = files.find((file) => file.id === fileId);
     if (fileItem) {
-      await uploadFileWithPresignedUrl(fileItem);
+      await uploadFileWithPresignedUrl({
+        fileItem,
+        postId: form.id,
+        updateFile: (id, updated) => {
+          setFiles((prev) =>
+            prev.map((file) =>
+              file.id === id ? { ...file, ...updated } : file
+            )
+          );
+        },
+      });
     }
   };
 
