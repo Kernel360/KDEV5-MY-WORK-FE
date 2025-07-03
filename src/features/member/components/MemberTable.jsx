@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import ConfirmDialog from "@/components/common/confirmDialog/ConfirmDialog";
 import AlertMessage from "@/components/common/alertMessage/AlertMessage";
+import { Box } from "@mui/material";
 
 const columns = [
   { key: "name", label: "이름", type: "avatar", searchable: true },
@@ -75,7 +76,7 @@ export default function MemberTable() {
   }));
 
   return (
-    <>
+    <Box>
       <CustomTable
         columns={columns}
         rows={drawMember || []}
@@ -124,6 +125,6 @@ export default function MemberTable() {
         message={notiMessage}
         severity={notiType}
       />
-    </>
+    </Box>
   );
 }
