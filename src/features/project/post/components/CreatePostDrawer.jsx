@@ -42,8 +42,8 @@ import {
 import * as postAPI from "@/api/post";
 import CustomButton from "@/components/common/customButton/CustomButton";
 import FilePreviewModal from "./FilePreviewModal";
-import { getFileIcon } from "@/utils/getFileIcon";
 import { formatFileSize } from "@/utils/formatFileSize";
+import FileAttachmentCard from "./FileAttachmentCard";
 
 export default function CreatePostDrawer({ open, onClose, onSubmit }) {
   const theme = useTheme();
@@ -624,172 +624,13 @@ export default function CreatePostDrawer({ open, onClose, onSubmit }) {
 
                     <Stack spacing={1}>
                       {files.map((file) => (
-                        <Box
+                        <FileAttachmentCard
                           key={file.id}
-                          sx={{
-                            p: 2,
-                            border: "1px solid",
-                            borderColor:
-                              file.status === "error"
-                                ? "error.main"
-                                : "grey.300",
-                            borderRadius: 1,
-                            bgcolor:
-                              file.status === "success"
-                                ? "success.50"
-                                : "background.paper",
-                          }}
-                        >
-                          <Stack
-                            direction="row"
-                            alignItems="center"
-                            spacing={2}
-                          >
-                            {/* 파일 아이콘/썸네일 */}
-                            <Box
-                              sx={{
-                                width: 48,
-                                height: 48,
-                                borderRadius: 1,
-                                overflow: "hidden",
-                                border: "1px solid",
-                                borderColor: "grey.300",
-                                bgcolor: "grey.100",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                cursor: file.type.startsWith("image/")
-                                  ? "pointer"
-                                  : "default",
-                                "&:hover": file.type.startsWith("image/")
-                                  ? {
-                                      borderColor: "primary.main",
-                                      opacity: 0.8,
-                                    }
-                                  : {},
-                              }}
-                              onClick={() =>
-                                file.type.startsWith("image/") &&
-                                handlePreviewOpen(file)
-                              }
-                            >
-                              {file.type.startsWith("image/") ? (
-                                <img
-                                  src={URL.createObjectURL(file.file)}
-                                  alt={file.name}
-                                  style={{
-                                    width: "100%",
-                                    height: "100%",
-                                    objectFit: "cover",
-                                  }}
-                                />
-                              ) : (
-                                getFileIcon(file.name, file.type)
-                              )}
-                            </Box>
-
-                            <Box sx={{ flex: 1, minWidth: 0 }}>
-                              <Typography variant="body2" noWrap>
-                                {file.name}
-                              </Typography>
-                              <Typography
-                                variant="caption"
-                                color="text.secondary"
-                              >
-                                {formatFileSize(file.size)}
-                              </Typography>
-                            </Box>
-
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 1,
-                              }}
-                            >
-                              {file.status === "pending" && (
-                                <Chip
-                                  label="대기중"
-                                  size="small"
-                                  color="default"
-                                />
-                              )}
-                              {file.status === "uploading" && (
-                                <Chip
-                                  label="업로드중"
-                                  size="small"
-                                  color="warning"
-                                />
-                              )}
-                              {file.status === "success" && (
-                                <Chip
-                                  label="완료"
-                                  size="small"
-                                  color="success"
-                                />
-                              )}
-                              {file.status === "error" && (
-                                <Chip label="오류" size="small" color="error" />
-                              )}
-
-                              {/* 재시도 버튼 (에러 상태인 경우만) */}
-                              {file.status === "error" && (
-                                <Tooltip title="다시 업로드">
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => handleFileRetry(file.id)}
-                                    color="warning"
-                                  >
-                                    <Refresh fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                              )}
-
-                              {/* 미리보기 버튼 (이미지인 경우만) */}
-                              {file.type.startsWith("image/") && (
-                                <Tooltip title="미리보기">
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => handlePreviewOpen(file)}
-                                    color="primary"
-                                  >
-                                    <ZoomIn fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                              )}
-
-                              <IconButton
-                                size="small"
-                                onClick={() => handleFileDelete(file.id)}
-                                color="error"
-                              >
-                                <Delete fontSize="small" />
-                              </IconButton>
-                            </Box>
-                          </Stack>
-
-                          {file.status === "uploading" && (
-                            <Box sx={{ mt: 1 }}>
-                              <LinearProgress
-                                variant="determinate"
-                                value={file.progress}
-                                sx={{ height: 4, borderRadius: 2 }}
-                              />
-                              <Typography
-                                variant="caption"
-                                color="text.secondary"
-                              >
-                                {file.progress}% 완료
-                              </Typography>
-                            </Box>
-                          )}
-
-                          {file.error && (
-                            <Alert severity="error" sx={{ mt: 1 }}>
-                              {file.error}
-                            </Alert>
-                          )}
-                        </Box>
+                          file={file}
+                          onPreview={handlePreviewOpen}
+                          onDelete={handleFileDelete}
+                          onRetry={handleFileRetry}
+                        />
                       ))}
                     </Stack>
                   </Box>
