@@ -85,38 +85,15 @@ export default function CompanyImageUploadSection({
               </Box>
             )}
             {(previewUrl || (isEdit && existingImagePath && !previewUrl)) ? (
-              <>
-                <img
-                  src={previewUrl || existingImagePath}
-                  alt="회사 로고 미리보기"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
-                <IconButton
-                  onClick={onDelete}
-                  sx={{
-                    position: "absolute",
-                    top: 4,
-                    right: 4,
-                    width: "24px",
-                    height: "24px",
-                    backgroundColor: "rgba(0, 0, 0, 0.6)",
-                    color: "white",
-                    "&:hover": {
-                      backgroundColor: "rgba(0, 0, 0, 0.8)",
-                    },
-                    "& .MuiSvgIcon-root": {
-                      fontSize: "14px",
-                    },
-                  }}
-                  size="small"
-                >
-                  <Delete fontSize="small" />
-                </IconButton>
-              </>
+              <img
+                src={previewUrl || existingImagePath}
+                alt="회사 로고 미리보기"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
             ) : (
               <Box
                 sx={{
@@ -147,20 +124,42 @@ export default function CompanyImageUploadSection({
               id="company-image-upload"
             />
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              <label htmlFor="company-image-upload">
-                <CustomButton
-                  kind="ghost"
-                  component="span"
-                  startIcon={<CloudUpload />}
-                  disabled={uploadStatus === "uploading"}
-                >
-                  {uploadStatus === "uploading" 
-                    ? "업로드 중..." 
-                    : previewUrl || (isEdit && existingImagePath && !previewUrl)
-                    ? "이미지 변경" 
-                    : "이미지 선택"}
-                </CustomButton>
-              </label>
+              <Box sx={{ display: "flex", gap: 1, flexDirection: "row" }}>
+                <label htmlFor="company-image-upload">
+                  <CustomButton
+                    kind="ghost"
+                    component="span"
+                    startIcon={<CloudUpload />}
+                    disabled={uploadStatus === "uploading"}
+                  >
+                    {uploadStatus === "uploading" 
+                      ? "업로드 중..." 
+                      : previewUrl || (isEdit && existingImagePath && !previewUrl)
+                      ? "이미지 변경" 
+                      : "이미지 선택"}
+                  </CustomButton>
+                </label>
+                
+                {/* 삭제 버튼 - 이미지가 있을 때만 표시 */}
+                {(previewUrl || (isEdit && existingImagePath && !previewUrl)) && (
+                  <CustomButton
+                    kind="ghost"
+                    onClick={onDelete}
+                    startIcon={<Delete />}
+                    sx={{
+                      color: "#f44336",
+                      borderColor: "#f44336",
+                      "&:hover": {
+                        backgroundColor: "#f443361a",
+                        borderColor: "#d32f2f",
+                        color: "#d32f2f",
+                      },
+                    }}
+                  >
+                    삭제
+                  </CustomButton>
+                )}
+              </Box>
               
               {/* 업로드 상태 칩 */}
               {uploadStatus === "uploading" && (
