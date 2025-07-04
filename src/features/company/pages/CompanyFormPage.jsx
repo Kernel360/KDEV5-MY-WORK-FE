@@ -46,9 +46,11 @@ export default function CompanyFormPage() {
     previewUrl,
     uploadStatus,
     error: imageError,
+    uploadedImageUrl,
     handleImageSelect: originalHandleImageSelect,
-    handleImageDelete,
+    handleImageDelete: originalHandleImageDelete,
     handleImageReplace,
+    handleImageUpload,
     resetImageUpload,
   } = useCompanyImageUpload();
 
@@ -134,12 +136,70 @@ export default function CompanyFormPage() {
     navigate(-1);
   };
 
-  const handleImageSelect = (event) => {
+  const handleImageDelete = () => {
+    originalHandleImageDelete();
+    // 폼에서 이미지 경로 제거
+    setForm(prev => ({ ...prev, logoImagePath: "" }));
+  };
+
+  const handleImageSelect = async (event) => {
     // 수정 모드에서 기존 이미지가 있으면 대체
     if (isEdit && form.logoImagePath) {
       handleImageReplace(form.logoImagePath);
     }
-    originalHandleImageSelect(event);
+    
+    // 파일 정보를 먼저 가져오기
+    const file = event.target.files[0];
+    
+    if (!file) {
+      return;
+    }
+    
+    await originalHandleImageSelect(event);
+    
+    // 회사 ID가 없으면 생성 대기
+    if (!form.id) {
+      console.log('회사 ID가 없어서 업로드 대기');
+      // 회사 ID가 생성될 때까지 대기
+      const checkId = setInterval(() => {
+        const currentFormId = form.id;
+        if (currentFormId) {
+          clearInterval(checkId);
+          console.log('회사 ID 생성됨:', currentFormId);
+          performUpload(file, currentFormId);
+        }
+      }, 100);
+      
+      // 10초 후 타임아웃
+      setTimeout(() => {
+        clearInterval(checkId);
+        console.error('회사 ID 생성 타임아웃');
+      }, 10000);
+      return;
+    }
+    
+    // 바로 업로드 수행
+    console.log('회사 ID 있음, 바로 업로드:', form.id);
+    performUpload(file, form.id);
+  };
+
+  const performUpload = async (file, companyId) => {
+    try {
+      console.log('=== 이미지 업로드 시작 ===');
+      console.log('파일명:', file.name);
+      console.log('파일크기:', file.size);
+      console.log('파일타입:', file.type);
+      console.log('회사ID:', companyId);
+      
+      const uploadedUrl = await handleImageUpload(file, companyId);
+      console.log('업로드 성공, URL:', uploadedUrl);
+      
+      // 업로드 성공 시 폼에 이미지 경로 저장
+      setForm(prev => ({ ...prev, logoImagePath: uploadedUrl }));
+      console.log('폼에 이미지 경로 저장됨');
+    } catch (error) {
+      console.error('이미지 업로드 실패:', error);
+    }
   };
 
   const headerAction = (
@@ -178,8 +238,10 @@ export default function CompanyFormPage() {
           onDelete: handleImageDelete,
           existingImagePath: isEdit && form.logoImagePath ? form.logoImagePath : null,
           isEdit,
+          uploadStatus,
         }}
       />
+
       <AlertMessage
         open={alertOpen}
         onClose={() => setAlertOpen(false)}
