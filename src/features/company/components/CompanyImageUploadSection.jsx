@@ -1,0 +1,153 @@
+import React from "react";
+import {
+  Box,
+  Stack,
+  Typography,
+  Divider,
+  Tooltip,
+  Alert,
+  IconButton,
+} from "@mui/material";
+import { InfoOutlined, CloudUpload, Delete } from "@mui/icons-material";
+import CustomButton from "@/components/common/customButton/CustomButton";
+
+export default function CompanyImageUploadSection({
+  previewUrl,
+  error,
+  onSelect,
+  onDelete,
+  existingImagePath,
+  isEdit = false,
+}) {
+  return (
+    <Box>
+      <Stack direction="row" alignItems="center" spacing={1}>
+        <Typography variant="subtitle1" fontWeight={600}>
+          4. 로고 이미지
+        </Typography>
+        <Tooltip title="회사 로고 이미지를 업로드하세요. (JPG, PNG, GIF, 최대 5MB)">
+          <InfoOutlined fontSize="small" color="action" />
+        </Tooltip>
+      </Stack>
+      <Divider sx={{ mt: 1, mb: 2 }} />
+
+      <Stack spacing={2}>
+        {/* 이미지 미리보기 영역 */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+          }}
+        >
+          {/* 이미지 미리보기 또는 플레이스홀더 */}
+          <Box
+            sx={{
+              position: "relative",
+              display: "inline-block",
+              width: "120px",
+              height: "120px",
+              borderRadius: "50%",
+              border: "3px solid",
+              borderColor: (previewUrl || (isEdit && existingImagePath && !previewUrl)) 
+                ? "primary.main" 
+                : "grey.300",
+              overflow: "hidden",
+              boxShadow: (previewUrl || (isEdit && existingImagePath && !previewUrl))
+                ? "0 4px 12px rgba(0, 0, 0, 0.15)"
+                : "0 2px 8px rgba(0, 0, 0, 0.1)",
+              backgroundColor: "grey.50",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {(previewUrl || (isEdit && existingImagePath && !previewUrl)) ? (
+              <>
+                <img
+                  src={previewUrl || existingImagePath}
+                  alt="회사 로고 미리보기"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+                <IconButton
+                  onClick={onDelete}
+                  sx={{
+                    position: "absolute",
+                    top: 4,
+                    right: 4,
+                    width: "24px",
+                    height: "24px",
+                    backgroundColor: "rgba(0, 0, 0, 0.6)",
+                    color: "white",
+                    "&:hover": {
+                      backgroundColor: "rgba(0, 0, 0, 0.8)",
+                    },
+                    "& .MuiSvgIcon-root": {
+                      fontSize: "14px",
+                    },
+                  }}
+                  size="small"
+                >
+                  <Delete fontSize="small" />
+                </IconButton>
+              </>
+            ) : (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "text.secondary",
+                  textAlign: "center",
+                  p: 2,
+                }}
+              >
+                <CloudUpload sx={{ fontSize: 32, mb: 1, opacity: 0.5 }} />
+                <Typography variant="caption" sx={{ fontSize: "0.7rem" }}>
+                  로고 이미지
+                </Typography>
+              </Box>
+            )}
+          </Box>
+
+          {/* 파일 선택 버튼 */}
+          <Box>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={onSelect}
+              style={{ display: "none" }}
+              id="company-image-upload"
+            />
+            <label htmlFor="company-image-upload">
+              <CustomButton
+                kind="ghost"
+                component="span"
+                startIcon={<CloudUpload />}
+              >
+                {previewUrl || (isEdit && existingImagePath && !previewUrl) 
+                  ? "이미지 변경" 
+                  : "이미지 선택"}
+              </CustomButton>
+            </label>
+          </Box>
+        </Box>
+
+        {/* 에러 메시지 */}
+        {error && (
+          <Alert severity="error" sx={{ borderRadius: 2 }}>
+            {error}
+          </Alert>
+        )}
+      </Stack>
+      
+      {/* 하단 여백 */}
+      <Box sx={{ mb: 2 }} />
+    </Box>
+  );
+} 

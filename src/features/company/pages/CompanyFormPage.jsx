@@ -12,6 +12,7 @@ import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
 import CompanyForm from "../components/CompanyForm";
 import AlertMessage from "@/components/common/alertMessage/AlertMessage";
+import useCompanyImageUpload from "@/hooks/useCompanyImageUpload";
 
 export default function CompanyFormPage() {
   const { id } = useParams();
@@ -38,6 +39,18 @@ export default function CompanyFormPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+
+  // 이미지 업로드 훅
+  const {
+    imageFile,
+    previewUrl,
+    uploadStatus,
+    error: imageError,
+    handleImageSelect: originalHandleImageSelect,
+    handleImageDelete,
+    handleImageReplace,
+    resetImageUpload,
+  } = useCompanyImageUpload();
 
   useEffect(() => {
     const generateNewCompanyId = async () => {
@@ -73,6 +86,13 @@ export default function CompanyFormPage() {
         contactEmail: current.contactEmail || "",
         logoImagePath: current.logoImagePath || "",
       });
+      
+      // 기존 로고 이미지가 있으면 미리보기 설정
+      if (current.logoImagePath) {
+        // 실제로는 API에서 이미지 URL을 가져와야 하지만, 
+        // 현재는 로고 이미지 경로만 표시
+        // TODO: API 연동 시 실제 이미지 URL로 변경
+      }
     }
   }, [isEdit, current]);
 
@@ -110,7 +130,16 @@ export default function CompanyFormPage() {
   };
 
   const handleCancel = () => {
+    resetImageUpload();
     navigate(-1);
+  };
+
+  const handleImageSelect = (event) => {
+    // 수정 모드에서 기존 이미지가 있으면 대체
+    if (isEdit && form.logoImagePath) {
+      handleImageReplace(form.logoImagePath);
+    }
+    originalHandleImageSelect(event);
   };
 
   const headerAction = (
@@ -142,6 +171,14 @@ export default function CompanyFormPage() {
         handleChange={handleChange}
         isEdit={isEdit}
         isSubmitted={isSubmitted}
+        imageUploadProps={{
+          previewUrl,
+          error: imageError,
+          onSelect: handleImageSelect,
+          onDelete: handleImageDelete,
+          existingImagePath: isEdit && form.logoImagePath ? form.logoImagePath : null,
+          isEdit,
+        }}
       />
       <AlertMessage
         open={alertOpen}
