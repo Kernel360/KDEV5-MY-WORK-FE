@@ -49,6 +49,7 @@ export default function CompanyFormPage() {
     uploadedImageUrl,
     handleImageSelect: originalHandleImageSelect,
     handleImageDelete: originalHandleImageDelete,
+    handleImageDeleteFromServer,
     handleImageReplace,
     handleImageUpload,
     resetImageUpload,
@@ -136,10 +137,28 @@ export default function CompanyFormPage() {
     navigate(-1);
   };
 
-  const handleImageDelete = () => {
-    originalHandleImageDelete();
-    // 폼에서 이미지 경로 제거
-    setForm(prev => ({ ...prev, logoImagePath: "" }));
+  const handleImageDelete = async () => {
+    try {
+      // 기존 이미지가 서버에 있으면 서버에서 삭제
+      if (form.logoImagePath && form.id) {
+        console.log('서버에서 이미지 삭제 시도:', form.id);
+        await handleImageDeleteFromServer(form.id);
+      } else {
+        // 서버에 업로드되지 않은 경우 로컬 상태만 초기화
+        console.log('로컬 상태만 초기화');
+        originalHandleImageDelete();
+      }
+      
+      // 폼에서 이미지 경로 제거
+      setForm(prev => ({ ...prev, logoImagePath: "" }));
+      console.log('이미지 삭제 완료');
+      
+    } catch (error) {
+      console.error('이미지 삭제 실패:', error);
+      // 에러가 발생해도 UI 상태는 초기화 (사용자 경험 개선)
+      originalHandleImageDelete();
+      setForm(prev => ({ ...prev, logoImagePath: "" }));
+    }
   };
 
   const handleImageSelect = async (event) => {

@@ -31,3 +31,14 @@ export function getCompanyImageUploadUrl(companyId, fileName) {
     fileName,
   });
 }
+
+/**
+ * 회사 이미지 삭제
+ * DELETE /api/companies/images/{companyId}
+ * 
+ * @param {string} companyId - 회사 UUID
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse
+ */
+export function deleteCompanyImage(companyId) {
+  return api.delete(`/api/companies/images/${companyId}`);
+}
