@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { validateFile } from "@/utils/validateFile";
 import { uploadCompanyImage } from "@/utils/uploadCompanyImage";
+import { deleteCompanyImage } from "@/api/company";
 
 export default function useCompanyImageUpload() {
   const [imageFile, setImageFile] = useState(null);
@@ -57,6 +58,34 @@ export default function useCompanyImageUpload() {
     // TODO: API 연동 시 기존 이미지 삭제 로직 추가
   };
 
+  const handleImageDeleteFromServer = async (companyId) => {
+    if (!companyId) {
+      console.log('handleImageDeleteFromServer: companyId 없음');
+      return;
+    }
+
+    try {
+      console.log('=== 서버에서 이미지 삭제 시작 ===');
+      console.log('회사ID:', companyId);
+      
+      setUploadStatus("uploading"); // 삭제 중 상태 표시
+      setError(null);
+
+      await deleteCompanyImage(companyId);
+      
+      // 로컬 상태 초기화
+      handleImageDelete();
+      
+      console.log('=== 서버에서 이미지 삭제 성공 ===');
+      
+    } catch (error) {
+      console.error('서버에서 이미지 삭제 실패:', error);
+      setError('이미지 삭제에 실패했습니다.');
+      setUploadStatus("error");
+      throw error;
+    }
+  };
+
   const handleImageUpload = async (file, companyId) => {
     if (!file || !companyId) {
       console.log('handleImageUpload: 파일 또는 companyId 없음', { file: file?.name, companyId });
@@ -108,6 +137,7 @@ export default function useCompanyImageUpload() {
     uploadedImageUrl,
     handleImageSelect,
     handleImageDelete,
+    handleImageDeleteFromServer,
     handleImageReplace,
     handleImageUpload,
     resetImageUpload,
