@@ -38,6 +38,7 @@ export default function Sidebar({
 
   const memberName = useSelector((state) => state.auth.user?.name);
   const memberRole = useSelector((state) => state.auth.user?.role);
+  const logoImagePath = useSelector((state) => state.auth.company?.logoImagePath);
   const currentPath = location.pathname;
 
   const filteredNavItems = navItems.filter(
@@ -63,7 +64,9 @@ export default function Sidebar({
   return (
     <SidebarRoot>
       <ProfileSection>
-        <Avatar src="/toss_logo.png" />
+        <Avatar 
+          src={logoImagePath || "/toss_logo.png"} 
+        />
         <Box
           sx={{
             display: "flex",
