@@ -7,6 +7,8 @@ import {
   Tooltip,
   Alert,
   IconButton,
+  CircularProgress,
+  Chip,
 } from "@mui/material";
 import { InfoOutlined, CloudUpload, Delete } from "@mui/icons-material";
 import CustomButton from "@/components/common/customButton/CustomButton";
@@ -18,6 +20,7 @@ export default function CompanyImageUploadSection({
   onDelete,
   existingImagePath,
   isEdit = false,
+  uploadStatus = "idle",
 }) {
   return (
     <Box>
@@ -62,6 +65,25 @@ export default function CompanyImageUploadSection({
               justifyContent: "center",
             }}
           >
+            {/* 업로드 상태 표시 */}
+            {uploadStatus === "uploading" && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "rgba(255, 255, 255, 0.8)",
+                  zIndex: 1,
+                }}
+              >
+                <CircularProgress size={24} />
+              </Box>
+            )}
             {(previewUrl || (isEdit && existingImagePath && !previewUrl)) ? (
               <>
                 <img
@@ -124,17 +146,48 @@ export default function CompanyImageUploadSection({
               style={{ display: "none" }}
               id="company-image-upload"
             />
-            <label htmlFor="company-image-upload">
-              <CustomButton
-                kind="ghost"
-                component="span"
-                startIcon={<CloudUpload />}
-              >
-                {previewUrl || (isEdit && existingImagePath && !previewUrl) 
-                  ? "이미지 변경" 
-                  : "이미지 선택"}
-              </CustomButton>
-            </label>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              <label htmlFor="company-image-upload">
+                <CustomButton
+                  kind="ghost"
+                  component="span"
+                  startIcon={<CloudUpload />}
+                  disabled={uploadStatus === "uploading"}
+                >
+                  {uploadStatus === "uploading" 
+                    ? "업로드 중..." 
+                    : previewUrl || (isEdit && existingImagePath && !previewUrl)
+                    ? "이미지 변경" 
+                    : "이미지 선택"}
+                </CustomButton>
+              </label>
+              
+              {/* 업로드 상태 칩 */}
+              {uploadStatus === "uploading" && (
+                <Chip 
+                  label="업로드 중" 
+                  size="small" 
+                  color="warning"
+                  sx={{ alignSelf: "flex-start" }}
+                />
+              )}
+              {uploadStatus === "success" && (
+                <Chip 
+                  label="업로드 완료" 
+                  size="small" 
+                  color="success"
+                  sx={{ alignSelf: "flex-start" }}
+                />
+              )}
+              {uploadStatus === "error" && (
+                <Chip 
+                  label="업로드 실패" 
+                  size="small" 
+                  color="error"
+                  sx={{ alignSelf: "flex-start" }}
+                />
+              )}
+            </Box>
           </Box>
         </Box>
 
