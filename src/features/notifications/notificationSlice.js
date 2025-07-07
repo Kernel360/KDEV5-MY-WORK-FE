@@ -63,6 +63,7 @@ const notificationSlice = createSlice({
     hasMore: true,
     readStatus: null,
     unreadCount: 0,
+    unreadCountStatus: null,
     filter: "ALL",
   },
   reducers: {
@@ -78,6 +79,17 @@ const notificationSlice = createSlice({
       state.page = 1;
       state.hasMore = true;
       state.notifications = [];
+    },
+    setUnreadNotificationCount(state, action) {
+      state.unreadCount = action.payload;
+    },
+    receiveNotification(state, action) {
+      const newNotif = action.payload;
+      const exists = state.notifications.some((n) => n.id === newNotif.id);
+      if (!exists) {
+        state.notifications.unshift(newNotif);
+        state.unreadCount += 1;
+      }
     },
   },
 
@@ -134,5 +146,11 @@ const notificationSlice = createSlice({
   },
 });
 
-export const { clearNotifications } = notificationSlice.actions;
+export const {
+  clearNotifications,
+  setNotificationFilter,
+  setUnreadNotificationCount,
+  receiveNotification,
+} = notificationSlice.actions;
+
 export default notificationSlice.reducer;
