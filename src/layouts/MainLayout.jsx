@@ -11,8 +11,8 @@ import {
 } from "./MainLayout.styles";
 import { Outlet } from "react-router-dom";
 import NotificationsDrawer from "@/features/notifications/components/NotificationsDrawer";
-import useNotificationPolling from "@/hooks/useNotificationPolling";
 import AlertMessage from "@/components/common/alertMessage/AlertMessage";
+import useNotificationSSE from "@/hooks/useNotificationSSE";
 
 export default function MainLayout() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -20,7 +20,7 @@ export default function MainLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const unreadCount = useSelector((state) => state?.notification.unreadCount);
-  useNotificationPolling(!notificationsOpen);
+  useNotificationSSE();
 
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
