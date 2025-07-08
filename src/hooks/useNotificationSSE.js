@@ -17,8 +17,6 @@ export default function useNotificationSSE(enabled = true) {
   useEffect(() => {
     if (!enabled || !isLoggedIn || !token) return;
 
-    console.log("[SSE] connecting to", SSE_URL);
-
     eventSourceRef.current?.close();
 
     const eventSource = new EventSourcePolyfill(SSE_URL, {
@@ -30,28 +28,20 @@ export default function useNotificationSSE(enabled = true) {
 
     eventSourceRef.current = eventSource;
 
-    eventSource.onopen = () => {
-      console.log("[SSE] 연결 성공");
-    };
+    eventSource.onopen = () => {};
 
-    eventSource.onerror = (error) => {
-      console.error("[SSE] 에러 발생:", error);
-    };
+    eventSource.onerror = (error) => {};
 
     eventSource.addEventListener("unread-notification-count", (event) => {
-      console.log("[SSE] unread-notification-count 수신:", event.data);
       try {
         const count = Number(event.data);
         if (!isNaN(count)) {
           dispatch(fetchUnreadNotificationCount());
         }
-      } catch (err) {
-        console.error("[SSE] 이벤트 파싱 실패", err);
-      }
+      } catch (err) {}
     });
 
     return () => {
-      console.log("[SSE] 연결 종료");
       eventSource.close();
     };
   }, [enabled, isLoggedIn, token]);
