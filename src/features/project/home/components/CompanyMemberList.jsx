@@ -49,12 +49,12 @@ export default function CompanyMemberList({ selectedEmployees, onRemove, onToggl
               </Typography>
               {['DEV_ADMIN', 'CLIENT_ADMIN', 'SYSTEM_ADMIN', 'ROLE_SYSTEM_ADMIN'].includes(emp.memberRole) && onToggleManager && (
                 <CustomButton
-                  kind={emp.isManager ? 'danger' : 'ghost'}
+                  kind={emp.isManager ? 'danger' : 'ghost-info'}
                   size="small"
                   onClick={() => onToggleManager(emp)}
                   sx={{ minWidth: 64 }}
                 >
-                  매니저
+                  {emp.isManager ? '매니저 해임' : '매니저 임명'}
                 </CustomButton>
               )}
             </Box>
