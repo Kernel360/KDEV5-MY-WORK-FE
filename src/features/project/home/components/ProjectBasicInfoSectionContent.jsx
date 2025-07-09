@@ -27,6 +27,7 @@ export default function ProjectBasicInfoSectionContent({
 }) {
   const [statusLoading, setStatusLoading] = React.useState(false);
   const [statusError, setStatusError] = React.useState("");
+  const [amountError, setAmountError] = React.useState("");
   const { id: projectId } = useParams();
   const userRole = useSelector(state => state.auth.user?.role);
   const canEditStep = [
@@ -34,6 +35,16 @@ export default function ProjectBasicInfoSectionContent({
     "ROLE_DEV_ADMIN",
     "ROLE_CLIENT_ADMIN"
   ].includes(userRole);
+
+  const handleAmountChange = (event) => {
+    const value = event.target.value;
+    if (value > 1000000) {
+      setAmountError("프로젝트 금액은 만원 단위 입니다. 100억을 넘을수 없습니다. 관리자에게 문의해주세요.");
+    } else {
+      setAmountError("");
+      setProjectAmount(value);
+    }
+  };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -80,10 +91,12 @@ export default function ProjectBasicInfoSectionContent({
             <TextField
               label="프로젝트 금액(만원)"
               value={projectAmount}
-              onChange={(e) => setProjectAmount(e.target.value)}
+              onChange={handleAmountChange}
               fullWidth
               type="number"
               inputProps={{ min: 0 }}
+              error={!!amountError}
+              helperText={amountError}
             />
           ) : (
             <>
