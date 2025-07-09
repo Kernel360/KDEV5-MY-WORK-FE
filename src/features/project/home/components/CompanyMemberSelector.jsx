@@ -18,7 +18,6 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
-import CustomButton from "@/components/common/customButton/CustomButton";
 import CompanyMemberList from "./CompanyMemberList";
 import { updateProjectManager } from "@/api/projectMember";
 import ConfirmDialog from "@/components/common/confirmDialog/ConfirmDialog";
