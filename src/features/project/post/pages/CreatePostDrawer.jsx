@@ -33,7 +33,7 @@ import {
   getSuccessfulPostAttachmentIds,
 } from "@/utils/fileUploadUtils";
 import FileUploadSection from "../components/FileUploadSection";
-import ConfirmDialog from "@/components/common/ConfirmDialog/ConfirmDialog";
+import ConfirmDialog from "@/components/common/confirmDialog/ConfirmDialog";
 
 export default function CreatePostDrawer({ open, onClose, onSubmit }) {
   const theme = useTheme();
