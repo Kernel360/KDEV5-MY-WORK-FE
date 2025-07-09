@@ -22,6 +22,9 @@ import {
 } from "@/features/company/companySlice";
 import { getCompanyMembersByCompanyId } from "@/api/member";
 import { useTheme } from "@mui/material/styles";
+import CustomButton from "@/components/common/customButton/CustomButton";
+import CreateRoundedIcon from "@mui/icons-material/CreateRounded";
+import { ROLES } from "@/constants/roles";
 
 export default function CompanyDetailPage() {
   const theme = useTheme();
@@ -31,6 +34,7 @@ export default function CompanyDetailPage() {
   const { current: company, loading: companyLoading } = useSelector(
     (state) => state.company
   );
+  const userRole = useSelector((state) => state.auth.user?.role);
 
   const [members, setMembers] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -85,13 +89,23 @@ export default function CompanyDetailPage() {
         </Box>
       </PageWrapper>
     );
-  }
+  } 
 
   return (
     <PageWrapper>
       <PageHeader
         title={company.name}
         subtitle={company.detail || "상세 설명이 없습니다."}
+        action={
+          (userRole === ROLES.SYSTEM_ADMIN) && (
+            <CustomButton
+              startIcon={<CreateRoundedIcon />}
+              onClick={() => navigate(`/companies/${id}/edit`)}
+            >
+              정보 수정
+            </CustomButton>
+          )
+        }
       />
       <Box display="flex" flexDirection="column" flex={1} minHeight={0}>
         <Paper
