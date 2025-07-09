@@ -121,14 +121,15 @@ export default function NotificationsDrawer({
 
     const navigationStrategies = {
       PROJECT_CHECK_LIST: () => {
+        onClose();
         navigate(
           `/projects/${notif.projectId}/approvals?checklistId=${notif.targetId}`
         );
       },
       POST: async () => {
         try {
-          await dispatch(markNotificationsAsRead(notif.id));
           await dispatch(fetchPostById(notif.targetId)).unwrap();
+          onClose();
           navigate(
             `/projects/${notif.projectId}/posts?postId=${notif.targetId}`
           );

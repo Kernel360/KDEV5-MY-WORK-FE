@@ -124,6 +124,10 @@ const notificationSlice = createSlice({
         state.notifications = state.notifications.map((n) =>
           n.id === readId ? { ...n, isRead: true } : n
         );
+
+        if (state.unreadCount > 0) {
+          state.unreadCount -= 1;
+        }
       })
       .addCase(markNotificationsAsRead.rejected, (state, action) => {
         state.readStatus = "error";
