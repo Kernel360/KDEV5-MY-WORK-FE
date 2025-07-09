@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
-import CommentSection from "./CommentSection";
+import CommentSection from "../components/CommentSection";
 import { fetchReviews } from "../reviewSlice";
 import {
   deletePost,
@@ -19,10 +19,11 @@ import {
   updatePostApproval,
 } from "../postSlice";
 import * as postAPI from "@/api/post";
-import FileAttachmentViewer from "./FileAttachmentViewer";
-import FilePreviewModal from "./FilePreviewModal";
-import PostDetailTopSection from "./PostDetailTopSection";
+import FileAttachmentViewer from "../components/FileAttachmentViewer";
+import FilePreviewModal from "../components/FilePreviewModal";
+import PostDetailTopSection from "../components/PostDetailTopSection";
 import { downloadAttachment } from "@/utils/downloadUtils";
+import { getStatusMeta, POST_APPROVAL_STATUS } from "@/utils/statusMaps";
 
 export default function PostDetailDrawer({
   open,
@@ -58,15 +59,6 @@ export default function PostDetailDrawer({
     open: false,
     attachment: null,
   });
-
-  // 파일 크기 포맷팅
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
 
   // 미리보기 모달 열기
   const handlePreviewOpen = (attachment) => {
@@ -142,15 +134,7 @@ export default function PostDetailDrawer({
     dispatch(fetchReviews({ postId, page }));
   };
 
-  const statusMap = {
-    PENDING: { label: "답변 대기", color: "neutral" },
-    APPROVED: { label: "답변 완료", color: "success" },
-  };
-
-  const stat = statusMap[approval] || {
-    label: approval ?? "-",
-    color: "neutral",
-  };
+  const stat = getStatusMeta(approval, POST_APPROVAL_STATUS);
 
   return (
     <>
@@ -209,7 +193,6 @@ export default function PostDetailDrawer({
                 </Typography>
               </Box>
 
-              {/* 첨부파일 섹션 */}
               {(attachmentImages.length > 0 || imagesLoading) && (
                 <FileAttachmentViewer
                   attachments={attachmentImages}
@@ -220,7 +203,6 @@ export default function PostDetailDrawer({
                 />
               )}
 
-              {/* 댓글 섹션 */}
               <CommentSection
                 postId={post.postId}
                 comments={reviews}
@@ -236,7 +218,6 @@ export default function PostDetailDrawer({
         </Paper>
       </Drawer>
 
-      {/* 이미지 미리보기 모달 */}
       <FilePreviewModal
         open={previewModal.open}
         attachment={previewModal.attachment}

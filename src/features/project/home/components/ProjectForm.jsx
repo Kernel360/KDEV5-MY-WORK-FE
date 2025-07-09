@@ -11,24 +11,14 @@ import {
   Grid,
   Tooltip,
   Autocomplete,
-  FormControlLabel,
-  Switch,
+  InputAdornment,
 } from "@mui/material";
 import { InfoOutlined, CalendarTodayRounded } from "@mui/icons-material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
+import { STATUS_OPTIONS } from "@/utils/statusMaps";
 
-/**
- * ProjectForm 컴포넌트
- *
- * props:
- * - form: { name, detail, step, startAt, endAt, devCompanyId, clientCompanyId, deleted }
- * - handleChange: (key: string) => (e: React.ChangeEvent<HTMLInputElement> | any) => void
- * - clientCompanies: 고객사 목록
- * - developerCompanies: 개발사 목록
- * - isEdit: 편집 모드 여부
- */
 export default function ProjectForm({
   form,
   handleChange,
@@ -36,12 +26,19 @@ export default function ProjectForm({
   developerCompanies = [],
   isEdit = false,
 }) {
-  const STATUS_OPTIONS = [
-    { value: "CONTRACT", label: "결제" },
-    { value: "IN_PROGRESS", label: "진행" },
-    { value: "PAYMENT", label: "검수" },
-    { value: "COMPLETED", label: "완료" },
-  ];
+  const [amountError, setAmountError] = React.useState("");
+
+  const handleAmountChange = (event) => {
+    const value = event.target.value;
+    if (value > 1000000) {
+      setAmountError(
+        "프로젝트 금액은 만원 단위 입니다. 100억을 넘을수 없습니다. 관리자에게 문의해주세요."
+      );
+    } else {
+      setAmountError("");
+      handleChange("projectAmount")({ target: { value: value } });
+    }
+  };
 
   return (
     <Box
@@ -129,22 +126,26 @@ export default function ProjectForm({
             <Divider sx={{ mt: 1, mb: 2 }} />
 
             <TextField
-              label="프로젝트 금액 (만원)"
+              label="프로젝트 금액"
               placeholder="예) 1000"
               type="number"
               value={form.projectAmount || ""}
-              onChange={handleChange("projectAmount")}
+              onChange={handleAmountChange}
               fullWidth
+              error={!!amountError}
+              helperText={amountError}
               InputProps={{
-                endAdornment: <span>만원</span>,
-                inputProps: { 
+                endAdornment: (
+                  <InputAdornment position="end">만원</InputAdornment>
+                ),
+                inputProps: {
                   step: 1,
                   min: 0,
-                  style: { 
-                    WebkitAppearance: 'none',
-                    MozAppearance: 'textfield'
-                  }
-                }
+                  style: {
+                    WebkitAppearance: "none",
+                    MozAppearance: "textfield",
+                  },
+                },
               }}
             />
           </Box>

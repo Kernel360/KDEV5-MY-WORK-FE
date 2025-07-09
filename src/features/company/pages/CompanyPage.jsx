@@ -26,7 +26,7 @@ export default function CompanyPage() {
           title="업체"
           subtitle={`총 ${totalCount ?? 0}개 업체가 등록되어 있습니다.`}
         />
-        <Box sx={{ flex: 1, overflow: "hidden", mb: 3 }}>
+        <Box sx={{ flex: 1, overflow: "auto", mb: 3 }}>
           <CompanyTable />
         </Box>
       </Box>

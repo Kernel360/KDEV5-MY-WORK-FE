@@ -3,10 +3,11 @@ import { Box } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import SectionTable from "@/components/common/sectionTable/SectionTable";
-import PostDetailDrawer from "../components/PostDetailDrawer";
-import CreatePostDrawer from "../components/CreatePostDrawer";
+import PostDetailDrawer from "./PostDetailDrawer";
+import CreatePostDrawer from "./CreatePostDrawer";
 import { fetchPosts, fetchPostById, createPost } from "../postSlice";
 import { fetchProjectStages } from "../../slices/projectStepSlice";
+import { POST_APPROVAL_STATUS } from "@/utils/statusMaps";
 
 export default function ProjectPostsPage() {
   const dispatch = useDispatch();
@@ -97,10 +98,7 @@ export default function ProjectPostsPage() {
       width: "15%",
       sortable: true,
       type: "status",
-      statusMap: {
-        PENDING: { label: "답변 대기", color: "neutral" },
-        APPROVED: { label: "답변 완료", color: "success" },
-      },
+      statusMap: POST_APPROVAL_STATUS,
     },
     {
       key: "authorName",

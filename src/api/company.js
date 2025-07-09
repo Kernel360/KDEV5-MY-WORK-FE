@@ -16,3 +16,29 @@ export function getCompanyNamesByType(companyType) {
     params: { companyType },
   });
 }
+
+/**
+ * 회사 이미지 업로드를 위한 presigned URL 발급
+ * POST /api/companies/images/upload-url/issue
+ * 
+ * @param {string} companyId - 회사 UUID
+ * @param {string} fileName - 파일명
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<CompanyImageUploadUrlResponse>
+ */
+export function getCompanyImageUploadUrl(companyId, fileName) {
+  return api.post(`/api/companies/images/upload-url/issue`, {
+    companyId,
+    fileName,
+  });
+}
+
+/**
+ * 회사 이미지 삭제
+ * DELETE /api/companies/images/{companyId}
+ * 
+ * @param {string} companyId - 회사 UUID
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse
+ */
+export function deleteCompanyImage(companyId) {
+  return api.delete(`/api/companies/images/${companyId}`);
+}

@@ -211,40 +211,66 @@ export default function CustomTable({
             </TableHead>
 
             <TableBody>
-              {rows.map((row, idx) => (
-                <TableRow
-                  key={idx}
-                  hover
-                  onClick={() => onRowClick?.(row)}
-                  sx={{ cursor: "pointer" }}
-                >
-                  {columns.map((col) => (
-                    <TableCell key={col.key}>
-                      {renderCell(col, row[col.key], row, theme, companies)}
-                    </TableCell>
-                  ))}
-                  {userRole === "ROLE_SYSTEM_ADMIN" &&
-                    !hideDeleteButton &&
-                    !row.deleted && (
-                      <TableCell key="__actions__" align="center">
-                        <CustomButton
-                          kind="ghost-danger"
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDelete?.(row);
-                          }}
-                        >
-                          삭제
-                        </CustomButton>
+              {rows.length > 0 ? (
+                rows.map((row, idx) => (
+                  <TableRow
+                    key={idx}
+                    hover
+                    onClick={() => onRowClick?.(row)}
+                    sx={{ cursor: "pointer" }}
+                  >
+                    {columns.map((col) => (
+                      <TableCell key={col.key}>
+                        {renderCell(col, row[col.key], row, theme, companies)}
                       </TableCell>
-                    )}
+                    ))}
+                    {userRole === "ROLE_SYSTEM_ADMIN" &&
+                      !hideDeleteButton &&
+                      !row.deleted && (
+                        <TableCell key="__actions__" align="center">
+                          <CustomButton
+                            kind="ghost-danger"
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDelete?.(row);
+                            }}
+                          >
+                            삭제
+                          </CustomButton>
+                        </TableCell>
+                      )}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={fullColumns.length}
+                    sx={{
+                      height: 200,
+                      p: 0,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: "100%",
+                        width: "100%",
+                      }}
+                    >
+                      <Typography variant="body2" color="text.secondary">
+                        등록된 데이터가 없습니다.
+                      </Typography>
+                    </Box>
+                  </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
 
-          {pagination && (
+          {pagination && rows.length > 0 && (
             <Box p={2}>
               <Stack direction="row" justifyContent="flex-end">
                 <Pagination

@@ -26,22 +26,19 @@ export const reissueToken = createAsyncThunk(
   }
 );
 
-export const logout = createAsyncThunk(
-  "auth/logout",
-  async (_, thunkAPI) => {
-    try {
-      await authAPI.logout();
-      return true;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error.response?.data || "Logout failed");
-    }
+export const logout = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
+  try {
+    await authAPI.logout();
+    return true;
+  } catch (error) {
+    return thunkAPI.rejectWithValue(error.response?.data || "Logout failed");
   }
-);
+});
 
-const storedToken   = localStorage.getItem("accessToken");
+const storedToken = localStorage.getItem("accessToken");
 const storedUserJson = localStorage.getItem("user");
 const storedCompanyJson = localStorage.getItem("company");
-const initialUser    = storedUserJson    ? JSON.parse(storedUserJson)    : null;
+const initialUser = storedUserJson ? JSON.parse(storedUserJson) : null;
 const initialCompany = storedCompanyJson ? JSON.parse(storedCompanyJson) : null;
 
 const authSlice = createSlice({
@@ -178,3 +175,5 @@ const authSlice = createSlice({
 
 export const { clearAuthState } = authSlice.actions;
 export default authSlice.reducer;
+export const getAccessToken = (state) => state.auth.accessToken;
+export const getUser = (state) => state.auth.user;

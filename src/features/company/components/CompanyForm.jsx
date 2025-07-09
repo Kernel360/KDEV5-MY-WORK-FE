@@ -11,11 +11,13 @@ import {
   MenuItem,
 } from "@mui/material";
 import { InfoOutlined } from "@mui/icons-material";
+import CompanyImageUploadSection from "./CompanyImageUploadSection";
 
 export default function CompanyForm({
   form,
   handleChange,
   isSubmitted = false,
+  imageUploadProps,
 }) {
   return (
     <Box
@@ -162,25 +164,7 @@ export default function CompanyForm({
           </Box>
 
           {/* 4) 로고 이미지 */}
-          {/* <Box>
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <Typography variant="subtitle1" fontWeight={600}>
-                4. 로고 이미지
-              </Typography>
-              <Tooltip title="회사 로고 이미지 경로를 입력하세요.">
-                <InfoOutlined fontSize="small" color="action" />
-              </Tooltip>
-            </Stack>
-            <Divider sx={{ mt: 1, mb: 2 }} />
-
-            <TextField
-              label="로고 이미지 경로"
-              placeholder="/images/company-logo.png"
-              value={form.logoImagePath || ""}
-              onChange={handleChange("logoImagePath")}
-              fullWidth
-            />
-          </Box> */}
+          <CompanyImageUploadSection {...imageUploadProps} />
         </Stack>
       </Paper>
     </Box>

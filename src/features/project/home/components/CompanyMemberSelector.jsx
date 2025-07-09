@@ -19,6 +19,10 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
 import CompanyMemberList from "./CompanyMemberList";
+import { updateProjectManager } from "@/api/projectMember";
+import ConfirmDialog from "@/components/common/confirmDialog/ConfirmDialog";
+import AlertMessage from "@/components/common/alertMessage/AlertMessage";
+
 /**
  * @param {string} companyId
  * @param {'고객사'|'개발사'} companyType
@@ -36,44 +40,42 @@ export default function CompanyMemberSelector({
   const [assigned, setAssigned] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [open, setOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmMsg, setConfirmMsg] = useState("");
+  const [pendingEmp, setPendingEmp] = useState(null);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMsg, setAlertMsg] = useState("");
+
+  const extractMembers = (payload) =>
+    Array.isArray(payload) ? payload : payload?.members || [];
 
   useEffect(() => {
-    if (companyId && projectId) {
-      dispatch(fetchCompanyMembersInProject({ projectId, companyId })).then(
-        (action) => {
-          if (Array.isArray(action.payload)) {
-            setAssigned(action.payload);
-          } else if (action.payload?.members) {
-            setAssigned(action.payload.members);
-          }
-        }
-      );
-    }
+    if (!companyId || !projectId) return;
+    dispatch(fetchCompanyMembersInProject({ projectId, companyId })).then(
+      (action) => {
+        const members = extractMembers(action.payload);
+        setAssigned(members);
+      }
+    );
   }, [companyId, projectId, dispatch]);
 
   const handleOpen = () => {
     setOpen(true);
-    if (companyId && projectId) {
-      setLoading(true);
-      dispatch(fetchProjectMemberList({ companyId, projectId }))
-        .then((action) => {
-          if (Array.isArray(action.payload)) {
-            setOptions(action.payload);
-          } else if (action.payload?.members) {
-            setOptions(action.payload.members);
-          }
-        })
-        .finally(() => setLoading(false));
-    }
+    if (!companyId || !projectId) return;
+
+    setLoading(true);
+    dispatch(fetchProjectMemberList({ companyId, projectId }))
+      .then((action) => setOptions(extractMembers(action.payload)))
+      .finally(() => setLoading(false));
   };
 
   const handleChange = (_e, newValue) => {
     const additions = newValue.filter(
       (nv) => !assigned.some((a) => a.memberId === nv.memberId)
     );
-    additions.forEach((emp) => {
-      dispatch(addMemberToProject({ projectId, memberId: emp.memberId }));
-    });
+    additions.forEach((emp) =>
+      dispatch(addMemberToProject({ projectId, memberId: emp.memberId }))
+    );
     setAssigned(newValue);
     setOpen(false);
   };
@@ -83,7 +85,34 @@ export default function CompanyMemberSelector({
     setAssigned((prev) => prev.filter((emp) => emp.memberId !== memberId));
   };
 
-  const getInitial = (name) => (name && name.length ? name[0] : "?");
+  const toggleManager = (emp) => {
+    const msg = emp.isManager
+      ? "매니저를 해임 하시겠습니까?"
+      : "매니저를 임명 하시겠습니까?";
+    setConfirmMsg(msg);
+    setPendingEmp(emp);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirm = async () => {
+    if (!pendingEmp) return;
+    try {
+      await updateProjectManager({ memberId: pendingEmp.id, projectId });
+      setAssigned((prev) =>
+        prev.map((e) =>
+          e.memberId === pendingEmp.id ? { ...e, isManager: !e.isManager } : e
+        )
+      );
+    } catch {
+      setAlertMsg("매니저 상태 변경에 실패했습니다.");
+      setAlertOpen(true);
+    } finally {
+      setConfirmOpen(false);
+      setPendingEmp(null);
+    }
+  };
+
+  const getInitial = (name) => (name?.length ? name[0] : "?");
 
   return (
     <Box>
@@ -91,38 +120,34 @@ export default function CompanyMemberSelector({
         multiple
         open={open}
         onOpen={handleOpen}
-        disableClearable
-        clearIcon={null}
         onClose={() => setOpen(false)}
         options={options}
         loading={loading}
+        value={assigned}
+        inputValue={inputValue}
+        disableClearable
+        clearIcon={null}
         getOptionLabel={(opt) => opt.memberName}
         isOptionEqualToValue={(opt, val) => opt.memberId === val.memberId}
-        value={assigned}
         onChange={handleChange}
-        inputValue={inputValue}
-        onInputChange={(_, newInput) => setInputValue(newInput)}
-        renderOption={(props, option, { selected }) => {
-          const { key, ...rest } = props;
-          return (
-            <Box
-              component="li"
-              key={key}
-              {...rest}
-              sx={{ display: "flex", alignItems: "center", py: 0.5 }}
-            >
-              <Avatar sx={{ width: 30, height: 30, mr: 1 }}>
-                {getInitial(option.memberName)}
-              </Avatar>
-              <Typography sx={{ flexGrow: 1 }}>{option.memberName}</Typography>
-              {selected && (
-                <Typography variant="caption" color="primary">
-                  선택됨
-                </Typography>
-              )}
-            </Box>
-          );
-        }}
+        onInputChange={(_, val) => setInputValue(val)}
+        renderOption={(props, option, { selected }) => (
+          <Box
+            component="li"
+            {...props}
+            sx={{ display: "flex", alignItems: "center", py: 0.5 }}
+          >
+            <Avatar sx={{ width: 30, height: 30, mr: 1 }}>
+              {getInitial(option.memberName)}
+            </Avatar>
+            <Typography sx={{ flexGrow: 1 }}>{option.memberName}</Typography>
+            {selected && (
+              <Typography variant="caption" color="primary">
+                선택됨
+              </Typography>
+            )}
+          </Box>
+        )}
         renderTags={() => null}
         renderInput={(params) => (
           <TextField
@@ -159,10 +184,28 @@ export default function CompanyMemberSelector({
             id: emp.memberId,
             name: emp.memberName,
             email: emp.email,
+            isManager: emp.isManager,
+            memberRole: emp.memberRole,
           }))}
           onRemove={handleRemove}
+          onToggleManager={toggleManager}
         />
       </Box>
+      <ConfirmDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleConfirm}
+        title="매니저 임명/해임"
+        description={confirmMsg}
+        confirmText="확인"
+        confirmKind="primary"
+      />
+      <AlertMessage
+        open={alertOpen}
+        onClose={() => setAlertOpen(false)}
+        message={alertMsg}
+        severity="error"
+      />
     </Box>
   );
 }
