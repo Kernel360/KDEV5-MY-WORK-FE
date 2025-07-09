@@ -1,6 +1,9 @@
 import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUnreadNotificationCount } from "@/features/notifications/notificationSlice";
+import {
+  setUnreadNotificationCount,
+  receiveNotification,
+} from "@/features/notifications/notificationSlice";
 import { getAccessToken, getUser } from "@/features/auth/authSlice";
 import { EventSourcePolyfill } from "event-source-polyfill";
 
@@ -20,29 +23,38 @@ export default function useNotificationSSE(enabled = true) {
     eventSourceRef.current?.close();
 
     const eventSource = new EventSourcePolyfill(SSE_URL, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
       withCredentials: true,
     });
 
     eventSourceRef.current = eventSource;
 
+    const handleUnreadCount = (event) => {
+      const count = Number(event.data);
+      if (!isNaN(count)) {
+        dispatch(setUnreadNotificationCount(count));
+      }
+    };
+
+    const handleNotification = (event) => {
+      try {
+        const notif = JSON.parse(event.data);
+        dispatch(receiveNotification(notif));
+      } catch {}
+    };
+
+    eventSource.addEventListener(
+      "unread-notification-count",
+      handleUnreadCount
+    );
     eventSource.onopen = () => {};
 
-    eventSource.onerror = (error) => {};
-
-    eventSource.addEventListener("unread-notification-count", (event) => {
-      try {
-        const count = Number(event.data);
-        if (!isNaN(count)) {
-          dispatch(fetchUnreadNotificationCount());
-        }
-      } catch (err) {}
-    });
+    eventSource.onerror = (error) => {
+      console.error("SSE Error:", error);
+    };
 
     return () => {
       eventSource.close();
     };
-  }, [enabled, isLoggedIn, token]);
+  }, [enabled, isLoggedIn, token, dispatch]);
 }

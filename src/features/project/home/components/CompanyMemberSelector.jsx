@@ -18,9 +18,10 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
-import CustomButton from "@/components/common/customButton/CustomButton";
 import CompanyMemberList from "./CompanyMemberList";
 import { updateProjectManager } from "@/api/projectMember";
+import ConfirmDialog from "@/components/common/confirmDialog/ConfirmDialog";
+import AlertMessage from "@/components/common/alertMessage/AlertMessage";
 
 /**
  * @param {string} companyId
@@ -39,6 +40,11 @@ export default function CompanyMemberSelector({
   const [assigned, setAssigned] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [open, setOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmMsg, setConfirmMsg] = useState("");
+  const [pendingEmp, setPendingEmp] = useState(null);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMsg, setAlertMsg] = useState("");
 
   const extractMembers = (payload) =>
     Array.isArray(payload) ? payload : payload?.members || [];
@@ -79,21 +85,30 @@ export default function CompanyMemberSelector({
     setAssigned((prev) => prev.filter((emp) => emp.memberId !== memberId));
   };
 
-  const toggleManager = async (emp) => {
-    const confirmMsg = emp.isManager
+  const toggleManager = (emp) => {
+    const msg = emp.isManager
       ? "매니저를 해임 하시겠습니까?"
       : "매니저를 임명 하시겠습니까?";
-    if (!window.confirm(confirmMsg)) return;
+    setConfirmMsg(msg);
+    setPendingEmp(emp);
+    setConfirmOpen(true);
+  };
 
+  const handleConfirm = async () => {
+    if (!pendingEmp) return;
     try {
-      await updateProjectManager({ memberId: emp.id, projectId });
+      await updateProjectManager({ memberId: pendingEmp.id, projectId });
       setAssigned((prev) =>
         prev.map((e) =>
-          e.memberId === emp.id ? { ...e, isManager: !e.isManager } : e
+          e.memberId === pendingEmp.id ? { ...e, isManager: !e.isManager } : e
         )
       );
     } catch {
-      alert("매니저 상태 변경에 실패했습니다.");
+      setAlertMsg("매니저 상태 변경에 실패했습니다.");
+      setAlertOpen(true);
+    } finally {
+      setConfirmOpen(false);
+      setPendingEmp(null);
     }
   };
 
@@ -176,6 +191,21 @@ export default function CompanyMemberSelector({
           onToggleManager={toggleManager}
         />
       </Box>
+      <ConfirmDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleConfirm}
+        title="매니저 임명/해임"
+        description={confirmMsg}
+        confirmText="확인"
+        confirmKind="primary"
+      />
+      <AlertMessage
+        open={alertOpen}
+        onClose={() => setAlertOpen(false)}
+        message={alertMsg}
+        severity="error"
+      />
     </Box>
   );
 }

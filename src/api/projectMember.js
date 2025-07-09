@@ -68,5 +68,5 @@ export function getProjectMemberList(companyId, projectId) {
  * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<ProjectManagerUpdateWebResponse>
  */
 export function updateProjectManager(data) {
-  return api.put("/api/project-member/manager", data);
+  return api.put("/api/project-member/update-project-manager", data);
 }
