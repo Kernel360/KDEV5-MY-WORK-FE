@@ -127,9 +127,11 @@ export default function CompanyMemberList({
                       size="small"
                       variant="filled"
                       sx={{
-                        fontSize: 11,
-                        height: 20,
+                        fontSize: 12,
+                        height: 22,
                         ...getRoleChipStyle(emp.memberRole),
+                        borderRadius: 1,
+                        fontWeight: 500,
                       }}
                     />
                   )}
@@ -139,9 +141,15 @@ export default function CompanyMemberList({
                     <Chip
                       label="매니저"
                       size="small"
-                      color="primary"
                       variant="filled"
-                      sx={{ fontSize: 12, height: 22 }}
+                      sx={{
+                        fontSize: 12,
+                        height: 22,
+                        bgcolor: theme.palette.status.error.bg,
+                        color: theme.palette.status.error.main,
+                        borderRadius: 1,
+                        fontWeight: 500,
+                      }}
                     />
                   )}
                 </Box>
@@ -169,14 +177,12 @@ export default function CompanyMemberList({
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        {!menuTarget?.isManager &&
-          menuTarget?.memberRole !== "USER" &&
-          onToggleManager && (
-            <MenuItem onClick={handleToggleManager}>
-              <PersonAddAltRoundedIcon fontSize="small" sx={{ mr: 1 }} />
-              매니저로 임명
-            </MenuItem>
-          )}
+        {onToggleManager && menuTarget?.memberRole !== "USER" && (
+          <MenuItem onClick={handleToggleManager}>
+            <PersonAddAltRoundedIcon fontSize="small" sx={{ mr: 1 }} />
+            {menuTarget?.isManager ? "매니저 해임" : "매니저로 임명"}
+          </MenuItem>
+        )}
         <MenuItem
           onClick={handleRemove}
           sx={{ color: theme.palette.error.main }}
