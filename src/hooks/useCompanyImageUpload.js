@@ -86,6 +86,34 @@ export default function useCompanyImageUpload() {
     }
   };
 
+  const handleImageDeleteFromServerOnly = async (companyId) => {
+    if (!companyId) {
+      console.log('handleImageDeleteFromServerOnly: companyId 없음');
+      return;
+    }
+
+    try {
+      console.log('=== 서버에서만 이미지 삭제 시작 ===');
+      console.log('회사ID:', companyId);
+      
+      setUploadStatus("uploading"); // 삭제 중 상태 표시
+      setError(null);
+
+      await deleteCompanyImage(companyId);
+      
+      // 로컬 상태는 초기화하지 않음 (미리보기 유지)
+      setUploadStatus("idle");
+      
+      console.log('=== 서버에서만 이미지 삭제 성공 ===');
+      
+    } catch (error) {
+      console.error('서버에서 이미지 삭제 실패:', error);
+      setError('이미지 삭제에 실패했습니다.');
+      setUploadStatus("error");
+      throw error;
+    }
+  };
+
   const handleImageUpload = async (file, companyId) => {
     if (!file || !companyId) {
       console.log('handleImageUpload: 파일 또는 companyId 없음', { file: file?.name, companyId });
@@ -138,6 +166,7 @@ export default function useCompanyImageUpload() {
     handleImageSelect,
     handleImageDelete,
     handleImageDeleteFromServer,
+    handleImageDeleteFromServerOnly,
     handleImageReplace,
     handleImageUpload,
     resetImageUpload,
