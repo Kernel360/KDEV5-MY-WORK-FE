@@ -50,6 +50,7 @@ export default function CompanyFormPage() {
     handleImageSelect: originalHandleImageSelect,
     handleImageDelete: originalHandleImageDelete,
     handleImageDeleteFromServer,
+    handleImageDeleteFromServerOnly,
     handleImageUpload,
     resetImageUpload,
   } = useCompanyImageUpload();
@@ -217,13 +218,13 @@ export default function CompanyFormPage() {
 
   const performUploadWithDelete = async (file, companyId) => {
     try {
-      // 1. 기존 이미지가 있으면 먼저 삭제
+      // 1. 기존 이미지가 있으면 먼저 삭제 (미리보기 유지)
       if (form.logoImagePath) {
         console.log('=== 기존 이미지 삭제 시작 ===');
         console.log('기존 이미지 경로:', form.logoImagePath);
         console.log('회사ID:', companyId);
         
-        await handleImageDeleteFromServer(companyId);
+        await handleImageDeleteFromServerOnly(companyId);
         console.log('기존 이미지 삭제 완료');
         
         // 폼에서 기존 이미지 경로 제거
