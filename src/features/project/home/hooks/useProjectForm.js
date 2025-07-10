@@ -8,6 +8,7 @@ import {
 import {
   createProjectStages,
   updateProjectStages,
+  fetchProjectStages,
 } from "@/features/project/slices/projectStepSlice";
 
 export default function useProjectForm(projectId) {
@@ -33,17 +34,28 @@ export default function useProjectForm(projectId) {
   useEffect(() => {
     if (projectId) {
       dispatch(fetchProjectById(projectId));
+      dispatch(fetchProjectStages(projectId));
     }
   }, [dispatch, projectId]);
 
   useEffect(() => {
-    const normalized = fetchedSteps.map((s) => ({
-      ...s,
-      orderNumber: s.orderNumber ?? s.orderNum,
-    }));
-    const sorted = normalized.sort((a, b) => a.orderNumber - b.orderNumber);
-    setSteps(sorted);
-    setInitialSteps((prev) => (prev.length === 0 ? sorted : prev));
+    if (fetchedSteps.length > 0 && initialSteps.length === 0) {
+      const normalized = fetchedSteps.map((s) => ({
+        ...s,
+        orderNumber: s.orderNumber ?? s.orderNum,
+      }));
+      const sorted = normalized.sort((a, b) => a.orderNumber - b.orderNumber);
+
+      setSteps(sorted);
+      setInitialSteps(sorted);
+    } else {
+      const normalized = fetchedSteps.map((s) => ({
+        ...s,
+        orderNumber: s.orderNumber ?? s.orderNum,
+      }));
+      const sorted = normalized.sort((a, b) => a.orderNumber - b.orderNumber);
+      setSteps(sorted);
+    }
   }, [fetchedSteps]);
 
   useEffect(() => {
@@ -110,41 +122,46 @@ export default function useProjectForm(projectId) {
 
       await dispatch(updateProject(payload)).unwrap();
 
-      if (stepEdited) {
-        await stepSaveFn();
-        setStepEdited(false);
-      }
+      const newSteps = steps.filter((s) => s.isNew);
+      const existingSteps = steps.filter((s) => !s.isNew);
 
-      if (pendingStep) {
-        const nextOrder = (fetchedSteps?.length ?? 0) + 1;
+      if (newSteps.length > 0) {
         await dispatch(
           createProjectStages({
             projectId,
-            projectSteps: [
-              {
-                title: pendingStep,
-                orderNumber: nextOrder,
-              },
-            ],
+            projectSteps: newSteps.map((s) => ({
+              title: s.title,
+              orderNumber: s.orderNumber,
+            })),
           })
         ).unwrap();
-        setPendingStep(null);
       }
 
-      // reload latest project info after save
+      if (stepEdited || newSteps.length > 0) {
+        await dispatch(
+          updateProjectStages({
+            projectId,
+            projectStepUpdateWebRequests: existingSteps.map(
+              ({ projectStepId, title, orderNumber }) => ({
+                projectStepId,
+                title,
+                orderNumber,
+              })
+            ),
+          })
+        ).unwrap();
+      }
+
+      await dispatch(fetchProjectStages(projectId)).unwrap();
+
+      setStepEdited(false);
+      setPendingStep(null);
+      setInitialSteps([...existingSteps, ...newSteps]);
       await dispatch(fetchProjectById(projectId));
     } catch (err) {
       console.error("프로젝트 저장 실패:", err);
     }
-  }, [
-    dispatch,
-    projectId,
-    values,
-    stepEdited,
-    stepSaveFn,
-    pendingStep,
-    fetchedSteps,
-  ]);
+  }, [dispatch, projectId, values, steps, stepEdited]);
 
   return {
     loading,
