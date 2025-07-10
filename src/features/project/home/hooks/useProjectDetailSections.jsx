@@ -1,8 +1,6 @@
 import React from "react";
-import { Typography, Tooltip, IconButton } from "@mui/material";
 import ProjectStepManager from "../components/ProjectStepManager/ProjectStepManager";
 import ProjectBasicInfoSectionContent from "../components/ProjectBasicInfoSectionContent";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CompanyMemberSectionContent from "../components/CompanyMemberSectionContent";
 
 const ROLE_SYSTEM_ADMIN = "ROLE_SYSTEM_ADMIN";
@@ -12,34 +10,18 @@ const ROLE_CLIENT_ADMIN = "ROLE_CLIENT_ADMIN";
 export default function useProjectDetailSections(
   project,
   memberRole,
-  onAddStep,
   isEditable,
-  projectName,
-  setProjectName,
-  projectDetail,
-  setProjectDetail,
-  periodStart,
-  setPeriodStart,
-  periodEnd,
-  setPeriodEnd,
-  projectAmount,
-  setProjectAmount,
-  projectStep,
-  setProjectStep,
+  values,
+  setField,
   setStepEdited,
-  setStepSaveFn
+  setStepSaveFn,
+  steps,
+  setSteps,
+  initialSteps,
+  setPendingStep
 ) {
   const hasRole = (section) =>
     !section.roles || section.roles.includes(memberRole);
-
-  const renderInfoRow = (label, value) => (
-    <>
-      <Typography variant="body2" color="text.secondary">
-        {label}
-      </Typography>
-      <Typography variant="body1">{value || "-"}</Typography>
-    </>
-  );
 
   const rawSections = [
     {
@@ -50,18 +32,18 @@ export default function useProjectDetailSections(
         <ProjectBasicInfoSectionContent
           project={project}
           isEditable={isEditable}
-          projectName={projectName}
-          setProjectName={setProjectName}
-          projectDetail={projectDetail}
-          setProjectDetail={setProjectDetail}
-          periodStart={periodStart}
-          setPeriodStart={setPeriodStart}
-          periodEnd={periodEnd}
-          setPeriodEnd={setPeriodEnd}
-          projectAmount={projectAmount}
-          setProjectAmount={setProjectAmount}
-          projectStep={projectStep}
-          setProjectStep={setProjectStep}
+          projectName={values.name}
+          setProjectName={(val) => setField("name", val)}
+          projectDetail={values.detail}
+          setProjectDetail={(val) => setField("detail", val)}
+          periodStart={values.startAt}
+          setPeriodStart={(val) => setField("startAt", val)}
+          periodEnd={values.endAt}
+          setPeriodEnd={(val) => setField("endAt", val)}
+          projectAmount={values.projectAmount}
+          setProjectAmount={(val) => setField("projectAmount", val)}
+          projectStep={values.step}
+          setProjectStep={(val) => setField("step", val)}
         />
       ),
     },
@@ -70,17 +52,14 @@ export default function useProjectDetailSections(
       roles: [ROLE_SYSTEM_ADMIN, ROLE_DEV_ADMIN],
       title: "프로젝트 단계 관리",
       tooltip: "단계를 생성·수정·삭제·조회할 수 있습니다.",
-      action: (
-        <Tooltip title="단계 추가">
-          <IconButton size="small" color="primary" onClick={onAddStep}>
-            <AddRoundedIcon />
-          </IconButton>
-        </Tooltip>
-      ),
       content: (
         <ProjectStepManager
+          steps={steps}
+          setSteps={setSteps}
+          initialSteps={initialSteps}
           onEditedChange={setStepEdited}
           onSaveChange={setStepSaveFn}
+          onAddNewPendingStep={setPendingStep}
         />
       ),
     },
