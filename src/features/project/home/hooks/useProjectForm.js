@@ -30,14 +30,12 @@ export default function useProjectForm(projectId) {
   const [stepSaveFn, setStepSaveFn] = useState(() => async () => {});
   const [pendingStep, setPendingStep] = useState(null);
 
-  // fetch project
   useEffect(() => {
     if (projectId) {
       dispatch(fetchProjectById(projectId));
     }
   }, [dispatch, projectId]);
 
-  // fetch steps → normalize
   useEffect(() => {
     const normalized = fetchedSteps.map((s) => ({
       ...s,
@@ -48,7 +46,6 @@ export default function useProjectForm(projectId) {
     setInitialSteps((prev) => (prev.length === 0 ? sorted : prev));
   }, [fetchedSteps]);
 
-  // set initial form values from project
   useEffect(() => {
     if (project) {
       setValues({
