@@ -75,7 +75,7 @@ export function getProjectMembers(params) {
  * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<ProjectStatusUpdateWebResponse>
  */
 export function updateProjectStatus(projectId, status) {
-  return api.post("/api/projects/project-status", null, {
+  return api.put("/api/projects/project-status", null, {
     params: { projectId, status },
   });
 }
