@@ -40,6 +40,7 @@ export default function ProjectApprovalsPage() {
   const [selected, setSelected] = useState("전체");
   const [selectedItem, setSelectedItem] = useState(null);
   const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
+  const companyType = useSelector((state) => state.auth.company?.type);
 
   const { progressList = [], checklistItems = [] } = useSelector(
     (state) => state.checklist
@@ -112,12 +113,14 @@ export default function ProjectApprovalsPage() {
       />
 
       <Box display="flex" justifyContent="flex-end" mb={2}>
-        <CustomButton
-          variant="contained"
-          onClick={() => setCreateDrawerOpen(true)}
-        >
-          체크리스트 작성
-        </CustomButton>
+        {(companyType === "DEV" || companyType === "SYSTEM") && (
+          <CustomButton
+            variant="contained"
+            onClick={() => setCreateDrawerOpen(true)}
+          >
+            체크리스트 작성
+          </CustomButton>
+        )}
       </Box>
 
       <Box
