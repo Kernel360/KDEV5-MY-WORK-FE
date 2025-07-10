@@ -7,7 +7,7 @@ import ConfirmDialog from "@/components/common/confirmDialog/ConfirmDialog";
 import { fetchCompanies, deleteCompany } from "@/features/company/companySlice";
 
 const columns = [
-  { key: "companyName", label: "회사명", type: "logo", searchable: true },
+  { key: "companyName", label: "회사명", type: "text", searchable: true },
   {
     key: "businessNumber",
     label: "사업자 번호",
