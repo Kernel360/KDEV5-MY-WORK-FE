@@ -74,46 +74,9 @@ export default function ProjectStepManager({
     }
 
     if (typeof onSaveChange === "function") {
-      onSaveChange(() => async () => {
-        const newSteps = orderedSteps.filter((s) => s.isNew);
-        const existingSteps = orderedSteps.filter((s) => !s.isNew);
-
-        if (newSteps.length > 0) {
-          await dispatch(
-            createProjectStages({
-              projectId,
-              projectSteps: newSteps.map((s, i) => ({
-                title: s.title,
-                orderNumber: i + 1 + existingSteps.length,
-              })),
-            })
-          );
-        }
-
-        await dispatch(
-          updateProjectStages({
-            projectId,
-            projectStepUpdateWebRequests: existingSteps.map(
-              ({ projectStepId, title, orderNumber }) => ({
-                projectStepId,
-                title,
-                orderNumber,
-              })
-            ),
-          })
-        );
-
-        setOriginalSteps([...existingSteps, ...newSteps]);
-      });
+      onSaveChange(() => orderedSteps); // 👉 저장해야 할 steps만 반환
     }
-  }, [
-    isStepEdited,
-    orderedSteps,
-    dispatch,
-    projectId,
-    onEditedChange,
-    onSaveChange,
-  ]);
+  }, [isStepEdited, orderedSteps, onEditedChange, onSaveChange]);
 
   const sensors = useSensors(useSensor(PointerSensor));
   const handleDragEnd = ({ active, over }) => {
@@ -144,7 +107,8 @@ export default function ProjectStepManager({
         ...s,
         title: updatedTitle,
         orderNumber: idx + 1,
-        isEdit: isTarget && s.title !== updatedTitle ? true : s.isEdit,
+        isEdit: s.isNew ? false : isTarget && s.title !== updatedTitle,
+        isNew: s.isNew,
       };
     });
     setOrderedSteps(updated);
