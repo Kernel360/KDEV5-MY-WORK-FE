@@ -7,11 +7,13 @@ import {
   updateProject,
 } from "@/features/project/slices/projectSlice";
 import { fetchCompanyNamesByType } from "@/features/company/companySlice";
+import { createProjectStages } from "@/features/project/slices/projectStepSlice";
 import { Button, Stack, Box } from "@mui/material";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
 import ProjectForm from "../components/ProjectForm";
 import usePermission from "@/hooks/usePermission";
+import { v4 as uuidv4 } from "uuid";
 
 export default function ProjectFormPage() {
   const { id: projectId } = useParams();
@@ -42,6 +44,12 @@ export default function ProjectFormPage() {
     clientCompanyId: "",
     projectAmount: "",
   });
+
+  const [steps, setSteps] = useState([
+    { projectStepId: uuidv4(), title: "기획", orderNumber: 1 },
+    { projectStepId: uuidv4(), title: "분석", orderNumber: 2 },
+    { projectStepId: uuidv4(), title: "설계", orderNumber: 3 },
+  ]);
 
   useEffect(() => {
     if (isEdit) {
@@ -92,7 +100,19 @@ export default function ProjectFormPage() {
         await dispatch(updateProject({ id: projectId, ...payload })).unwrap();
         navigate(`/projects/${projectId}`);
       } else {
-        await dispatch(createProject(payload)).unwrap();
+        // 1. 프로젝트 생성
+        const res = await dispatch(createProject(payload)).unwrap();
+        const newProjectId = res.projectId || res.id;
+        // 2. 프로젝트 단계 생성
+        await dispatch(
+          createProjectStages({
+            projectId: newProjectId,
+            projectSteps: steps.map((s, idx) => ({
+              title: s.title,
+              orderNumber: idx + 1,
+            })),
+          })
+        ).unwrap();
         navigate("/projects");
       }
     } catch (err) {
@@ -114,6 +134,8 @@ export default function ProjectFormPage() {
         <ProjectForm
           form={form}
           handleChange={handleChange}
+          steps={steps}
+          setSteps={setSteps}
           handleSubmit={handleSubmit}
           onCancel={handleCancel}
           loading={projectLoading}

@@ -18,6 +18,7 @@ import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import { STATUS_OPTIONS } from "@/utils/statusMaps";
+import ProjectStepManager from "../components/ProjectStepManager/ProjectStepManager";
 
 export default function ProjectForm({
   form,
@@ -25,6 +26,8 @@ export default function ProjectForm({
   clientCompanies = [],
   developerCompanies = [],
   isEdit = false,
+  steps = [],
+  setSteps = () => {},
 }) {
   const [amountError, setAmountError] = React.useState("");
 
@@ -274,6 +277,26 @@ export default function ProjectForm({
                 />
               </Grid>
             </Grid>
+          </Box>
+
+          {/* 5) 프로젝트 스탭 */}
+          <Box>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Typography variant="subtitle1" fontWeight={600}>
+                5. 프로젝트 단계 관리
+              </Typography>
+              <Tooltip title="프로젝트의 단계를 입력, 수정, 순서 변경할 수 있습니다.">
+                <InfoOutlined fontSize="small" color="action" />
+              </Tooltip>
+            </Stack>
+            <Divider sx={{ mt: 1, mb: 2 }} />
+            <ProjectStepManager
+              steps={steps}
+              setSteps={setSteps}
+              initialSteps={steps}
+              onEditedChange={() => {}}
+              onSaveChange={() => {}}
+            />
           </Box>
         </Stack>
       </Paper>
