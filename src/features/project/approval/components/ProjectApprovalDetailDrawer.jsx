@@ -31,6 +31,7 @@ export default function ProjectApprovalDetailDrawer({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const dispatch = useDispatch();
+  const companyType = useSelector((state) => state.auth.company?.type);
   const { id: projectId } = useParams();
 
   const { current: checkList, error } = useSelector((state) => state.checklist);
@@ -97,19 +98,23 @@ export default function ProjectApprovalDetailDrawer({
           <Stack spacing={4}>
             <ApprovalDetailHeader checkList={checkList} onClose={onClose} />
             <ApprovalDetailContent checkList={checkList} />
-            {["PENDING", "REQUEST_CHANGES"].includes(checkList.approval) && (
-              <ApprovalActionInput
-                approvalType={approvalType}
-                setApprovalType={setApprovalType}
-                reasonText={reasonText}
-                setReasonText={setReasonText}
-                onCancel={() => {
-                  setApprovalType(null);
-                  setReasonText("");
-                }}
-                onConfirm={handleConfirm}
-              />
-            )}
+            {[
+              "PENDING",
+              "REQUEST_CHANGES"
+            ].includes(checkList.approval) &&
+              (companyType === "CLIENT" || companyType === "SYSTEM") && (
+                <ApprovalActionInput
+                  approvalType={approvalType}
+                  setApprovalType={setApprovalType}
+                  reasonText={reasonText}
+                  setReasonText={setReasonText}
+                  onCancel={() => {
+                    setApprovalType(null);
+                    setReasonText("");
+                  }}
+                  onConfirm={handleConfirm}
+                />
+              )}
             <ApprovalHistoryList
               histories={histories}
               loading={historyLoading}
