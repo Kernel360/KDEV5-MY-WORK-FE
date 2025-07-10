@@ -1,4 +1,3 @@
-// src/components/member/MemberDetailPage.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -18,10 +17,8 @@ import { InfoOutlined } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
-import ConfirmDialog from "@/components/common/confirmDialog/ConfirmDialog";
 import CustomButton from "@/components/common/customButton/CustomButton";
 import CreateRoundedIcon from "@mui/icons-material/CreateRounded";
-import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import { getMemberById, deleteMember } from "@/api/member";
 import { getRoleLabel } from "@/utils/roleUtils";
 
@@ -45,11 +42,6 @@ export default function MemberDetailPage() {
       }
     })();
   }, [id]);
-
-  const handleDelete = async () => {
-    await deleteMember({ memberId: id });
-    navigate("/members");
-  };
 
   if (loading) {
     return (
@@ -81,13 +73,6 @@ export default function MemberDetailPage() {
         action={
           <Stack direction="row" spacing={1}>
             <CustomButton
-              kind="danger"
-              startIcon={<DeleteRoundedIcon />}
-              onClick={() => setConfirmOpen(true)}
-            >
-              삭제하기
-            </CustomButton>
-            <CustomButton
               startIcon={<CreateRoundedIcon />}
               onClick={() => navigate(`/members/${id}/edit`)}
             >
@@ -95,17 +80,6 @@ export default function MemberDetailPage() {
             </CustomButton>
           </Stack>
         }
-      />
-
-      <ConfirmDialog
-        open={confirmOpen}
-        title="회원을 삭제하시겠습니까?"
-        description="삭제 후에는 복구할 수 없습니다."
-        cancelText="취소"
-        confirmText="삭제하기"
-        confirmColor="error"
-        onClose={() => setConfirmOpen(false)}
-        onConfirm={handleDelete}
       />
 
       <Box
