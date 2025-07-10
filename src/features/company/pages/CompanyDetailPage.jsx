@@ -25,6 +25,7 @@ import { useTheme } from "@mui/material/styles";
 import CustomButton from "@/components/common/customButton/CustomButton";
 import CreateRoundedIcon from "@mui/icons-material/CreateRounded";
 import { ROLES } from "@/constants/roles";
+import Pagination from "@mui/material/Pagination";
 
 export default function CompanyDetailPage() {
   const theme = useTheme();
@@ -37,7 +38,7 @@ export default function CompanyDetailPage() {
   const userRole = useSelector((state) => state.auth.user?.role);
 
   const [members, setMembers] = useState([]);
-  const [totalCount, setTotalCount] = useState(0);
+  const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -49,13 +50,13 @@ export default function CompanyDetailPage() {
   useEffect(() => {
     if (!company?.companyId) return;
     setLoadingMembers(true);
-    getCompanyMembersByCompanyId(company.companyId)
+    getCompanyMembersByCompanyId(company.companyId, page, searchText)
       .then((res) => {
         setMembers(res.data.data.members);
-        setTotalCount(res.data.data.totalCount);
+        setTotal(res.data.data.total);
       })
       .finally(() => setLoadingMembers(false));
-  }, [company?.companyId]);
+  }, [company?.companyId, page, searchText]);
 
   const handleDelete = async () => {
     await dispatch(deleteCompany(id)).unwrap();
@@ -237,6 +238,14 @@ export default function CompanyDetailPage() {
                   </Stack>
                 ))}
               </Stack>
+              <Box sx={{ display: 'flex', justifyContent: 'end', mt: 2 }}>
+                <Pagination
+                  count={Math.ceil(total / 10)}
+                  page={page}
+                  onChange={(_, value) => setPage(value)}
+                  size="small"
+                />
+              </Box>
             </Box>
           </Stack>
         </Paper>

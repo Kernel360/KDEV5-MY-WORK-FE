@@ -86,8 +86,15 @@ export function getMemberProjects(memberId) {
 /**
  * 회사별 직원 목록 조회 (GET /api/companies/{companyId}/members)
  * @param {string} companyId - 조회할 회사 UUID
+ * @param {number} [page=1] - 페이지 번호 (1 이상)
+ * @param {string} [memberName=""] - 검색어 (이름 기준)
  * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<MemberListWebResponse>
  */
-export function getCompanyMembersByCompanyId(companyId) {
-  return api.get(`/api/companies/${companyId}/members`);
+export function getCompanyMembersByCompanyId(companyId, page = 1, memberName = "") {
+  return api.get(`/api/companies/${companyId}/members`, {
+    params: {
+      page,
+      memberName: memberName || undefined,
+    },
+  });
 }
