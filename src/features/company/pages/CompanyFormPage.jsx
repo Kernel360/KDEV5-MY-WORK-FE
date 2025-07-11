@@ -139,9 +139,13 @@ export default function CompanyFormPage() {
 
   const handleImageDelete = async () => {
     try {
-      // 기존 이미지가 서버에 있으면 서버에서 삭제
-      if (form.logoImagePath && form.id) {
-        console.log('서버에서 이미지 삭제 시도:', form.id);
+      // 수정 모드에서 기존 이미지가 서버에 있으면 서버에서 삭제
+      if (isEdit && form.logoImagePath && id) {
+        console.log('수정 모드: 서버에서 이미지 삭제 시도, 회사 ID:', id);
+        await handleImageDeleteFromServer(id);
+      } else if (!isEdit && form.logoImagePath && form.id) {
+        // 생성 모드에서 기존 이미지가 서버에 있으면 서버에서 삭제
+        console.log('생성 모드: 서버에서 이미지 삭제 시도, 회사 ID:', form.id);
         await handleImageDeleteFromServer(form.id);
       } else {
         // 서버에 업로드되지 않은 경우 로컬 상태만 초기화
@@ -171,9 +175,16 @@ export default function CompanyFormPage() {
     
     await originalHandleImageSelect(event);
     
-    // 회사 ID가 없으면 생성 대기
+    // 수정 모드에서는 바로 업로드 (이미 회사 ID가 있음)
+    if (isEdit && id) {
+      console.log('수정 모드: 바로 업로드 시작, 회사 ID:', id);
+      performUploadWithDelete(file, id);
+      return;
+    }
+    
+    // 생성 모드에서 회사 ID가 없으면 생성 대기
     if (!form.id) {
-      console.log('회사 ID가 없어서 업로드 대기');
+      console.log('생성 모드: 회사 ID가 없어서 업로드 대기');
       // 회사 ID가 생성될 때까지 대기
       const checkId = setInterval(() => {
         const currentFormId = form.id;
@@ -192,8 +203,8 @@ export default function CompanyFormPage() {
       return;
     }
     
-    // 바로 업로드 수행 (삭제 포함)
-    console.log('회사 ID 있음, 바로 업로드:', form.id);
+    // 생성 모드에서 회사 ID가 있으면 바로 업로드
+    console.log('생성 모드: 회사 ID 있음, 바로 업로드:', form.id);
     performUploadWithDelete(file, form.id);
   };
 
@@ -223,6 +234,7 @@ export default function CompanyFormPage() {
         console.log('=== 기존 이미지 삭제 시작 ===');
         console.log('기존 이미지 경로:', form.logoImagePath);
         console.log('회사ID:', companyId);
+        console.log('모드:', isEdit ? '수정' : '생성');
         
         await handleImageDeleteFromServerOnly(companyId);
         console.log('기존 이미지 삭제 완료');
@@ -237,6 +249,7 @@ export default function CompanyFormPage() {
       console.log('파일크기:', file.size);
       console.log('파일타입:', file.type);
       console.log('회사ID:', companyId);
+      console.log('모드:', isEdit ? '수정' : '생성');
       
       const uploadedUrl = await handleImageUpload(file, companyId);
       console.log('새 이미지 업로드 성공, URL:', uploadedUrl);
