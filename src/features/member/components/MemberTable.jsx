@@ -8,7 +8,7 @@ import AlertMessage from "@/components/common/alertMessage/AlertMessage";
 import { Box } from "@mui/material";
 
 const columns = [
-  { key: "name", label: "이름", type: "avatar", searchable: true },
+  { key: "name", label: "이름", type: "text", searchable: true },
   { key: "email", label: "이메일", type: "text", searchable: true },
   { key: "companyName", label: "회사", type: "text", searchable: false },
   { key: "position", label: "직책", type: "text", searchable: true },
@@ -67,19 +67,11 @@ export default function MemberTable() {
     }
   };
 
-  const drawMember = (members || []).map((p) => ({
-    ...p,
-    name: {
-      name: p.name,
-      src: `https://i.pravatar.cc/40?u=${p.id}`,
-    },
-  }));
-
   return (
     <Box>
       <CustomTable
         columns={columns}
-        rows={drawMember || []}
+        rows={members || []}
         onRowClick={(row) => {
           navigate(`/members/${row.id}`);
         }}
