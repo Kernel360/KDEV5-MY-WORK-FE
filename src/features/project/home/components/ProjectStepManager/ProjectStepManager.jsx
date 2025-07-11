@@ -103,19 +103,26 @@ export default function ProjectStepManager({
     const updated = orderedSteps.map((s, idx) => {
       const isTarget = s.projectStepId === editingStep.projectStepId;
       const updatedTitle = isTarget ? editingStep.title.trim() : s.title;
+
+      // 기존 isEdit 값을 기억해 두세요
+      const wasEdited = s.isEdit || false;
+
       return {
         ...s,
         title: updatedTitle,
         orderNumber: idx + 1,
-        isEdit: s.isNew ? false : isTarget && s.title !== updatedTitle,
+        // 새로 편집됐거나 이전에 편집된 적이 있으면 true
+        isEdit: s.isNew
+          ? false
+          : (isTarget && s.title !== updatedTitle) || wasEdited,
         isNew: s.isNew,
       };
     });
+
     setOrderedSteps(updated);
     setSteps(updated);
     setIsEditDialogOpen(false);
   };
-
   const handleConfirmAddStep = () => {
     const nextOrder = orderedSteps.length + 1;
     const newStep = {
