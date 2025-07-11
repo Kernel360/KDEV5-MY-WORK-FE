@@ -28,6 +28,22 @@ export default function MainLayout() {
   const [alertMessage, setAlertMessage] = useState("");
   const [alertSeverity, setAlertSeverity] = useState("info");
 
+  // 전역 알럿 함수 (기존 방식과 동일)
+  const showGlobalAlert = (message, severity = "info") => {
+    setAlertMessage(message);
+    setAlertSeverity(severity);
+    setAlertOpen(true);
+  };
+
+  // 전역 함수를 window 객체에 등록 (기존 방식과 동일)
+  useEffect(() => {
+    window.showGlobalAlert = showGlobalAlert;
+    
+    return () => {
+      delete window.showGlobalAlert;
+    };
+  }, []);
+
   useEffect(() => {
     if (isLoggedIn) {
       dispatch(fetchUnreadNotificationCount());
