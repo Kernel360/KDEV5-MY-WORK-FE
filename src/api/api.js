@@ -58,7 +58,10 @@ api.interceptors.response.use(
 
     // 403 Forbidden 처리
     if (error.response?.status === 403) {
-      window.location.replace("/forbidden");
+      // 전역 알럿 함수 직접 호출 (기존 방식과 동일)
+      if (window.showGlobalAlert) {
+        window.showGlobalAlert("권한이 부족합니다. 관리자에게 문의하세요.", "error");
+      }
       return Promise.reject(error);
     }
 
