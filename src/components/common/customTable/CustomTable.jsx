@@ -38,6 +38,7 @@ export default function CustomTable({
   secondaryFilter = null,
   onDelete,
   hideDeleteButton = false,
+  hideActionsColumn = false,
 }) {
   const { companyListOnlyIdName: companies = [] } = useSelector(
     (state) => state.company
@@ -59,11 +60,11 @@ export default function CustomTable({
 
   const fullColumns = [
     ...columns,
-    {
+    ...(hideActionsColumn ? [] : [{
       key: "__actions__",
       label: "관리",
       type: "actions",
-    },
+    }]),
   ];
 
   return (
@@ -224,7 +225,8 @@ export default function CustomTable({
                         {renderCell(col, row[col.key], row, theme, companies)}
                       </TableCell>
                     ))}
-                    {userRole === "ROLE_SYSTEM_ADMIN" &&
+                    {!hideActionsColumn && 
+                      userRole === "ROLE_SYSTEM_ADMIN" &&
                       !hideDeleteButton &&
                       !row.deleted && (
                         <TableCell key="__actions__" align="center">

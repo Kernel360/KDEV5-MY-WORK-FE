@@ -213,7 +213,7 @@ const LogsTable = () => {
           options: targetTypeFilterOptions,
           onChange: handleTargetTypeFilterChange,
         }}
-        hideDeleteButton={true}
+        hideActionsColumn={true}
       />
 
       <Dialog 
