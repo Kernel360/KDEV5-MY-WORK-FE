@@ -21,7 +21,7 @@ export default function useProjectForm(projectId) {
   const { current: project, loading } = useSelector((state) => state.project);
   const fetchedSteps = useSelector((state) => state.projectStep.items) || [];
 
-  // 기본 프로젝트 값
+  // 프로젝트 기본 값
   const [values, setValues] = useState({
     name: "",
     detail: "",
@@ -31,18 +31,19 @@ export default function useProjectForm(projectId) {
     step: "CONTRACT",
   });
 
-  // 프로젝트 단계 관리
+  // 단계 관리
   const [steps, setSteps] = useState([]);
   const [initialSteps, setInitialSteps] = useState([]);
   const [stepEdited, setStepEdited] = useState(false);
-  const [stepSaveFn, setStepSaveFn] = useState(() => async () => {}); // 초기 값 설정
   const [pendingStep, setPendingStep] = useState(null);
 
-  // 직원 상태 관리 (개발사, 고객사만 나누어 관리)
-  const [devAssigned, setDevAssigned] = useState([]); // 개발사 직원
-  const [clientAssigned, setClientAssigned] = useState([]); // 고객사 직원
+  // 직원(개발사/고객사) 관리
+  const [devAssigned, setDevAssigned] = useState([]);
+  const [clientAssigned, setClientAssigned] = useState([]);
+  const [initialDevAssigned, setInitialDevAssigned] = useState([]);
+  const [initialClientAssigned, setInitialClientAssigned] = useState([]);
 
-  // 프로젝트 및 단계 정보 불러오기
+  // 프로젝트 + 단계 조회
   useEffect(() => {
     if (projectId) {
       dispatch(fetchProjectById(projectId));
@@ -50,92 +51,73 @@ export default function useProjectForm(projectId) {
     }
   }, [dispatch, projectId]);
 
-  // 회사 직원 목록 불러오기 (개발사, 고객사)
+  // 회사 직원 조회
   useEffect(() => {
-    if (
-      !project?.devCompanyId ||
-      !project?.clientCompanyId ||
-      !project.projectId
-    )
-      return;
+    if (!project?.projectId) return;
 
-    // Fetch development company members
+    // 개발사 직원
     dispatch(
       fetchCompanyMembersInProject({
         projectId: project.projectId,
-        companyId: project?.devCompanyId,
+        companyId: project.devCompanyId,
       })
     ).then((action) => {
-      const devMembers = action.payload.members || [];
-      // isNew 값을 false로 설정하여 초기화
-      const devMembersWithSelection = devMembers.map((member) => ({
-        ...member,
-        isNew: false, // isNew를 false로 설정
-        isDelete: false, // isDelete를 false로 설정
+      const list = (action.payload.members || []).map((m) => ({
+        ...m,
+        isNew: false,
+        isDelete: false,
       }));
-
-      setDevAssigned(devMembersWithSelection);
+      setDevAssigned(list);
+      setInitialDevAssigned(list);
     });
 
-    // Fetch client company members
+    // 고객사 직원
     dispatch(
       fetchCompanyMembersInProject({
         projectId: project.projectId,
-        companyId: project?.clientCompanyId,
+        companyId: project.clientCompanyId,
       })
     ).then((action) => {
-      const clientMembers = action.payload.members || [];
-      // isNew 값을 false로 설정하여 초기화
-      const clientMembersWithSelection = clientMembers.map((member) => ({
-        ...member,
-        isNew: false, // isNew를 false로 설정
-        isDelete: false, // isDelete를 false로 설정
+      const list = (action.payload.members || []).map((m) => ({
+        ...m,
+        isNew: false,
+        isDelete: false,
       }));
-
-      setClientAssigned(clientMembersWithSelection);
+      setClientAssigned(list);
+      setInitialClientAssigned(list);
     });
   }, [dispatch, project]);
 
-  // 프로젝트 단계 정보 정리
+  // 단계 정리
   useEffect(() => {
-    if (fetchedSteps.length > 0 && initialSteps.length === 0) {
-      const normalized = fetchedSteps.map((s) => ({
-        ...s,
-        orderNumber: s.orderNumber ?? s.orderNum,
-      }));
-      const sorted = normalized.sort((a, b) => a.orderNumber - b.orderNumber);
-      setSteps(sorted);
+    const normalized = fetchedSteps.map((s) => ({
+      ...s,
+      orderNumber: s.orderNumber ?? s.orderNum,
+    }));
+    const sorted = normalized.sort((a, b) => a.orderNumber - b.orderNumber);
+    setSteps(sorted);
+    if (initialSteps.length === 0) {
       setInitialSteps(sorted);
-    } else {
-      const normalized = fetchedSteps.map((s) => ({
-        ...s,
-        orderNumber: s.orderNumber ?? s.orderNum,
-      }));
-      const sorted = normalized.sort((a, b) => a.orderNumber - b.orderNumber);
-      setSteps(sorted);
     }
   }, [fetchedSteps]);
 
-  // 프로젝트 데이터 세팅
+  // 프로젝트 기본값 세팅
   useEffect(() => {
-    if (project) {
-      setValues({
-        name: project.name ?? "",
-        detail: project.detail ?? "",
-        startAt: dayjs(project.startAt).format("YYYY-MM-DD") || "",
-        endAt: dayjs(project.endAt).format("YYYY-MM-DD") || "",
-        projectAmount: project.projectAmount ?? "",
-        step: project.step || "CONTRACT",
-      });
-    }
+    if (!project) return;
+    setValues({
+      name: project.name || "",
+      detail: project.detail || "",
+      startAt: dayjs(project.startAt).format("YYYY-MM-DD"),
+      endAt: dayjs(project.endAt).format("YYYY-MM-DD"),
+      projectAmount: project.projectAmount ?? "",
+      step: project.step || "CONTRACT",
+    });
   }, [project]);
 
-  // 프로젝트 필드 값 변경
-  const setField = (field, value) => {
+  const setField = (field, value) =>
     setValues((prev) => ({ ...prev, [field]: value }));
-  };
 
-  // 프로젝트가 수정되었는지 확인
+  // 변경 감지
   const isEdited = useMemo(() => {
     if (!project) return false;
 
@@ -147,36 +129,44 @@ export default function useProjectForm(projectId) {
       project.projectAmount !== values.projectAmount ||
       project.step !== values.step;
 
-    const employeeChanged =
-      devAssigned.some((emp) => emp.isNew || emp.isDeleted) ||
-      clientAssigned.some((emp) => emp.isNew || emp.isDeleted); // 직원 변경 감지 (새로 추가된 직원이나 삭제된 직원)
+    // 직원 변경: 새로 추가되거나 삭제 표시된 항목이 있으면 true
+    const devChanged = devAssigned.some((e) => e.isNew || e.isDelete);
+    const clientChanged = clientAssigned.some((e) => e.isNew || e.isDelete);
 
     return (
-      fieldsChanged || stepEdited || pendingStep !== null || employeeChanged
+      fieldsChanged ||
+      stepEdited ||
+      pendingStep != null ||
+      devChanged ||
+      clientChanged
     );
   }, [project, values, stepEdited, pendingStep, devAssigned, clientAssigned]);
 
-  // 프로젝트 값 초기화
+  // 리셋
   const reset = () => {
     if (!project) return;
-
+    // fields
     setValues({
-      name: project.name ?? "",
-      detail: project.detail ?? "",
-      startAt: dayjs(project.startAt).format("YYYY-MM-DD") || "",
-      endAt: dayjs(project.endAt).format("YYYY-MM-DD") || "",
+      name: project.name || "",
+      detail: project.detail || "",
+      startAt: dayjs(project.startAt).format("YYYY-MM-DD"),
+      endAt: dayjs(project.endAt).format("YYYY-MM-DD"),
       projectAmount: project.projectAmount ?? "",
       step: project.step || "CONTRACT",
     });
-
+    // 단계
     setSteps(initialSteps);
     setStepEdited(false);
     setPendingStep(null);
+    // 직원
+    setDevAssigned(initialDevAssigned);
+    setClientAssigned(initialClientAssigned);
   };
 
-  // 프로젝트 저장
+  // 저장
   const save = useCallback(async () => {
     try {
+      // 프로젝트 업데이트
       const payload = {
         id: projectId,
         name: values.name,
@@ -186,31 +176,28 @@ export default function useProjectForm(projectId) {
         projectAmount:
           values.projectAmount === "" ? null : Number(values.projectAmount),
         step: values.step,
-        deleted: false,
       };
-
       await dispatch(updateProject(payload)).unwrap();
 
+      // 단계 생성/업데이트
       const newSteps = steps.filter((s) => s.isNew);
-      const existingSteps = steps.filter((s) => !s.isNew);
-
-      if (newSteps.length > 0) {
+      const existSteps = steps.filter((s) => !s.isNew);
+      if (newSteps.length) {
         await dispatch(
           createProjectStages({
             projectId,
-            projectSteps: newSteps.map((s) => ({
-              title: s.title,
-              orderNumber: s.orderNumber,
+            projectSteps: newSteps.map(({ title, orderNumber }) => ({
+              title,
+              orderNumber,
             })),
           })
         ).unwrap();
       }
-
-      if (stepEdited || newSteps.length > 0) {
+      if (stepEdited || newSteps.length) {
         await dispatch(
           updateProjectStages({
             projectId,
-            projectStepUpdateWebRequests: existingSteps.map(
+            projectStepUpdateWebRequests: existSteps.map(
               ({ projectStepId, title, orderNumber }) => ({
                 projectStepId,
                 title,
@@ -221,29 +208,29 @@ export default function useProjectForm(projectId) {
         ).unwrap();
       }
 
-      // 새로 추가된 직원 처리
-      const newAssignedEmployees = [
-        ...devAssigned.filter((emp) => emp.isNew),
-        ...clientAssigned.filter((emp) => emp.isNew),
-      ];
-      newAssignedEmployees.forEach((emp) => {
-        if (!emp.memberId) return;
-        dispatch(addMemberToProject({ projectId, memberId: emp.memberId }));
-      });
-
-      // 삭제된 직원 처리
-      const deletedEmployees = [
-        ...devAssigned.filter((emp) => emp.isDelete),
-        ...clientAssigned.filter((emp) => emp.isDelete),
-      ];
-      deletedEmployees.forEach((emp) => {
-        if (!emp.memberId) return;
-        dispatch(
-          removeMemberFromProject({ projectId, memberId: emp.memberId })
+      // 직원 추가/삭제 처리
+      devAssigned
+        .filter((e) => e.isNew)
+        .forEach((e) =>
+          dispatch(addMemberToProject({ projectId, memberId: e.memberId }))
         );
-      });
+      clientAssigned
+        .filter((e) => e.isNew)
+        .forEach((e) =>
+          dispatch(addMemberToProject({ projectId, memberId: e.memberId }))
+        );
+      devAssigned
+        .filter((e) => e.isDelete)
+        .forEach((e) =>
+          dispatch(removeMemberFromProject({ projectId, memberId: e.memberId }))
+        );
+      clientAssigned
+        .filter((e) => e.isDelete)
+        .forEach((e) =>
+          dispatch(removeMemberFromProject({ projectId, memberId: e.memberId }))
+        );
 
-      // 화면 새로고침
+      // 전체 새로고침
       window.location.reload();
     } catch (err) {
       console.error("프로젝트 저장 실패:", err);
@@ -270,11 +257,10 @@ export default function useProjectForm(projectId) {
     setSteps,
     initialSteps,
     setStepEdited,
-    setStepSaveFn,
     setPendingStep,
-    devAssigned, // 개발사 직원
-    clientAssigned, // 고객사 직원
-    setDevAssigned, // 개발사 직원 상태 변경 함수
-    setClientAssigned, // 고객사 직원 상태 변경 함수
+    devAssigned,
+    clientAssigned,
+    setDevAssigned,
+    setClientAssigned,
   };
 }

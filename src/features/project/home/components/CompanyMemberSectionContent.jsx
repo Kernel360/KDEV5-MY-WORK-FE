@@ -4,7 +4,6 @@ import { useParams } from "react-router-dom";
 import {
   Autocomplete,
   Box,
-  Avatar,
   Typography,
   TextField,
   CircularProgress,
@@ -24,81 +23,61 @@ export default function CompanyMemberSectionContent({
   contactNumber,
   companyId,
   companyType,
+  assigned = [],
   setAssigned,
-  assigned,
 }) {
   const dispatch = useDispatch();
   const { id: projectId } = useParams();
-  const [members, setMembers] = useState([]); // 회사 직원 목록
+  const [members, setMembers] = useState([]); // 전체 직원 목록
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const [open, setOpen] = useState(false); // Autocomplete 드롭다운 상태 제어
   const theme = useTheme();
 
-  // 회사 전체 직원 목록을 가져옵니다.
+  // 직원 목록 로드
   useEffect(() => {
     if (!companyId) return;
-
     setLoading(true);
-    getCompanyMembersByCompanyId(companyId) // API로 회사 전체 직원 목록을 가져옵니다.
-      .then((res) => {
-        setMembers(res.data.data.members); // API 응답에서 직원 목록 저장
-      })
+    getCompanyMembersByCompanyId(companyId)
+      .then((res) => setMembers(res.data.data.members))
       .finally(() => setLoading(false));
   }, [companyId]);
 
-  const handleOpen = () => setOpen(true);
-
-  // 직원 선택 및 해제 처리
+  // Autocomplete 변경 시 assigned 업데이트
   const handleChange = (_e, newValue) => {
-    const updatedAssigned = assigned.map((emp) => {
-      // 새로운 값이 선택되면 해당 id의 직원은 isDelete: false로 수정
-      if (newValue.some((newEmp) => newEmp.memberId === emp.memberId)) {
-        return { ...emp, isDelete: false }; // isDelete를 false로 업데이트
+    const selectedIds = new Set(newValue.map((o) => o.id));
+
+    // 1) 기존 assigned: 선택된 ID만 isDelete=false, 나머지는 true
+    const updated = assigned.map((emp) => ({
+      ...emp,
+      isDelete: !selectedIds.has(emp.memberId),
+    }));
+
+    // 2) newValue 중 assigned에 없으면 신규 추가
+    newValue.forEach((o) => {
+      if (!assigned.some((emp) => emp.memberId === o.id)) {
+        updated.push({
+          memberId: o.id,
+          memberName: o.name,
+          email: o.email,
+          isManager: o.isManager,
+          memberRole: o.memberRole,
+          isNew: true,
+          isDelete: false,
+        });
       }
-      return emp; // 선택되지 않으면 그대로 유지
     });
 
-    // 새로 선택된 직원은 추가, isNew: true, isDelete: false로 설정
-    const newEmployees = newValue
-      .filter((emp) => !assigned.some((a) => a.memberId === emp.memberId))
-      .map((emp) => ({
-        ...emp,
-        isNew: true, // 새로 선택된 직원은 isNew: true
-        isDelete: false, // 새 직원은 isDelete: false
-      }));
-
-    // 선택 해제된 직원은 isDelete: true로 설정
-    const removedEmployees = assigned
-      .filter(
-        (emp) => !newValue.some((newEmp) => newEmp.memberId === emp.memberId)
-      )
-      .map((emp) => ({
-        ...emp,
-        isDelete: true, // 선택 해제된 직원은 isDelete: true
-      }));
-
-    // 새로운 직원 목록과 기존 직원 목록을 병합해서 할당
-    setAssigned([...updatedAssigned, ...newEmployees, ...removedEmployees]);
+    setAssigned(updated);
   };
 
-  const handleCheckboxChange = (option, selected) => {
-    const updatedAssigned = assigned.map((emp) => {
-      if (emp.memberId === option.id) {
-        // 체크된 경우, isDelete를 false로 설정
-        return selected
-          ? { ...emp, isDelete: false }
-          : { ...emp, isDelete: true }; // 체크 해제된 경우 isDelete를 true로 설정
-      }
-      return emp; // 해당 직원이 아니면 그대로 유지
-    });
-
-    setAssigned(updatedAssigned);
-  };
-  console.log("assigned", assigned);
+  // Autocomplete에 넘길 value: assigned 중 isDelete=false인 것들을 members에서 뽑아낸 option 객체
+  const selectedOptions = members.filter((m) =>
+    assigned.some((emp) => emp.memberId === m.id && !emp.isDelete)
+  );
 
   return (
     <Box>
+      {/* 기본 정보 */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6}>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
@@ -114,51 +93,36 @@ export default function CompanyMemberSectionContent({
         </Grid>
       </Grid>
 
+      {/* Autocomplete + 리스트 */}
       <Stack spacing={2}>
         <Autocomplete
           multiple
-          open={open}
-          onOpen={handleOpen}
-          onClose={() => setOpen(false)}
-          options={members} // API에서 가져온 전체 직원 목록을 사용
+          options={members}
+          value={selectedOptions}
           loading={loading}
           inputValue={inputValue}
-          disableClearable
-          clearIcon={null}
-          getOptionLabel={(opt) => opt.name || ""} // 기본값을 보장하기 위해 '' 처리
-          isOptionEqualToValue={(opt, val) => opt.id === val.memberId}
-          value={assigned.filter((emp) => !emp.isDelete)} // 삭제되지 않은 직원만 표시
+          onInputChange={(_, v) => setInputValue(v)}
+          disableCloseOnSelect
+          getOptionLabel={(opt) => opt.name}
+          isOptionEqualToValue={(opt, val) => opt.id === val.id}
           onChange={handleChange}
-          onInputChange={(_, val) => setInputValue(val)}
-          disableCloseOnSelect // 선택 후 드롭다운이 닫히지 않도록 설정
-          // onBlur에서 close 방지
-          onBlur={(e) => e.preventDefault()} // 블러 시 드롭다운이 닫히지 않도록 처리
-          onClick={(e) => e.stopPropagation()} // 클릭 시 드롭다운이 닫히지 않도록 처리
-          renderOption={(props, option) => {
-            // assigned에서 해당 직원 찾기
-            const assignedEmployee = assigned.find(
-              (emp) => emp.memberId === option.id
-            );
-            const isChecked = assignedEmployee
-              ? !assignedEmployee.isDelete
-              : false; // isDelete가 true이면 체크 해제
-
-            return (
-              <Box
-                component="li"
-                {...props}
-                key={option.id} // 여기에 key를 추가
-                sx={{ display: "flex", alignItems: "center", py: 0.5 }}
-              >
-                <Typography sx={{ flexGrow: 1 }}>{option.name}</Typography>
-                <Checkbox
-                  checked={isChecked} // assigned.isDelete에 따라 체크박스 상태 변경
-                  onChange={() => handleCheckboxChange(option, !isChecked)} // 체크박스 변경 처리
-                  color="primary"
-                />
-              </Box>
-            );
-          }}
+          // 여기서 MUI가 넘겨주는 `selected`를 사용합니다.
+          renderOption={(props, option, { selected }) => (
+            <Box
+              component="li"
+              {...props}
+              key={option.id}
+              sx={{ display: "flex", alignItems: "center", py: 0.5 }}
+            >
+              <Checkbox
+                edge="start"
+                checked={selected}
+                tabIndex={-1}
+                disableRipple
+              />
+              <Typography sx={{ ml: 1 }}>{option.name}</Typography>
+            </Box>
+          )}
           renderTags={() => null}
           renderInput={(params) => (
             <TextField
@@ -194,15 +158,13 @@ export default function CompanyMemberSectionContent({
 
         <Box sx={{ mt: 2 }}>
           <CompanyMemberList
-            selectedEmployees={assigned
-              .filter((emp) => !emp.isDelete)
-              .map((emp) => ({
-                id: emp.memberId,
-                name: emp.memberName,
-                email: emp.email,
-                isManager: emp.isManager,
-                memberRole: emp.memberRole,
-              }))}
+            selectedEmployees={selectedOptions.map((opt) => ({
+              id: opt.id,
+              name: opt.name,
+              email: opt.email,
+              isManager: opt.isManager,
+              memberRole: opt.memberRole,
+            }))}
             setAssigned={setAssigned}
           />
         </Box>
