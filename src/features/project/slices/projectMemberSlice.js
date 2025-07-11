@@ -87,7 +87,7 @@ const projectMemberSlice = createSlice({
       })
       .addCase(fetchCompanyMembersInProject.fulfilled, (state, action) => {
         state.loading = false;
-        state.companyMembers = action.payload.companyMembers;
+        state.companyMembers = action.payload.members;
       })
       .addCase(fetchCompanyMembersInProject.rejected, (state, action) => {
         state.loading = false;

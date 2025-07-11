@@ -38,10 +38,6 @@ export default function CompanyMemberList({
     setAnchorEl(null);
   };
 
-  const handleMenuExited = () => {
-    setMenuTarget(null);
-  };
-
   const handleToggleManager = () => {
     if (onToggleManager && menuTarget) {
       onToggleManager(menuTarget);
@@ -90,7 +86,7 @@ export default function CompanyMemberList({
         const roleLabel = ROLE_LABEL_MAP[emp.memberRole] || emp.memberRole;
         return (
           <Box
-            key={emp.id}
+            key={`${emp.id}-${emp.memberRole}`}
             sx={{
               minWidth: 300,
               maxWidth: 300,
@@ -152,6 +148,40 @@ export default function CompanyMemberList({
                       }}
                     />
                   )}
+
+                  {/* 새로운 직원 표시 */}
+                  {emp.isNew && (
+                    <Chip
+                      label="새로운 직원"
+                      size="small"
+                      variant="filled"
+                      sx={{
+                        fontSize: 12,
+                        height: 22,
+                        bgcolor: theme.palette.status.info.bg,
+                        color: theme.palette.status.info.main,
+                        borderRadius: 1,
+                        fontWeight: 500,
+                      }}
+                    />
+                  )}
+
+                  {/* 삭제된 직원 표시 */}
+                  {emp.isDeleted && (
+                    <Chip
+                      label="삭제됨"
+                      size="small"
+                      variant="filled"
+                      sx={{
+                        fontSize: 12,
+                        height: 22,
+                        bgcolor: theme.palette.status.error.bg,
+                        color: theme.palette.status.error.main,
+                        borderRadius: 1,
+                        fontWeight: 500,
+                      }}
+                    />
+                  )}
                 </Box>
 
                 {emp.email && (
@@ -173,7 +203,6 @@ export default function CompanyMemberList({
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
-        onExited={handleMenuExited}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
       >
