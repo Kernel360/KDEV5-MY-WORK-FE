@@ -59,7 +59,7 @@ export default function CompanyMemberSectionContent({
           memberId: o.id,
           memberName: o.name,
           email: o.email,
-          isManager: o.isManager,
+          isManager: false,
           memberRole: o.memberRole,
           isNew: true,
           isDelete: false,
@@ -70,10 +70,19 @@ export default function CompanyMemberSectionContent({
     setAssigned(updated);
   };
 
-  // Autocomplete에 넘길 value: assigned 중 isDelete=false인 것들을 members에서 뽑아낸 option 객체
-  const selectedOptions = members.filter((m) =>
+  const compareOptions = members.filter((m) =>
     assigned.some((emp) => emp.memberId === m.id && !emp.isDelete)
   );
+
+  const handleToggleManager = (targetMemberId) => {
+    setAssigned(
+      assigned.map((emp) =>
+        emp.memberId === targetMemberId
+          ? { ...emp, isManager: !emp.isManager }
+          : emp
+      )
+    );
+  };
 
   return (
     <Box>
@@ -98,11 +107,12 @@ export default function CompanyMemberSectionContent({
         <Autocomplete
           multiple
           options={members}
-          value={selectedOptions}
+          value={compareOptions}
           loading={loading}
           inputValue={inputValue}
           onInputChange={(_, v) => setInputValue(v)}
           disableCloseOnSelect
+          disableClearable
           getOptionLabel={(opt) => opt.name}
           isOptionEqualToValue={(opt, val) => opt.id === val.id}
           onChange={handleChange}
@@ -158,14 +168,8 @@ export default function CompanyMemberSectionContent({
 
         <Box sx={{ mt: 2 }}>
           <CompanyMemberList
-            selectedEmployees={selectedOptions.map((opt) => ({
-              id: opt.id,
-              name: opt.name,
-              email: opt.email,
-              isManager: opt.isManager,
-              memberRole: opt.memberRole,
-            }))}
-            setAssigned={setAssigned}
+            selectedEmployees={assigned.filter((emp) => !emp.isDelete)}
+            onToggleManager={handleToggleManager}
           />
         </Box>
       </Stack>
