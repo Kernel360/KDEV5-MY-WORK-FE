@@ -158,8 +158,6 @@ export default function useProjectForm(projectId) {
     loadClientMembers();
   }, [dispatch, project]);
 
-  console.log("setInitialDevAssigned", initialDevAssigned);
-
   // 3) 전체 고객사 직원 목록 불러와서 assigned에 없는 사람은 isNew/isDelete 기본 값으로 추가
   useEffect(() => {
     if (!project?.clientCompanyId) return;
@@ -224,8 +222,6 @@ export default function useProjectForm(projectId) {
 
   const setField = (field, value) =>
     setValues((prev) => ({ ...prev, [field]: value }));
-
-  console.log(devAssigned, "devAssigned");
 
   // 변경 여부 계산
   const isEdited = useMemo(() => {
