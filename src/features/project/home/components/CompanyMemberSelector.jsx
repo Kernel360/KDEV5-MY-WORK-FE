@@ -69,14 +69,25 @@ export default function CompanyMemberSelector({
       .finally(() => setLoading(false));
   };
 
-  const handleChange = (_e, newValue) => {
+  const handleChange = async (_e, newValue) => {
     const additions = newValue.filter(
       (nv) => !assigned.some((a) => a.memberId === nv.memberId)
     );
-    additions.forEach((emp) =>
-      dispatch(addMemberToProject({ projectId, memberId: emp.memberId }))
-    );
-    setAssigned(newValue);
+    
+    // 새로 추가된 직원들을 서버에 추가
+    for (const emp of additions) {
+      await dispatch(addMemberToProject({ projectId, memberId: emp.memberId }));
+    }
+    
+    // 직원 추가 후 상세 정보를 다시 가져와서 assigned 상태 업데이트
+    if (additions.length > 0) {
+      const action = await dispatch(fetchCompanyMembersInProject({ projectId, companyId }));
+      const members = extractMembers(action.payload);
+      setAssigned(members);
+    } else {
+      setAssigned(newValue);
+    }
+    
     setOpen(false);
   };
 
