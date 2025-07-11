@@ -15,6 +15,7 @@ import {
   removeMemberFromProject,
   fetchCompanyMembersInProject,
 } from "@/features/project/slices/projectMemberSlice";
+import { getCompanyMembersByCompanyId } from "@/api/member";
 
 export default function useProjectForm(projectId) {
   const dispatch = useDispatch();
@@ -52,42 +53,138 @@ export default function useProjectForm(projectId) {
     }
   }, [dispatch, projectId]);
 
-  // 회사 직원 불러오기
   useEffect(() => {
-    if (!project?.projectId) return;
+    if (!project?.projectId || !project.devCompanyId) return;
 
-    // 개발사 직원
-    dispatch(
-      fetchCompanyMembersInProject({
-        projectId: project.projectId,
-        companyId: project.devCompanyId,
-      })
-    ).then((action) => {
-      const list = (action.payload.members || []).map((m) => ({
-        ...m,
-        isNew: false,
-        isDelete: false,
-      }));
-      setDevAssigned(list);
-      setInitialDevAssigned(list);
-    });
+    const loadDevMembers = async () => {
+      try {
+        // 1) 프로젝트에 할당된 개발사 직원 조회
+        const assignedAction = await dispatch(
+          fetchCompanyMembersInProject({
+            projectId: project.projectId,
+            companyId: project.devCompanyId,
+          })
+        ).unwrap();
 
-    // 고객사 직원
-    dispatch(
-      fetchCompanyMembersInProject({
-        projectId: project.projectId,
-        companyId: project.clientCompanyId,
-      })
-    ).then((action) => {
-      const list = (action.payload.members || []).map((m) => ({
-        ...m,
-        isNew: false,
-        isDelete: false,
-      }));
-      setClientAssigned(list);
-      setInitialClientAssigned(list);
-    });
+        const assignedList = (assignedAction.members || []).map((m) => ({
+          memberId: m.memberId,
+          memberName: m.memberName,
+          email: m.email,
+          memberRole: m.memberRole,
+          isManager: m.isManager,
+          isNew: false,
+          isDelete: false,
+        }));
+
+        // 2) 회사 전체 개발사 직원 조회
+        const res = await getCompanyMembersByCompanyId(project.devCompanyId);
+        const fullList = res.data.data.members;
+
+        // 3) 할당되지 않은 직원만 missing으로 추출
+        const missing = fullList
+          .filter((m) => !assignedList.some((e) => e.memberId === m.id))
+          .map((m) => ({
+            memberId: m.id,
+            memberName: m.name,
+            email: m.email,
+            memberRole: m.role,
+            isManager: false,
+            isNew: true,
+            isDelete: true,
+          }));
+
+        const combined = [...assignedList, ...missing];
+
+        setDevAssigned(combined);
+        setInitialDevAssigned(combined);
+      } catch (err) {
+        console.error("개발사 직원 로드 실패:", err);
+      }
+    };
+
+    loadDevMembers();
   }, [dispatch, project]);
+
+  // 고객사 직원 로드 & 병합
+  useEffect(() => {
+    if (!project?.projectId || !project.clientCompanyId) return;
+
+    const loadClientMembers = async () => {
+      try {
+        // 1) 프로젝트에 할당된 고객사 직원 조회
+        const assignedAction = await dispatch(
+          fetchCompanyMembersInProject({
+            projectId: project.projectId,
+            companyId: project.clientCompanyId,
+          })
+        ).unwrap();
+
+        const assignedList = (assignedAction.members || []).map((m) => ({
+          memberId: m.memberId,
+          memberName: m.memberName,
+          email: m.email,
+          memberRole: m.memberRole,
+          isManager: m.isManager,
+          isNew: false,
+          isDelete: false,
+        }));
+
+        // 2) 회사 전체 고객사 직원 조회
+        const res = await getCompanyMembersByCompanyId(project.clientCompanyId);
+        const fullList = res.data.data.members;
+
+        // 3) 할당되지 않은 직원만 missing으로 추출
+        const missing = fullList
+          .filter((m) => !assignedList.some((e) => e.memberId === m.id))
+          .map((m) => ({
+            memberId: m.id,
+            memberName: m.name,
+            email: m.email,
+            memberRole: m.role,
+            isManager: false,
+            isNew: true,
+            isDelete: true,
+          }));
+
+        const combined = [...assignedList, ...missing];
+
+        setClientAssigned(combined);
+        setInitialClientAssigned(combined);
+      } catch (err) {
+        console.error("고객사 직원 로드 실패:", err);
+      }
+    };
+
+    loadClientMembers();
+  }, [dispatch, project]);
+
+  console.log("setInitialDevAssigned", initialDevAssigned);
+
+  // 3) 전체 고객사 직원 목록 불러와서 assigned에 없는 사람은 isNew/isDelete 기본 값으로 추가
+  useEffect(() => {
+    if (!project?.clientCompanyId) return;
+
+    getCompanyMembersByCompanyId(project.clientCompanyId)
+      .then((res) => {
+        const full = res.data.data.members;
+        setClientAssigned((prev) => {
+          const missing = full
+            .filter((m) => !prev.some((e) => e.memberId === m.id))
+            .map((m) => ({
+              memberId: m.id,
+              memberName: m.name,
+              email: m.email,
+              memberRole: m.memberRole,
+              isManager: false,
+              isNew: true,
+              isDelete: true,
+            }));
+          return prev.concat(missing);
+        });
+        setInitialClientAssigned(full);
+      })
+      .catch(console.error);
+  }, [project?.clientCompanyId]);
 
   // 단계 정리 및 초기화
   useEffect(() => {
@@ -128,6 +225,8 @@ export default function useProjectForm(projectId) {
   const setField = (field, value) =>
     setValues((prev) => ({ ...prev, [field]: value }));
 
+  console.log(devAssigned, "devAssigned");
+
   // 변경 여부 계산
   const isEdited = useMemo(() => {
     if (!project) return false;
@@ -140,15 +239,49 @@ export default function useProjectForm(projectId) {
       project.projectAmount !== values.projectAmount ||
       project.step !== values.step;
 
-    const devChanged = devAssigned.some((e) => e.isNew || e.isDelete);
-    const clientChanged = clientAssigned.some((e) => e.isNew || e.isDelete);
+    const devChanged = devAssigned.some((emp) => {
+      const init = initialDevAssigned.find((i) => i.memberId === emp.memberId);
+      if (init) {
+        // 초기엔 isNew/isDelete 가 모두 false 였으니, 지금 true 로 바뀌었거나
+        // 혹은 반대로 바뀐 게 있다면 true
+        return emp.isNew !== init.isNew || emp.isDelete !== init.isDelete;
+      }
+      // 초기 스냅샷엔 없던 멤버 → 당연히 추가된 것이므로 변화로 간주
+      return emp.isNew || emp.isDelete;
+    });
+
+    // ▶ clientAssigned 도 동일하게
+    const clientChanged = clientAssigned.some((emp) => {
+      const init = initialClientAssigned.find(
+        (i) => i.memberId === emp.memberId
+      );
+      if (init) {
+        return emp.isNew !== init.isNew || emp.isDelete !== init.isDelete;
+      }
+      return emp.isNew || emp.isDelete;
+    });
+
+    const managerChanged =
+      devAssigned.some((emp) => {
+        const init = initialDevAssigned.find(
+          (i) => i.memberId === emp.memberId
+        );
+        return init ? emp.isManager !== init.isManager : false;
+      }) ||
+      clientAssigned.some((emp) => {
+        const init = initialClientAssigned.find(
+          (i) => i.memberId === emp.memberId
+        );
+        return init ? emp.isManager !== init.isManager : false;
+      });
 
     return (
       fieldsChanged ||
       stepEdited ||
       pendingStep !== null ||
       devChanged ||
-      clientChanged
+      clientChanged ||
+      managerChanged
     );
   }, [project, values, stepEdited, pendingStep, devAssigned, clientAssigned]);
 
@@ -255,6 +388,20 @@ export default function useProjectForm(projectId) {
         .forEach((e) =>
           dispatch(removeMemberFromProject({ projectId, memberId: e.memberId }))
         );
+
+      const managerChanged = [...devAssigned, ...clientAssigned].filter(
+        (emp) => emp.isManager !== emp.originalIsManager
+      );
+      for (const emp of managerChanged) {
+        try {
+          await updateProjectManager({
+            memberId: emp.memberId,
+            projectId,
+          });
+        } catch (err) {
+          console.error("매니저 상태 변경 실패:", emp.memberId, err);
+        }
+      }
 
       // 완료 후 새로고침
       window.location.reload();

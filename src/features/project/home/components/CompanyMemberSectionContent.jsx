@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import {
@@ -6,7 +6,6 @@ import {
   Box,
   Typography,
   TextField,
-  CircularProgress,
   IconButton,
   Grid,
   Stack,
@@ -15,7 +14,6 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@mui/material/styles";
 import CompanyMemberList from "./CompanyMemberList";
-import { getCompanyMembersByCompanyId } from "@/api/member";
 
 export default function CompanyMemberSectionContent({
   companyLabel = "회사",
@@ -28,51 +26,24 @@ export default function CompanyMemberSectionContent({
 }) {
   const dispatch = useDispatch();
   const { id: projectId } = useParams();
-  const [members, setMembers] = useState([]); // 전체 직원 목록
-  const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const theme = useTheme();
 
-  // 직원 목록 로드
-  useEffect(() => {
-    if (!companyId) return;
-    setLoading(true);
-    getCompanyMembersByCompanyId(companyId)
-      .then((res) => setMembers(res.data.data.members))
-      .finally(() => setLoading(false));
-  }, [companyId]);
-
   // Autocomplete 변경 시 assigned 업데이트
   const handleChange = (_e, newValue) => {
-    const selectedIds = new Set(newValue.map((o) => o.id));
+    const selectedIds = new Set(newValue.map((o) => o.memberId));
 
-    // 1) 기존 assigned: 선택된 ID만 isDelete=false, 나머지는 true
+    // 기존 assigned: 선택된 ID만 isDelete=false, 나머지는 true
     const updated = assigned.map((emp) => ({
       ...emp,
       isDelete: !selectedIds.has(emp.memberId),
     }));
 
-    // 2) newValue 중 assigned에 없으면 신규 추가
-    newValue.forEach((o) => {
-      if (!assigned.some((emp) => emp.memberId === o.id)) {
-        updated.push({
-          memberId: o.id,
-          memberName: o.name,
-          email: o.email,
-          isManager: false,
-          memberRole: o.memberRole,
-          isNew: true,
-          isDelete: false,
-        });
-      }
-    });
-
     setAssigned(updated);
   };
 
-  const compareOptions = members.filter((m) =>
-    assigned.some((emp) => emp.memberId === m.id && !emp.isDelete)
-  );
+  // 현재 value: 삭제되지 않은(=체크된) 목록
+  const checkedList = assigned.filter((emp) => !emp.isDelete);
 
   const handleToggleManager = (targetMemberId) => {
     setAssigned(
@@ -106,22 +77,20 @@ export default function CompanyMemberSectionContent({
       <Stack spacing={2}>
         <Autocomplete
           multiple
-          options={members}
-          value={compareOptions}
-          loading={loading}
+          options={assigned}
+          value={checkedList}
           inputValue={inputValue}
           onInputChange={(_, v) => setInputValue(v)}
           disableCloseOnSelect
           disableClearable
-          getOptionLabel={(opt) => opt.name}
-          isOptionEqualToValue={(opt, val) => opt.id === val.id}
+          getOptionLabel={(opt) => opt.memberName}
+          isOptionEqualToValue={(opt, val) => opt.memberId === val.memberId}
           onChange={handleChange}
-          // 여기서 MUI가 넘겨주는 `selected`를 사용합니다.
           renderOption={(props, option, { selected }) => (
             <Box
               component="li"
               {...props}
-              key={option.id}
+              key={option.memberId}
               sx={{ display: "flex", alignItems: "center", py: 0.5 }}
             >
               <Checkbox
@@ -130,7 +99,7 @@ export default function CompanyMemberSectionContent({
                 tabIndex={-1}
                 disableRipple
               />
-              <Typography sx={{ ml: 1 }}>{option.name}</Typography>
+              <Typography sx={{ ml: 1 }}>{option.memberName}</Typography>
             </Box>
           )}
           renderTags={() => null}
@@ -143,7 +112,6 @@ export default function CompanyMemberSectionContent({
                 ...params.InputProps,
                 endAdornment: (
                   <>
-                    {loading && <CircularProgress size={20} />}
                     {inputValue && (
                       <IconButton
                         size="small"
@@ -168,7 +136,7 @@ export default function CompanyMemberSectionContent({
 
         <Box sx={{ mt: 2 }}>
           <CompanyMemberList
-            selectedEmployees={assigned.filter((emp) => !emp.isDelete)}
+            selectedEmployees={checkedList}
             onToggleManager={handleToggleManager}
           />
         </Box>
