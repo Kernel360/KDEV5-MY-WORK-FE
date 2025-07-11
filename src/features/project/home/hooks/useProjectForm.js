@@ -233,8 +233,7 @@ export default function useProjectForm(projectId) {
       project.detail !== values.detail ||
       dayjs(project.startAt).format("YYYY-MM-DD") !== values.startAt ||
       dayjs(project.endAt).format("YYYY-MM-DD") !== values.endAt ||
-      project.projectAmount !== values.projectAmount ||
-      project.step !== values.step;
+      project.projectAmount !== values.projectAmount;
 
     const devChanged = devAssigned.some((emp) => {
       const init = initialDevAssigned.find((i) => i.memberId === emp.memberId);
@@ -315,6 +314,7 @@ export default function useProjectForm(projectId) {
         ...(values.endAt && { endAt: `${values.endAt}T18:00:00` }),
         projectAmount:
           values.projectAmount === "" ? null : Number(values.projectAmount),
+        deleted: false,
       };
 
       // 2) 실제 프로젝트 필드 변경 여부만 체크
@@ -325,7 +325,7 @@ export default function useProjectForm(projectId) {
           values.startAt ||
         (project.endAt ? dayjs(project.endAt).format("YYYY-MM-DD") : "") !==
           values.endAt ||
-        project.projectAmount !== payload.projectAmount ||
+        project.projectAmount !== payload.projectAmount;
 
       // 3) 변경이 있을 때만 API 호출
       if (hasFieldChanges) {
