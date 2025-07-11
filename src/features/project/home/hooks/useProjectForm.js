@@ -16,6 +16,7 @@ import {
   fetchCompanyMembersInProject,
 } from "@/features/project/slices/projectMemberSlice";
 import { getCompanyMembersByCompanyId } from "@/api/member";
+import { updateProjectManager } from "@/api/projectMember";
 
 export default function useProjectForm(projectId) {
   const dispatch = useDispatch();
@@ -314,7 +315,6 @@ export default function useProjectForm(projectId) {
         ...(values.endAt && { endAt: `${values.endAt}T18:00:00` }),
         projectAmount:
           values.projectAmount === "" ? null : Number(values.projectAmount),
-        step: values.step,
       };
 
       // 2) 실제 프로젝트 필드 변경 여부만 체크
@@ -326,7 +326,6 @@ export default function useProjectForm(projectId) {
         (project.endAt ? dayjs(project.endAt).format("YYYY-MM-DD") : "") !==
           values.endAt ||
         project.projectAmount !== payload.projectAmount ||
-        project.step !== payload.step;
 
       // 3) 변경이 있을 때만 API 호출
       if (hasFieldChanges) {
@@ -385,9 +384,29 @@ export default function useProjectForm(projectId) {
           dispatch(removeMemberFromProject({ projectId, memberId: e.memberId }))
         );
 
-      const managerChanged = [...devAssigned, ...clientAssigned].filter(
-        (emp) => emp.isManager !== emp.originalIsManager
-      );
+      const managerChanged = [];
+
+      // 개발사 Assigned 중에서 초기값과 isManager가 다른 경우
+      for (const emp of devAssigned) {
+        const init = initialDevAssigned.find(
+          (i) => i.memberId === emp.memberId
+        );
+        if (init && init.isManager !== emp.isManager) {
+          managerChanged.push(emp);
+        }
+      }
+
+      // 고객사 Assigned도 동일하게
+      for (const emp of clientAssigned) {
+        const init = initialClientAssigned.find(
+          (i) => i.memberId === emp.memberId
+        );
+        if (init && init.isManager !== emp.isManager) {
+          managerChanged.push(emp);
+        }
+      }
+
+      // 변경된 매니저들에 대해 API 호출
       for (const emp of managerChanged) {
         try {
           await updateProjectManager({
