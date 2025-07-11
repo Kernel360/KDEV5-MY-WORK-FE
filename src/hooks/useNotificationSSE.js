@@ -44,7 +44,7 @@ export default function useNotificationSSE(enabled = true) {
     };
 
     eventSource.addEventListener(
-      "unread-notification-count",
+      "notification-unread-count",
       handleUnreadCount
     );
     eventSource.onopen = () => {};
