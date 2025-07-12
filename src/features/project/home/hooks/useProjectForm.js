@@ -14,9 +14,10 @@ import {
   addMemberToProject,
   removeMemberFromProject,
   fetchCompanyMembersInProject,
+  updateProjectManager,
 } from "@/features/project/slices/projectMemberSlice";
 import { getCompanyMembersByCompanyId } from "@/api/member";
-import { updateProjectManager } from "@/api/projectMember";
+import { updateProjectStatus } from "@/api/project";
 
 export default function useProjectForm(projectId) {
   const dispatch = useDispatch();
@@ -30,7 +31,7 @@ export default function useProjectForm(projectId) {
     startAt: "",
     endAt: "",
     projectAmount: "",
-    step: "CONTRACT",
+    status: "CONTRACT",
   });
 
   // 단계 관리
@@ -45,6 +46,13 @@ export default function useProjectForm(projectId) {
   const [clientAssigned, setClientAssigned] = useState([]);
   const [initialDevAssigned, setInitialDevAssigned] = useState([]);
   const [initialClientAssigned, setInitialClientAssigned] = useState([]);
+
+  const [saving, setSaving] = useState(false);
+  const [alertInfo, setAlertInfo] = useState({
+    open: false,
+    message: "",
+    severity: "error",
+  });
 
   // 프로젝트 + 단계 불러오기
   useEffect(() => {
@@ -242,7 +250,7 @@ export default function useProjectForm(projectId) {
           : "",
         endAt: project.endAt ? dayjs(project.endAt).format("YYYY-MM-DD") : "",
         projectAmount: project.projectAmount ?? "",
-        step: project.step || "CONTRACT",
+        status: project.step || "CONTRACT",
       });
     }
   }, [project]);
@@ -259,7 +267,8 @@ export default function useProjectForm(projectId) {
       project.detail !== values.detail ||
       dayjs(project.startAt).format("YYYY-MM-DD") !== values.startAt ||
       dayjs(project.endAt).format("YYYY-MM-DD") !== values.endAt ||
-      project.projectAmount !== values.projectAmount;
+      project.projectAmount !== values.projectAmount ||
+      project.step !== values.status;
 
     const devChanged = devAssigned.some((emp) => {
       const init = initialDevAssigned.find((i) => i.memberId === emp.memberId);
@@ -319,7 +328,7 @@ export default function useProjectForm(projectId) {
         : "",
       endAt: project.endAt ? dayjs(project.endAt).format("YYYY-MM-DD") : "",
       projectAmount: project.projectAmount ?? "",
-      step: project.step || "CONTRACT",
+      status: project.step || "CONTRACT",
     });
     setSteps(initialSteps);
     setStepEdited(false);
@@ -330,7 +339,13 @@ export default function useProjectForm(projectId) {
 
   // 저장
   const save = useCallback(async () => {
+    setSaving(true);
+    let success = true;
     try {
+      // 0) 프로젝트 상태 변경(pendingStep)이 있으면 한 번만 API 요청
+      if (values.status !== null && values.status !== project.step) {
+        await updateProjectStatus(projectId, values.status);
+      }
       // 1) payload 준비
       const payload = {
         id: projectId,
@@ -341,6 +356,7 @@ export default function useProjectForm(projectId) {
         projectAmount:
           values.projectAmount === "" ? null : Number(values.projectAmount),
         deleted: false,
+        step: project.step,
       };
 
       // 2) 실제 프로젝트 필드 변경 여부만 체크
@@ -448,10 +464,20 @@ export default function useProjectForm(projectId) {
       );
       await Promise.all(managerPromises);
     } catch (err) {
-      console.error("프로젝트 저장 실패:", err);
+      setAlertInfo({
+        open: true,
+        message: "프로젝트 저장 중 오류가 발생했습니다.",
+        severity: "error",
+      });
+      success = false;
     } finally {
-      // 모든 로직 완료 후(성공·실패 상관없이) 새로고침
-      window.location.reload();
+      setSaving(false);
+      if (success) {
+        window.location.reload();
+      } else {
+        // 실패 시에만 로딩 해제
+        setSaving(false);
+      }
     }
   }, [
     dispatch,
@@ -484,5 +510,8 @@ export default function useProjectForm(projectId) {
     clientAssigned,
     setDevAssigned,
     setClientAssigned,
+    saving,
+    alertInfo,
+    setAlertInfo,
   };
 }
