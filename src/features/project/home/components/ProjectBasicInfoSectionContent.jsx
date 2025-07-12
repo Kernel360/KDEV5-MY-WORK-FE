@@ -11,7 +11,6 @@ import { CalendarTodayRounded } from "@mui/icons-material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import { useParams } from "react-router-dom";
-import { updateProjectStatus } from "@/api/project";
 import { STATUS_OPTIONS, getStatusLabel } from "@/utils/statusMaps";
 import { useSelector } from "react-redux";
 
@@ -27,16 +26,15 @@ export default function ProjectBasicInfoSectionContent({
   setPeriodEnd,
   projectAmount,
   setProjectAmount,
-  projectStep,
-  setProjectStep,
   project,
+  projectStatus,
+  setProjectStatus,
 }) {
   const [statusLoading, setStatusLoading] = React.useState(false);
   const [statusError, setStatusError] = React.useState("");
   const [amountError, setAmountError] = React.useState("");
-  const { id: projectId } = useParams();
   const userRole = useSelector((state) => state.auth.user?.role);
-  const canEditStep = [
+  const canEditStatus = [
     "ROLE_SYSTEM_ADMIN",
     "ROLE_DEV_ADMIN",
     "ROLE_CLIENT_ADMIN",
@@ -123,25 +121,13 @@ export default function ProjectBasicInfoSectionContent({
           )}
         </Grid>
 
-        {canEditStep && (
+        {canEditStatus && (
           <Grid item xs={12} sm={12}>
             <TextField
               select
               label="프로젝트 상태"
-              value={projectStep}
-              onChange={async (e) => {
-                const newStatus = e.target.value;
-                setStatusLoading(true);
-                setStatusError("");
-                try {
-                  await updateProjectStatus(projectId, newStatus);
-                  setProjectStep(newStatus);
-                } catch (err) {
-                  setStatusError("상태 변경에 실패했습니다.");
-                } finally {
-                  setStatusLoading(false);
-                }
-              }}
+              value={projectStatus}
+              onChange={(e) => setProjectStatus(e.target.value)}
               fullWidth
               sx={{ minWidth: 100 }}
               required

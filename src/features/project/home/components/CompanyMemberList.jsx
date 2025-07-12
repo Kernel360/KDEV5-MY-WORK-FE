@@ -1,16 +1,8 @@
-import React, { useState } from "react";
-import {
-  Box,
-  Typography,
-  IconButton,
-  Chip,
-  Menu,
-  MenuItem,
-} from "@mui/material";
+import React from "react";
+import { Box, Typography, Chip, IconButton } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import PersonAddAltRoundedIcon from "@mui/icons-material/PersonAddAltRounded";
-import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
+import PersonAddOutlinedIcon from "@mui/icons-material/PersonAddOutlined";
+import PersonRemoveOutlinedIcon from "@mui/icons-material/PersonRemoveOutlined";
 
 const ROLE_LABEL_MAP = {
   DEV_ADMIN: "개발 관리자",
@@ -22,41 +14,10 @@ const ROLE_LABEL_MAP = {
 
 export default function CompanyMemberList({
   selectedEmployees,
-  onRemove,
   onToggleManager,
 }) {
   const theme = useTheme();
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [menuTarget, setMenuTarget] = useState(null);
 
-  const handleMenuOpen = (event, emp) => {
-    setAnchorEl(event.currentTarget);
-    setMenuTarget(emp);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleMenuExited = () => {
-    setMenuTarget(null);
-  };
-
-  const handleToggleManager = () => {
-    if (onToggleManager && menuTarget) {
-      onToggleManager(menuTarget);
-    }
-    handleMenuClose();
-  };
-
-  const handleRemove = () => {
-    if (onRemove && menuTarget) {
-      onRemove(menuTarget.id);
-    }
-    handleMenuClose();
-  };
-
-  // 역할 색상 매핑
   const getRoleChipStyle = (role) => {
     switch (role) {
       case "DEV_ADMIN":
@@ -88,109 +49,87 @@ export default function CompanyMemberList({
     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 1.5 }}>
       {selectedEmployees.map((emp) => {
         const roleLabel = ROLE_LABEL_MAP[emp.memberRole] || emp.memberRole;
+        const canToggleManager = emp.memberRole !== "USER";
         return (
           <Box
-            key={emp.id}
+            key={emp.memberId}
             sx={{
+              position: "relative",
               minWidth: 300,
               maxWidth: 300,
               minHeight: 80,
-              maxHeight: 100,
-              flex: "1 0 120px",
+              maxHeight: 80,
               border: `1px solid ${theme.palette.divider}`,
               borderRadius: 2,
               p: 2,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
               backgroundColor: theme.palette.background.paper,
-              boxSizing: "border-box",
             }}
           >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <Box sx={{ flex: 1, overflow: "hidden" }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Typography variant="body2" fontWeight={600} noWrap>
-                    {emp.name}
-                  </Typography>
-
-                  {/* 역할 Chip */}
-                  {emp.memberRole && (
-                    <Chip
-                      label={roleLabel}
-                      size="small"
-                      variant="filled"
-                      sx={{
-                        fontSize: 12,
-                        height: 22,
-                        ...getRoleChipStyle(emp.memberRole),
-                        borderRadius: 1,
-                        fontWeight: 500,
-                      }}
-                    />
-                  )}
-
-                  {/* 매니저 Chip */}
-                  {emp.isManager && (
-                    <Chip
-                      label="매니저"
-                      size="small"
-                      variant="filled"
-                      sx={{
-                        fontSize: 12,
-                        height: 22,
-                        bgcolor: theme.palette.status.error.bg,
-                        color: theme.palette.status.error.main,
-                        borderRadius: 1,
-                        fontWeight: 500,
-                      }}
-                    />
-                  )}
-                </Box>
-
-                {emp.email && (
-                  <Typography variant="caption" color="text.secondary" noWrap>
-                    {emp.email}
-                  </Typography>
+            {/* 토글 버튼 */}
+            {canToggleManager && (
+              <IconButton
+                size="small"
+                onClick={() => onToggleManager(emp.memberId)}
+                sx={{
+                  position: "absolute",
+                  top: 8,
+                  right: 8,
+                  color: emp.isManager
+                    ? theme.palette.primary.main
+                    : theme.palette.text.secondary,
+                }}
+              >
+                {emp.isManager ? (
+                  <PersonRemoveOutlinedIcon fontSize="small" />
+                ) : (
+                  <PersonAddOutlinedIcon fontSize="small" />
                 )}
-              </Box>
-
-              <IconButton size="small" onClick={(e) => handleMenuOpen(e, emp)}>
-                <MoreVertIcon fontSize="small" />
               </IconButton>
+            )}
+
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography variant="body2" fontWeight={600} noWrap>
+                {emp.memberName || emp.name}
+              </Typography>
+              {emp.memberRole && (
+                <Chip
+                  label={roleLabel}
+                  size="small"
+                  variant="filled"
+                  sx={{
+                    fontSize: 12,
+                    height: 22,
+                    ...getRoleChipStyle(emp.memberRole),
+                    borderRadius: 1,
+                    fontWeight: 500,
+                  }}
+                />
+              )}
+              {emp.isManager && (
+                <Chip
+                  label="담당자"
+                  size="small"
+                  color="filled"
+                  sx={{
+                    fontSize: 12,
+                    height: 22,
+                    bgcolor: theme.palette.status.error.bg,
+                    color: theme.palette.status.error.main,
+                    borderRadius: 1,
+                    fontWeight: 500,
+                  }}
+                />
+              )}
             </Box>
+
+            {emp.email && (
+              <Typography variant="caption" color="text.secondary" noWrap>
+                {emp.email}
+              </Typography>
+            )}
           </Box>
         );
       })}
-
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        onExited={handleMenuExited}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        {onToggleManager && menuTarget?.memberRole !== "USER" && (
-          <MenuItem onClick={handleToggleManager}>
-            <PersonAddAltRoundedIcon fontSize="small" sx={{ mr: 1 }} />
-            {menuTarget?.isManager ? "매니저 해임" : "매니저로 임명"}
-          </MenuItem>
-        )}
-        <MenuItem
-          onClick={handleRemove}
-          sx={{ color: theme.palette.error.main }}
-        >
-          <DeleteRoundedIcon fontSize="small" sx={{ mr: 1 }} />
-          삭제
-        </MenuItem>
-      </Menu>
     </Box>
   );
 }

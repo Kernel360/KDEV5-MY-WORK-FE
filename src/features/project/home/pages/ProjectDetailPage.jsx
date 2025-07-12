@@ -8,6 +8,8 @@ import Section from "@/components/layouts/section/Section";
 import CustomButton from "@/components/common/customButton/CustomButton";
 import useProjectForm from "../hooks/useProjectForm";
 import useProjectDetailSections from "../hooks/useProjectDetailSections";
+import LoadingScreen from "@/components/common/loadingScreen/LoadingScreen";
+import AlertMessage from "@/components/common/alertMessage/AlertMessage";
 
 export default function ProjectDetailPage() {
   const { id } = useParams();
@@ -22,14 +24,22 @@ export default function ProjectDetailPage() {
     isEdited,
     reset,
     save,
+    saving,
+    alertInfo,
+    setAlertInfo,
     setStepEdited,
     setStepSaveFn,
     steps,
     setSteps,
     initialSteps,
     setPendingStep,
+    devAssigned, // 개발사 직원 상태
+    clientAssigned, // 고객사 직원 상태
+    setDevAssigned, // 개발사 직원 상태 변경 함수
+    setClientAssigned, // 고객사 직원 상태 변경 함수
   } = useProjectForm(id);
 
+  // sections 생성
   const sections = useProjectDetailSections(
     project,
     user?.role,
@@ -41,18 +51,12 @@ export default function ProjectDetailPage() {
     steps,
     setSteps,
     initialSteps,
-    setPendingStep
+    setPendingStep,
+    devAssigned,
+    clientAssigned,
+    setDevAssigned,
+    setClientAssigned
   );
-
-  if (!id || loading || !project) {
-    return (
-      <PageWrapper>
-        <Box display="flex" justifyContent="center" alignItems="center" mt={10}>
-          <CircularProgress />
-        </Box>
-      </PageWrapper>
-    );
-  }
 
   return (
     <PageWrapper>
@@ -110,6 +114,12 @@ export default function ProjectDetailPage() {
           </CustomButton>
         </Stack>
       )}
+      <AlertMessage
+        open={alertInfo.open}
+        onClose={() => setAlertInfo({ ...alertInfo, open: false })}
+        message={alertInfo.message}
+        severity={alertInfo.severity}
+      />
     </PageWrapper>
   );
 }

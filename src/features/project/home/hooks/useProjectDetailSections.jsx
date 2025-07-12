@@ -1,4 +1,3 @@
-import React from "react";
 import ProjectStepManager from "../components/ProjectStepManager/ProjectStepManager";
 import ProjectBasicInfoSectionContent from "../components/ProjectBasicInfoSectionContent";
 import CompanyMemberSectionContent from "../components/CompanyMemberSectionContent";
@@ -18,7 +17,11 @@ export default function useProjectDetailSections(
   steps,
   setSteps,
   initialSteps,
-  setPendingStep
+  setPendingStep,
+  devAssigned,
+  clientAssigned,
+  setDevAssigned,
+  setClientAssigned
 ) {
   const hasRole = (section) =>
     !section.roles || section.roles.includes(memberRole);
@@ -42,8 +45,8 @@ export default function useProjectDetailSections(
           setPeriodEnd={(val) => setField("endAt", val)}
           projectAmount={values.projectAmount}
           setProjectAmount={(val) => setField("projectAmount", val)}
-          projectStep={values.step}
-          setProjectStep={(val) => setField("step", val)}
+          projectStatus={values.status}
+          setProjectStatus={(val) => setField("status", val)}
         />
       ),
     },
@@ -76,6 +79,8 @@ export default function useProjectDetailSections(
           companyId={project?.devCompanyId}
           companyType="개발사"
           tooltip="개발사 직원 정보를 확인하고 참여 인원을 설정할 수 있습니다."
+          assigned={devAssigned} // 개발사 직원만 전달
+          setAssigned={setDevAssigned} // setDevAssigned 전달
         />
       ),
     },
@@ -92,6 +97,8 @@ export default function useProjectDetailSections(
           companyId={project?.clientCompanyId}
           companyType="고객사"
           tooltip="고객사 직원 정보를 확인하고 참여 인원을 설정할 수 있습니다."
+          assigned={clientAssigned} // 고객사 직원만 전달
+          setAssigned={setClientAssigned} // setClientAssigned 전달
         />
       ),
     },
