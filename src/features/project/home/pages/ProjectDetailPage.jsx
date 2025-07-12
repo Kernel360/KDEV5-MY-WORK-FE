@@ -8,6 +8,8 @@ import Section from "@/components/layouts/section/Section";
 import CustomButton from "@/components/common/customButton/CustomButton";
 import useProjectForm from "../hooks/useProjectForm";
 import useProjectDetailSections from "../hooks/useProjectDetailSections";
+import LoadingScreen from "@/components/common/loadingScreen/LoadingScreen";
+import AlertMessage from "@/components/common/alertMessage/AlertMessage";
 
 export default function ProjectDetailPage() {
   const { id } = useParams();
@@ -22,6 +24,9 @@ export default function ProjectDetailPage() {
     isEdited,
     reset,
     save,
+    saving,
+    alertInfo,
+    setAlertInfo,
     setStepEdited,
     setStepSaveFn,
     steps,
@@ -52,16 +57,6 @@ export default function ProjectDetailPage() {
     setDevAssigned,
     setClientAssigned
   );
-
-  if (!id || loading || !project) {
-    return (
-      <PageWrapper>
-        <Box display="flex" justifyContent="center" alignItems="center" mt={10}>
-          <CircularProgress />
-        </Box>
-      </PageWrapper>
-    );
-  }
 
   return (
     <PageWrapper>
@@ -119,6 +114,12 @@ export default function ProjectDetailPage() {
           </CustomButton>
         </Stack>
       )}
+      <AlertMessage
+        open={alertInfo.open}
+        onClose={() => setAlertInfo({ ...alertInfo, open: false })}
+        message={alertInfo.message}
+        severity={alertInfo.severity}
+      />
     </PageWrapper>
   );
 }
