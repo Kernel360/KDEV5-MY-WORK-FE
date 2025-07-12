@@ -77,9 +77,22 @@ export default function useProjectForm(projectId) {
           isDelete: false,
         }));
 
-        // 2) 회사 전체 개발사 직원 조회
-        const res = await getCompanyMembersByCompanyId(project.devCompanyId);
-        const fullList = res.data.data.members;
+        // --- 헬퍼: 페이지 반복 호출로 전체 직원 목록 가져오기 ---
+        const fetchAllMembers = async (companyId) => {
+          let page = 1;
+          let all = [];
+          while (true) {
+            const res = await getCompanyMembersByCompanyId(companyId, page);
+            const members = res.data.data.members;
+            all = all.concat(members);
+            if (members.length < 10) break; // 마지막 페이지
+            page += 1;
+          }
+          return all;
+        };
+
+        // 2) 회사 전체 개발사 직원 (모든 페이지)
+        const fullList = await fetchAllMembers(project.devCompanyId);
 
         // 3) 할당되지 않은 직원만 missing으로 추출
         const missing = fullList
@@ -130,9 +143,22 @@ export default function useProjectForm(projectId) {
           isDelete: false,
         }));
 
-        // 2) 회사 전체 고객사 직원 조회
-        const res = await getCompanyMembersByCompanyId(project.clientCompanyId);
-        const fullList = res.data.data.members;
+        // --- 헬퍼: 페이지 반복 호출로 전체 직원 목록 가져오기 ---
+        const fetchAllMembers = async (companyId) => {
+          let page = 1;
+          let all = [];
+          while (true) {
+            const res = await getCompanyMembersByCompanyId(companyId, page);
+            const members = res.data.data.members;
+            all = all.concat(members);
+            if (members.length < 10) break; // 마지막 페이지 도달
+            page += 1;
+          }
+          return all;
+        };
+
+        // 2) 회사 전체 고객사 직원 (모든 페이지)
+        const fullList = await fetchAllMembers(project.clientCompanyId);
 
         // 3) 할당되지 않은 직원만 missing으로 추출
         const missing = fullList
@@ -363,74 +389,81 @@ export default function useProjectForm(projectId) {
       }
 
       // 직원 추가/삭제 처리
-      devAssigned
-        .filter((e) => e.isNew && !e.isDelete)
-        .forEach((e) =>
-          dispatch(addMemberToProject({ projectId, memberId: e.memberId }))
-        );
-      clientAssigned
-        .filter((e) => e.isNew && !e.isDelete)
-        .forEach((e) =>
-          dispatch(addMemberToProject({ projectId, memberId: e.memberId }))
-        );
-      devAssigned
-        .filter((e) => !e.isNew && e.isDelete)
-        .forEach((e) =>
-          dispatch(removeMemberFromProject({ projectId, memberId: e.memberId }))
-        );
-      clientAssigned
-        .filter((e) => !e.isNew && e.isDelete)
-        .forEach((e) =>
-          dispatch(removeMemberFromProject({ projectId, memberId: e.memberId }))
-        );
+      const addPromises = [
+        ...devAssigned
+          .filter((e) => e.isNew && !e.isDelete)
+          .map((e) =>
+            dispatch(
+              addMemberToProject({ projectId, memberId: e.memberId })
+            ).unwrap()
+          ),
+        ...clientAssigned
+          .filter((e) => e.isNew && !e.isDelete)
+          .map((e) =>
+            dispatch(
+              addMemberToProject({ projectId, memberId: e.memberId })
+            ).unwrap()
+          ),
+      ];
 
+      const removePromises = [
+        ...devAssigned
+          .filter((e) => !e.isNew && e.isDelete)
+          .map((e) =>
+            dispatch(
+              removeMemberFromProject({ projectId, memberId: e.memberId })
+            ).unwrap()
+          ),
+        ...clientAssigned
+          .filter((e) => !e.isNew && e.isDelete)
+          .map((e) =>
+            dispatch(
+              removeMemberFromProject({ projectId, memberId: e.memberId })
+            ).unwrap()
+          ),
+      ];
+
+      await Promise.all([...addPromises, ...removePromises]);
+
+      // 매니저 변경 탐지
       const managerChanged = [];
-
-      // 개발사 Assigned 중에서 초기값과 isManager가 다른 경우
       for (const emp of devAssigned) {
         const init = initialDevAssigned.find(
           (i) => i.memberId === emp.memberId
         );
-        if (init && init.isManager !== emp.isManager) {
-          managerChanged.push(emp);
-        }
+        if (init && init.isManager !== emp.isManager) managerChanged.push(emp);
       }
-
-      // 고객사 Assigned도 동일하게
       for (const emp of clientAssigned) {
         const init = initialClientAssigned.find(
           (i) => i.memberId === emp.memberId
         );
-        if (init && init.isManager !== emp.isManager) {
-          managerChanged.push(emp);
-        }
+        if (init && init.isManager !== emp.isManager) managerChanged.push(emp);
       }
 
-      // 변경된 매니저들에 대해 API 호출
-      for (const emp of managerChanged) {
-        try {
-          await updateProjectManager({
-            memberId: emp.memberId,
-            projectId,
-          });
-        } catch (err) {
-          console.error("매니저 상태 변경 실패:", emp.memberId, err);
-        }
-      }
-
-      // 완료 후 새로고침
-      window.location.reload();
+      // 매니저 상태 변경 API 호출
+      const managerPromises = managerChanged.map((emp) =>
+        dispatch(
+          updateProjectManager({ projectId, memberId: emp.memberId })
+        ).unwrap()
+      );
+      await Promise.all(managerPromises);
     } catch (err) {
       console.error("프로젝트 저장 실패:", err);
+    } finally {
+      // 모든 로직 완료 후(성공·실패 상관없이) 새로고침
+      window.location.reload();
     }
   }, [
     dispatch,
     projectId,
+    project,
     values,
     steps,
     stepEdited,
     devAssigned,
     clientAssigned,
+    initialDevAssigned,
+    initialClientAssigned,
   ]);
 
   return {

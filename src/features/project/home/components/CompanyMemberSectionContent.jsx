@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-import { useParams } from "react-router-dom";
 import {
   Autocomplete,
   Box,
@@ -24,26 +22,22 @@ export default function CompanyMemberSectionContent({
   assigned = [],
   setAssigned,
 }) {
-  const dispatch = useDispatch();
-  const { id: projectId } = useParams();
   const [inputValue, setInputValue] = useState("");
   const theme = useTheme();
 
-  // Autocomplete 변경 시 assigned 업데이트
+  // 체크된(삭제되지 않은) 리스트
+  const checkedList = assigned.filter((emp) => !emp.isDelete);
+
+  // 선택 변경 시 assigned 업데이트
   const handleChange = (_e, newValue) => {
     const selectedIds = new Set(newValue.map((o) => o.memberId));
-
-    // 기존 assigned: 선택된 ID만 isDelete=false, 나머지는 true
-    const updated = assigned.map((emp) => ({
-      ...emp,
-      isDelete: !selectedIds.has(emp.memberId),
-    }));
-
-    setAssigned(updated);
+    setAssigned(
+      assigned.map((emp) => ({
+        ...emp,
+        isDelete: !selectedIds.has(emp.memberId),
+      }))
+    );
   };
-
-  // 현재 value: 삭제되지 않은(=체크된) 목록
-  const checkedList = assigned.filter((emp) => !emp.isDelete);
 
   const handleToggleManager = (targetMemberId) => {
     setAssigned(
@@ -80,12 +74,24 @@ export default function CompanyMemberSectionContent({
           options={assigned}
           value={checkedList}
           inputValue={inputValue}
-          onInputChange={(_, v) => setInputValue(v)}
+          onInputChange={(event, newInputValue, reason) => {
+            if (reason === "input") {
+              setInputValue(newInputValue);
+            }
+          }}
           disableCloseOnSelect
           disableClearable
           getOptionLabel={(opt) => opt.memberName}
           isOptionEqualToValue={(opt, val) => opt.memberId === val.memberId}
           onChange={handleChange}
+          /** ● 여기가 핵심: memberName 기준으로 필터링 */
+          filterOptions={(options, { inputValue }) =>
+            options.filter((opt) =>
+              opt.memberName
+                .toLowerCase()
+                .includes(inputValue.trim().toLowerCase())
+            )
+          }
           renderOption={(props, option, { selected }) => (
             <Box
               component="li"
@@ -106,7 +112,7 @@ export default function CompanyMemberSectionContent({
           renderInput={(params) => (
             <TextField
               {...params}
-              placeholder={`${companyType} 직원 이름 검색`}
+              placeholder={`${companyType} 직원 선택`}
               size="small"
               InputProps={{
                 ...params.InputProps,
