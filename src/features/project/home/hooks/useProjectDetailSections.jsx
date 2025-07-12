@@ -45,8 +45,8 @@ export default function useProjectDetailSections(
           setPeriodEnd={(val) => setField("endAt", val)}
           projectAmount={values.projectAmount}
           setProjectAmount={(val) => setField("projectAmount", val)}
-          projectStep={values.step}
-          setProjectStep={(val) => setField("step", val)}
+          projectStatus={values.status}
+          setProjectStatus={(val) => setField("status", val)}
         />
       ),
     },
