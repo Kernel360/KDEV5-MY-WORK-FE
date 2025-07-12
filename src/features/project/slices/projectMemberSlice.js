@@ -5,6 +5,7 @@ import {
   addProjectMember,
   deleteProjectMember,
   getCompanyMembersInProject,
+  updateProjectManager as apiUpdateProjectManager,
 } from "@/api/projectMember";
 
 export const fetchProjectMemberList = createAsyncThunk(
@@ -49,6 +50,18 @@ export const removeMemberFromProject = createAsyncThunk(
     try {
       const response = await deleteProjectMember(projectId, memberId);
       return response.data.data; // ProjectMemberDeleteWebResponse
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+export const updateProjectManager = createAsyncThunk(
+  "projectMember/updateManager",
+  async ({ projectId, memberId }, { rejectWithValue }) => {
+    try {
+      await apiUpdateProjectManager({ projectId, memberId });
+      return { memberId };
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
@@ -118,6 +131,18 @@ const projectMemberSlice = createSlice({
         state.list = state.list.filter((m) => m.id !== action.payload.memberId);
       })
       .addCase(removeMemberFromProject.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(updateProjectManager.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProjectManager.fulfilled, (state, action) => {
+        state.loading = false;
+        // 필요에 따라 companyMembers나 list 안에서 해당 memberId의 isManager 값을 갱신할 수 있습니다.
+      })
+      .addCase(updateProjectManager.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
