@@ -45,26 +45,7 @@
 ## 🛠️ 3. 기술 스택
 
 <div style="display:flex; flex-direction:column; align-items:flex-start;">
-    <p><strong>Backend</strong></p>
-    <div>
-        <img src="https://img.shields.io/badge/Java_17-007396?style=for-the-badge&logo=java&logoColor=white"> 
-        <img src="https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring boot&logoColor=white">
-        <img src="https://img.shields.io/badge/spring_Data_JPA-6DB33F?style=for-the-badge&logo=spring&logoColor=white"> 
-        <img src="https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=spring security&logoColor=white">
-    </div>
-    <p><strong>FrontEnd</strong></p>
-    <div>
-        <img src="https://shields.io/badge/JavaScript-F7DF1E?logo=JavaScript&logoColor=000&style=for-the-badge"/>
-        <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=Vite&logoColor=white"/>
-        <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=React&logoColor=black"/>
-        <img src="https://img.shields.io/badge/-Redux-black?style=for-the-badge&logo=redux"/>
-    </div>
-    <p><strong>Infra</strong></p>
-    <div>
-        <img src="https://img.shields.io/badge/Amazon AWS-232F3E?style=for-the-badge&logo=amazonaws&logoColor=white"/>
-        <img src="https://img.shields.io/badge/Mysql-4479A1?style=for-the-badge&logo=mysql&logoColor=white">
-        <img src="https://img.shields.io/badge/Gradle-02303A?style=for-the-badge&logo=Gradle&logoColor=white">
-<img src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white">
+<div> <p><strong>빌드 도구</strong></p> <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=Vite&logoColor=white"/> <p><strong>UI 라이브러리</strong></p> <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=React&logoColor=black"/> <img src="https://img.shields.io/badge/Material_UI-007FFF?style=for-the-badge&logo=Material-UI&logoColor=white"/> <p><strong>상태 관리</strong></p> <img src="https://img.shields.io/badge/Redux_Toolkit-764ABC?style=for-the-badge&logo=Redux&logoColor=white"/> <p><strong>라우팅</strong></p> <img src="https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&logo=react-router&logoColor=white"/> <p><strong>HTTP 클라이언트</strong></p> <img src="https://img.shields.io/badge/axios-5A29E4?style=for-the-badge&logo=axios&logoColor=white"/> <p><strong>날짜/시간</strong></p> <img src="https://img.shields.io/badge/Day.js-2C3381?style=for-the-badge&logo=dayjs&logoColor=white"/> <p><strong>차트</strong></p> <img src="https://img.shields.io/badge/Recharts-FF6384?style=for-the-badge&logo=Recharts&logoColor=white"/> <p><strong>스타일링</strong></p> <img src="https://img.shields.io/badge/Sass-CD6799?style=for-the-badge&logo=Sass&logoColor=white"/> </div>
     </div>
 </div>
 
