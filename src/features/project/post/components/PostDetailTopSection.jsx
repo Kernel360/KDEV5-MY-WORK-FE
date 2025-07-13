@@ -1,3 +1,4 @@
+// src/components/PostDetailTopSection.jsx
 import React from "react";
 import { Box, Typography, IconButton, Stack, Avatar } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -8,6 +9,7 @@ import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import CustomButton from "@/components/common/customButton/CustomButton";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
+import EditIcon from "@mui/icons-material/Edit";
 import { getStatusMeta, POST_APPROVAL_STATUS } from "@/utils/statusMaps";
 
 export default function PostDetailTopSection({
@@ -16,6 +18,7 @@ export default function PostDetailTopSection({
   onClose,
   onApprovalToggle,
   approval,
+  onEdit,
 }) {
   return (
     <>
@@ -30,7 +33,6 @@ export default function PostDetailTopSection({
           <Avatar sx={{ width: 40, height: 40 }}>
             {post.companyName?.[0] || "?"}
           </Avatar>
-
           <Box>
             <Stack
               direction="row"
@@ -44,7 +46,6 @@ export default function PostDetailTopSection({
                 />
                 <Typography fontWeight={600}>{post.authorName}</Typography>
               </Stack>
-
               <Stack direction="row" spacing={1} alignItems="center">
                 <BusinessRoundedIcon
                   sx={{ fontSize: 16, color: "text.secondary" }}
@@ -54,7 +55,6 @@ export default function PostDetailTopSection({
                 </Typography>
               </Stack>
             </Stack>
-
             <Stack direction="row" spacing={1} alignItems="center" mt={0.5}>
               <AccessTimeRoundedIcon
                 sx={{ fontSize: 16, color: "text.secondary" }}
@@ -67,6 +67,9 @@ export default function PostDetailTopSection({
         </Stack>
 
         <Stack direction="row" spacing={1} alignItems="center">
+          <IconButton onClick={onEdit}>
+            <EditIcon />
+          </IconButton>
           <IconButton onClick={onDelete}>
             <DeleteIcon />
           </IconButton>
@@ -81,6 +84,7 @@ export default function PostDetailTopSection({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          mt: 2,
         }}
       >
         <Typography variant="h5" fontWeight={700}>
