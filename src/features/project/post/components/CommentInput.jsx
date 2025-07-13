@@ -1,40 +1,59 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, TextField, Button } from "@mui/material";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import { useDispatch } from "react-redux";
-import { addReview, fetchReviews } from "../reviewSlice";
+import { addReview, fetchReviews, updateReview } from "../reviewSlice";
+import CustomButton from "@/components/common/customButton/CustomButton";
 
 /**
  * CommentInput 컴포넌트
+ *
  * @param {object} props
- * @param {string} props.postId - 게시글 UUID
- * @param {string|null} [props.parentId=null] - 대댓글 대상으로 지정할 부모 댓글 UUID
+ * @param {string} props.postId           - 게시글 UUID
+ * @param {string|null} [props.parentId]  - 대댓글 대상 부모 댓글 UUID
+ * @param {string|null} [props.editReviewId] - 수정할 댓글 UUID (없으면 신규)
+ * @param {string} [props.initialText]    - 수정 모드 시 초기 댓글 텍스트
+ * @param {() => void} [props.onCancel]   - 수정 취소 콜백
  */
-export default function CommentInput({ postId, parentId = null }) {
-  const [text, setText] = useState("");
+export default function CommentInput({
+  postId,
+  parentId = null,
+  editReviewId = null,
+  initialText = "",
+  onCancel,
+}) {
+  const [text, setText] = useState(initialText);
   const dispatch = useDispatch();
+
+  // editReviewId 가 바뀌면 input 초기화
+  useEffect(() => {
+    setText(initialText);
+  }, [initialText]);
 
   const handleSubmit = () => {
     const commentText = text.trim();
     if (!commentText) return;
 
-    // 요청 페이로드
-    const payload = {
-      postId: postId,
-      comment: commentText,
-      parentId: parentId,
-    };
-
-    dispatch(addReview(payload))
-      .unwrap()
-      .then(() => {
-        setText("");
-        // 등록 후 1페이지로 리뷰 목록 갱신
-        dispatch(fetchReviews({ postId, page: 1 }));
-      })
-      .catch((err) => {
-        console.error("댓글 등록 실패", err);
-      });
+    if (editReviewId) {
+      // 수정 모드
+      dispatch(updateReview({ reviewId: editReviewId, comment: commentText }))
+        .unwrap()
+        .then(() => {
+          setText("");
+          onCancel?.();
+          dispatch(fetchReviews({ postId, page: 1 }));
+        })
+        .catch((err) => console.error("댓글 수정 실패", err));
+    } else {
+      // 새 댓글/대댓글
+      dispatch(addReview({ postId, comment: commentText, parentId }))
+        .unwrap()
+        .then(() => {
+          setText("");
+          dispatch(fetchReviews({ postId, page: 1 }));
+        })
+        .catch((err) => console.error("댓글 등록 실패", err));
+    }
   };
 
   return (
@@ -43,7 +62,11 @@ export default function CommentInput({ postId, parentId = null }) {
       <TextField
         fullWidth
         placeholder={
-          parentId ? "답글을 입력해 주세요." : "댓글을 입력해 주세요."
+          editReviewId
+            ? "댓글을 수정해 주세요."
+            : parentId
+              ? "답글을 입력해 주세요."
+              : "댓글을 입력해 주세요."
         }
         variant="outlined"
         size="small"
@@ -52,14 +75,26 @@ export default function CommentInput({ postId, parentId = null }) {
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
-      <Button
-        variant="contained"
+      <CustomButton
+        kind="primary"
         size="small"
         disabled={!text.trim()}
         onClick={handleSubmit}
       >
-        등록
-      </Button>
+        {editReviewId ? "수정" : "등록"}
+      </CustomButton>
+      {editReviewId && (
+        <CustomButton
+          kind="ghost"
+          size="small"
+          onClick={() => {
+            setText(initialText);
+            onCancel?.();
+          }}
+        >
+          취소
+        </CustomButton>
+      )}
     </Box>
   );
 }
