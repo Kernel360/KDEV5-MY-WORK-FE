@@ -8,11 +8,15 @@ import {
   Paper,
   TextField,
   Button,
+  Divider,
+  Tooltip,
 } from "@mui/material";
 import {
   Close as CloseIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
+  InfoOutlined,
+  CloudUpload,
 } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
@@ -21,6 +25,7 @@ import CommentSection from "../components/CommentSection";
 import FileAttachmentViewer from "../components/FileAttachmentViewer";
 import FilePreviewModal from "../components/FilePreviewModal";
 import PostDetailTopSection from "../components/PostDetailTopSection";
+import FileUploadSection from "../components/FileUploadSection";
 
 import { fetchReviews } from "../reviewSlice";
 import {
@@ -30,9 +35,22 @@ import {
   updatePostApproval,
   updatePost,
   fetchPostById,
+  bulkActivateAttachments,
+  deleteAttachment,
 } from "../postSlice";
 import * as postAPI from "@/api/post";
 import { downloadAttachment } from "@/utils/downloadUtils";
+import {
+  updateFileItem,
+  getUniqueFiles,
+  convertToFileItems,
+  hasUnfinishedUploads,
+  hasFailedUploads,
+  getSuccessfulPostAttachmentIds,
+} from "@/utils/fileUploadUtils";
+import { validateFile } from "@/utils/validateFile";
+import { uploadFileWithPresignedUrl } from "@/utils/uploadFileWithPresignedUrl";
+import CustomButton from "@/components/common/customButton/CustomButton";
 
 export default function PostDetailDrawer({
   open,
@@ -53,6 +71,10 @@ export default function PostDetailDrawer({
   const [form, setForm] = useState({ title: "", content: "" });
   const [saving, setSaving] = useState(false);
 
+  // 파일 수정 관련 상태
+  const [newFiles, setNewFiles] = useState([]); // 새로 추가된 파일들
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]); // 삭제할 기존 첨부파일 ID들
+
   // 첨부 이미지 뷰어 상태
   const attachmentImages = useSelector((s) => s.post.attachmentImages || []);
   const imagesLoading = useSelector((s) => s.post.imagesLoading);
@@ -65,8 +87,13 @@ export default function PostDetailDrawer({
   });
   const handlePreviewOpen = (attachment) =>
     setPreviewModal({ open: true, attachment });
-  const handlePreviewClose = () =>
+  const handlePreviewClose = () => {
+    // 새로운 파일 미리보기인 경우 메모리 해제
+    if (previewModal.attachment?.imageUrl) {
+      URL.revokeObjectURL(previewModal.attachment.imageUrl);
+    }
     setPreviewModal({ open: false, attachment: null });
+  };
 
   const handleDownload = (att) =>
     downloadAttachment(att, postAPI.getAttachmentDownloadUrl);
@@ -104,24 +131,75 @@ export default function PostDetailDrawer({
   // 편집 모드 진입
   const handleEditToggle = () => {
     setForm({ title: detail.title, content: detail.content });
+    setNewFiles([]);
+    setDeletedAttachmentIds([]);
     setIsEditing(true);
   };
   // 편집 취소
   const handleCancelEdit = () => {
+    setForm({ title: "", content: "" });
+    setNewFiles([]);
+    setDeletedAttachmentIds([]);
     setIsEditing(false);
   };
   // 편집 저장
   const handleSaveEdit = async () => {
+    // 파일 업로드 상태 체크
+    if (hasUnfinishedUploads(newFiles)) {
+      alert("파일 업로드가 완료될 때까지 기다려주세요.");
+      return;
+    }
+
+    if (hasFailedUploads(newFiles)) {
+      if (!window.confirm("업로드에 실패한 파일이 있습니다. 그래도 저장하시겠습니까?")) {
+        return;
+      }
+    }
+
     setSaving(true);
     try {
+      // 1. 게시글 내용 업데이트
       await dispatch(
         updatePost({
           postId: detail.postId,
           data: { title: form.title, content: form.content },
         })
       ).unwrap();
-      // 저장 후 다시 detail fetch
+
+      // 2. 기존 첨부파일 삭제 처리
+      for (const attachmentId of deletedAttachmentIds) {
+        try {
+          await dispatch(deleteAttachment(attachmentId)).unwrap();
+        } catch (error) {
+          console.error("첨부파일 삭제 실패:", error);
+        }
+      }
+
+      // 3. 새로운 파일 활성화 처리
+      const newPostAttachmentIds = getSuccessfulPostAttachmentIds(newFiles);
+      if (newPostAttachmentIds.length > 0) {
+        try {
+          await dispatch(
+            bulkActivateAttachments({
+              postId: detail.postId,
+              postAttachmentIds: newPostAttachmentIds,
+            })
+          ).unwrap();
+        } catch (error) {
+          console.error("파일 활성화 실패:", error);
+        }
+      }
+
+      // 4. 상태 초기화 및 새로고침
+      setNewFiles([]);
+      setDeletedAttachmentIds([]);
       await dispatch(fetchPostById(detail.postId)).unwrap();
+      
+      // 첨부파일 이미지도 새로고침
+      if (detail.postAttachments?.length) {
+        dispatch(fetchAttachmentImages(detail.postAttachments));
+      }
+
       setIsEditing(false);
     } catch {
       window.alert("저장에 실패했습니다.");
@@ -133,6 +211,108 @@ export default function PostDetailDrawer({
   // 댓글 더보기
   const handleLoadMore = ({ postId, page }) =>
     dispatch(fetchReviews({ postId, page }));
+
+  // 파일 수정 핸들러들
+  const handleFileSelect = async (event) => {
+    const selectedFiles = Array.from(event.target.files);
+    const validFiles = [];
+    const invalidFiles = [];
+
+    selectedFiles.forEach((file) => {
+      const errors = validateFile(file);
+      if (errors.length === 0) validFiles.push(file);
+      else invalidFiles.push({ file, errors });
+    });
+
+    if (invalidFiles.length > 0) {
+      const errorMessages = invalidFiles
+        .map(({ file, errors }) => `${file.name}: ${errors.join(", ")}`)
+        .join("\n");
+      alert(`다음 파일들의 업로드가 실패했습니다:\n\n${errorMessages}`);
+    }
+
+    const uniqueFiles = getUniqueFiles(validFiles, newFiles);
+    if (uniqueFiles.length !== validFiles.length) {
+      alert(
+        `${validFiles.length - uniqueFiles.length}개의 파일이 이미 선택되어 있습니다.`
+      );
+    }
+
+    if (uniqueFiles.length === 0) return;
+
+    const newFileItems = convertToFileItems(uniqueFiles);
+    setNewFiles((prev) => [...prev, ...newFileItems]);
+
+    // 파일 업로드 실행
+    for (const fileItem of newFileItems) {
+      await uploadFileWithPresignedUrl({
+        fileItem,
+        postId: detail.postId,
+        updateFile: (id, updated) =>
+          setNewFiles((prev) => updateFileItem(prev, id, updated)),
+      });
+    }
+  };
+
+  const handleFileDelete = async (fileId) => {
+    const fileToDelete = newFiles.find((file) => file.id === fileId);
+    if (!fileToDelete) return;
+    if (!window.confirm(`"${fileToDelete.name}" 파일을 삭제하시겠습니까?`))
+      return;
+
+    try {
+      if (fileToDelete.status === "success" && fileToDelete.postAttachmentId) {
+        await dispatch(
+          deleteAttachment(fileToDelete.postAttachmentId)
+        ).unwrap();
+      }
+      setNewFiles((prev) => prev.filter((file) => file.id !== fileId));
+    } catch {
+      alert("파일 삭제에 실패했습니다.");
+    }
+  };
+
+  const handleFileRetry = async (fileId) => {
+    const fileItem = newFiles.find((file) => file.id === fileId);
+    if (fileItem) {
+      await uploadFileWithPresignedUrl({
+        fileItem,
+        postId: detail.postId,
+        updateFile: (id, updated) =>
+          setNewFiles((prev) => updateFileItem(prev, id, updated)),
+      });
+    }
+  };
+
+  const handleFilePreviewOpen = (file) => {
+    setPreviewModal({
+      open: true,
+      attachment: {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        imageUrl: URL.createObjectURL(file.file),
+      },
+    });
+  };
+
+  const handleFilePreviewClose = () => {
+    if (previewModal.attachment?.imageUrl) {
+      URL.revokeObjectURL(previewModal.attachment.imageUrl);
+    }
+    setPreviewModal({ open: false, attachment: null });
+  };
+
+  // 기존 첨부파일 삭제
+  const handleExistingAttachmentDelete = (attachmentId) => {
+    if (!window.confirm("기존 첨부파일을 삭제하시겠습니까?")) return;
+    setDeletedAttachmentIds((prev) => [...prev, attachmentId]);
+  };
+
+  // 기존 첨부파일 삭제 취소
+  const handleExistingAttachmentRestore = (attachmentId) => {
+    setDeletedAttachmentIds((prev) => prev.filter((id) => id !== attachmentId));
+  };
 
   return (
     <>
@@ -196,6 +376,86 @@ export default function PostDetailDrawer({
                     setForm((f) => ({ ...f, content: e.target.value }))
                   }
                 />
+
+                {/* 파일 수정 섹션 */}
+                <Box>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <Typography variant="subtitle1" fontWeight={600}>
+                      파일 수정
+                    </Typography>
+                    <Tooltip title="기존 파일을 삭제하거나 새로운 파일을 추가할 수 있습니다.">
+                      <InfoOutlined fontSize="small" color="action" />
+                    </Tooltip>
+                  </Stack>
+                  <Divider sx={{ mt: 1, mb: 2 }} />
+
+                  {/* 기존 첨부파일 목록 */}
+                  {detail.postAttachments && detail.postAttachments.length > 0 && (
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
+                        기존 첨부파일
+                      </Typography>
+                      <Stack spacing={1}>
+                        {detail.postAttachments.map((attachment) => {
+                          const isDeleted = deletedAttachmentIds.includes(attachment.postAttachmentId);
+                          return (
+                            <Box
+                              key={attachment.postAttachmentId}
+                              sx={{
+                                p: 2,
+                                border: 1,
+                                borderColor: isDeleted ? 'error.main' : 'grey.300',
+                                borderRadius: 1,
+                                bgcolor: isDeleted ? 'error.50' : 'background.paper',
+                                opacity: isDeleted ? 0.6 : 1,
+                              }}
+                            >
+                              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                <Typography 
+                                  variant="body2" 
+                                  sx={{ 
+                                    textDecoration: isDeleted ? 'line-through' : 'none',
+                                    color: isDeleted ? 'error.main' : 'text.primary'
+                                  }}
+                                >
+                                  {attachment.fileName}
+                                </Typography>
+                                <Box>
+                                  {isDeleted ? (
+                                    <Button
+                                      size="small"
+                                      color="primary"
+                                      onClick={() => handleExistingAttachmentRestore(attachment.postAttachmentId)}
+                                    >
+                                      복원
+                                    </Button>
+                                  ) : (
+                                    <Button
+                                      size="small"
+                                      color="error"
+                                      onClick={() => handleExistingAttachmentDelete(attachment.postAttachmentId)}
+                                    >
+                                      삭제
+                                    </Button>
+                                  )}
+                                </Box>
+                              </Stack>
+                            </Box>
+                          );
+                        })}
+                      </Stack>
+                    </Box>
+                  )}
+
+                  {/* 새로운 파일 추가 섹션 */}
+                  <FileUploadSection
+                    files={newFiles}
+                    onSelect={handleFileSelect}
+                    onDelete={handleFileDelete}
+                    onRetry={handleFileRetry}
+                    onPreview={handleFilePreviewOpen}
+                  />
+                </Box>
 
                 <Stack direction="row" justifyContent="flex-end" spacing={2}>
                   <Button variant="outlined" onClick={handleCancelEdit}>
@@ -267,7 +527,7 @@ export default function PostDetailDrawer({
       <FilePreviewModal
         open={previewModal.open}
         attachment={previewModal.attachment}
-        onClose={handlePreviewClose}
+        onClose={isEditing ? handleFilePreviewClose : handlePreviewClose}
       />
     </>
   );
