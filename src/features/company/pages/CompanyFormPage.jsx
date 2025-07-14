@@ -7,6 +7,7 @@ import {
   updateCompany,
   createCompanyId,
 } from "@/features/company/companySlice";
+import { getCompanyImageDownloadUrl } from "@/api/company";
 import { Box, Button, Stack } from "@mui/material";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
@@ -48,6 +49,7 @@ export default function CompanyFormPage() {
   const [isSubmitted, setIsSubmitted] = useState(false); // 폼 제출 여부
   const [alertOpen, setAlertOpen] = useState(false); // 에러 알림 표시
   const [alertMessage, setAlertMessage] = useState(""); // 에러 메시지
+  const [existingImageUrl, setExistingImageUrl] = useState(null); // 기존 이미지 미리보기 URL
 
   // 이미지 업로드 관련 훅
   // - 이미지 파일 선택, 미리보기, 업로드 상태 관리
@@ -118,11 +120,16 @@ export default function CompanyFormPage() {
         logoImagePath: current.logoImagePath || "",
       });
       
-      // 기존 로고 이미지가 있는 경우 미리보기 처리
-      // logoImagePath는 S3 URL이므로 CompanyImageUploadSection에서 직접 사용
+      // 기존 로고 이미지가 있는 경우 다운로드 URL 발급 요청
       if (current.logoImagePath) {
-        // existingImagePath prop을 통해 기존 이미지 미리보기 표시
-        // 새 이미지 선택 전까지는 기존 이미지 유지
+        getCompanyImageDownloadUrl(current.companyId)
+          .then((response) => {
+            const downloadUrl = response.data.data.downloadUrl;
+            setExistingImageUrl(downloadUrl);
+          })
+          .catch((error) => {
+            console.error('이미지 다운로드 URL 발급 실패:', error);
+          });
       }
     }
   }, [isEdit, current]);
@@ -203,11 +210,15 @@ export default function CompanyFormPage() {
       
       // 폼에서 이미지 경로 제거
       setForm(prev => ({ ...prev, logoImagePath: "" }));
+      // 기존 이미지 미리보기 초기화
+      setExistingImageUrl(null);
       
     } catch (error) {
       // 에러가 발생해도 UI 상태는 초기화 (사용자 경험 개선)
       originalHandleImageDelete();
       setForm(prev => ({ ...prev, logoImagePath: "" }));
+      // 기존 이미지 미리보기 초기화
+      setExistingImageUrl(null);
     }
   };
 
@@ -227,6 +238,9 @@ export default function CompanyFormPage() {
     if (!file) {
       return;
     }
+    
+    // 기존 이미지 미리보기 초기화
+    setExistingImageUrl(null);
     
     // 파일 검증 및 미리보기 설정
     await originalHandleImageSelect(event);
@@ -346,7 +360,7 @@ export default function CompanyFormPage() {
           error: imageError,
           onSelect: handleImageSelect,
           onDelete: handleImageDelete,
-          existingImagePath: isEdit && form.logoImagePath ? form.logoImagePath : null,
+          existingImagePath: isEdit && existingImageUrl ? existingImageUrl : null,
           isEdit,
           uploadStatus,
         }}
