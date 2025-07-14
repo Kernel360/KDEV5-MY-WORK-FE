@@ -30,7 +30,6 @@ import FileUploadSection from "../components/FileUploadSection";
 import { fetchReviews } from "../reviewSlice";
 import {
   deletePost,
-  fetchAttachmentImages,
   clearAttachmentImages,
   updatePostApproval,
   updatePost,
@@ -75,10 +74,7 @@ export default function PostDetailDrawer({
   const [newFiles, setNewFiles] = useState([]); // 새로 추가된 파일들
   const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]); // 삭제할 기존 첨부파일 ID들
 
-  // 첨부 이미지 뷰어 상태
-  const attachmentImages = useSelector((s) => s.post.attachmentImages || []);
-  const imagesLoading = useSelector((s) => s.post.imagesLoading);
-  const imagesError = useSelector((s) => s.post.imagesError);
+  // 첨부 이미지 뷰어 상태 (제거됨)
 
   // 파일 미리보기 모달
   const [previewModal, setPreviewModal] = useState({
@@ -103,9 +99,10 @@ export default function PostDetailDrawer({
     if (!open || !initialPost?.postId) return;
     dispatch(clearAttachmentImages());
     dispatch(fetchReviews({ postId: initialPost.postId, page: 1 }));
-    if (initialPost.postAttachments?.length) {
-      dispatch(fetchAttachmentImages(initialPost.postAttachments));
-    }
+    // 첨부파일 자동 다운로드 제거
+    // if (initialPost.postAttachments?.length) {
+    //   dispatch(fetchAttachmentImages(initialPost.postAttachments));
+    // }
     // 새로 열 때마다 Redux에서 상세 데이터도 다시 가져옵니다
     dispatch(fetchPostById(initialPost.postId));
   }, [open, initialPost, dispatch]);
@@ -195,10 +192,10 @@ export default function PostDetailDrawer({
       setDeletedAttachmentIds([]);
       await dispatch(fetchPostById(detail.postId)).unwrap();
       
-      // 첨부파일 이미지도 새로고침
-      if (detail.postAttachments?.length) {
-        dispatch(fetchAttachmentImages(detail.postAttachments));
-      }
+      // 첨부파일 자동 다운로드 제거
+      // if (detail.postAttachments?.length) {
+      //   dispatch(fetchAttachmentImages(detail.postAttachments));
+      // }
 
       setIsEditing(false);
     } catch {
@@ -501,9 +498,9 @@ export default function PostDetailDrawer({
                 </Box>
 
                 <FileAttachmentViewer
-                  attachments={attachmentImages}
-                  loading={imagesLoading}
-                  error={imagesError}
+                  attachments={detail.postAttachments || []}
+                  loading={false}
+                  error={null}
                   onPreview={handlePreviewOpen}
                   onDownload={handleDownload}
                 />
