@@ -66,6 +66,21 @@ export default function usePostForm({ dispatch, open }) {
 
     if (newFiles.length === 0) return;
 
+    // 최대 첨부파일 개수 체크 (3개 제한)
+    const currentFileCount = files.length;
+    const maxFiles = 3;
+    const availableSlots = maxFiles - currentFileCount;
+
+    if (availableSlots <= 0) {
+      alert(`첨부파일은 최대 ${maxFiles}개까지만 등록할 수 있습니다.`);
+      return;
+    }
+
+    if (newFiles.length > availableSlots) {
+      alert(`첨부파일은 최대 ${maxFiles}개까지만 등록할 수 있습니다. (현재 ${currentFileCount}개, ${availableSlots}개 더 추가 가능)`);
+      return;
+    }
+
     const newFileItems = convertToFileItems(newFiles);
     setFiles((prev) => [...prev, ...newFileItems]);
 
