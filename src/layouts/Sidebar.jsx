@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
+import { getCompanyImageDownloadUrl } from "@/api/company";
 
 import {
   SidebarRoot,
@@ -39,7 +40,24 @@ export default function Sidebar({
   const memberName = useSelector((state) => state.auth.user?.name);
   const memberRole = useSelector((state) => state.auth.user?.role);
   const logoImagePath = useSelector((state) => state.auth.company?.logoImagePath);
+  const companyId = useSelector((state) => state.auth.company?.id);
   const currentPath = location.pathname;
+  
+  const [companyImageUrl, setCompanyImageUrl] = useState(null);
+
+  // 회사 로고 이미지 다운로드 URL 요청
+  useEffect(() => {
+    if (logoImagePath && companyId) {
+      getCompanyImageDownloadUrl(companyId)
+        .then((response) => {
+          const downloadUrl = response.data.data.downloadUrl;
+          setCompanyImageUrl(downloadUrl);
+        })
+        .catch((error) => {
+          console.error('회사 이미지 다운로드 URL 발급 실패:', error);
+        });
+    }
+  }, [logoImagePath, companyId]);
 
   const filteredNavItems = navItems.filter(
     (item) => item.roles && item.roles.includes(memberRole)
@@ -65,7 +83,7 @@ export default function Sidebar({
     <SidebarRoot>
       <ProfileSection>
         <Avatar 
-          src={logoImagePath || "/toss_logo.png"} 
+          src={companyImageUrl || "/toss_logo.png"} 
         />
         <Box
           sx={{

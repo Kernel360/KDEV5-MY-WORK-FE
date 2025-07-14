@@ -16,6 +16,8 @@ export default function ProjectDetailPage() {
   const user = useSelector((state) => state.auth?.user);
   const isAdmin = user?.role === "ROLE_SYSTEM_ADMIN";
 
+  const isEditable = user?.role !== "ROLE_USER";
+
   const {
     loading,
     project,
@@ -99,7 +101,7 @@ export default function ProjectDetailPage() {
         </Paper>
       </Box>
 
-      {isAdmin && (
+      {isEditable && (
         <Stack
           direction="row"
           justifyContent="flex-end"

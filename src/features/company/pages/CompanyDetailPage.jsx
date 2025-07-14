@@ -13,7 +13,7 @@ import {
   CircularProgress,
   Avatar,
 } from "@mui/material";
-import { InfoOutlined, Close as CloseIcon } from "@mui/icons-material";
+import { InfoOutlined, Close as CloseIcon, CloudUpload } from "@mui/icons-material";
 import PageWrapper from "@/components/layouts/pageWrapper/PageWrapper";
 import PageHeader from "@/components/layouts/pageHeader/PageHeader";
 import {
@@ -21,6 +21,7 @@ import {
   deleteCompany,
 } from "@/features/company/companySlice";
 import { getCompanyMembersByCompanyId } from "@/api/member";
+import { getCompanyImageDownloadUrl } from "@/api/company";
 import { useTheme } from "@mui/material/styles";
 import CustomButton from "@/components/common/customButton/CustomButton";
 import CreateRoundedIcon from "@mui/icons-material/CreateRounded";
@@ -42,10 +43,25 @@ export default function CompanyDetailPage() {
   const [page, setPage] = useState(1);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [companyImageUrl, setCompanyImageUrl] = useState(null);
 
   useEffect(() => {
     dispatch(fetchCompanyById(id));
   }, [dispatch, id]);
+
+  // 회사 로고 이미지 다운로드 URL 요청
+  useEffect(() => {
+    if (company?.logoImagePath && company?.companyId) {
+      getCompanyImageDownloadUrl(company.companyId)
+        .then((response) => {
+          const downloadUrl = response.data.data.downloadUrl;
+          setCompanyImageUrl(downloadUrl);
+        })
+        .catch((error) => {
+          console.error('회사 이미지 다운로드 URL 발급 실패:', error);
+        });
+    }
+  }, [company?.logoImagePath, company?.companyId]);
 
   useEffect(() => {
     if (!company?.companyId) return;
@@ -245,6 +261,83 @@ export default function CompanyDetailPage() {
                   onChange={(_, value) => setPage(value)}
                   size="small"
                 />
+              </Box>
+            </Box>
+
+            {/* 4. 회사 로고 */}
+            <Box>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Typography variant="subtitle1" fontWeight={600}>
+                  4. 회사 로고
+                </Typography>
+                <Tooltip title="회사 로고 이미지입니다.">
+                  <InfoOutlined fontSize="small" color="action" />
+                </Tooltip>
+              </Stack>
+              <Divider sx={{ mt: 1, mb: 2 }} />
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                }}
+              >
+                {/* 이미지 미리보기 또는 플레이스홀더 */}
+                <Box
+                  sx={{
+                    position: "relative",
+                    display: "inline-block",
+                    width: "120px",
+                    height: "120px",
+                    borderRadius: "50%",
+                    border: "3px solid",
+                    borderColor: companyImageUrl ? "primary.main" : "grey.300",
+                    overflow: "hidden",
+                    boxShadow: companyImageUrl
+                      ? "0 4px 12px rgba(0, 0, 0, 0.15)"
+                      : "0 2px 8px rgba(0, 0, 0, 0.1)",
+                    backgroundColor: "grey.50",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {companyImageUrl ? (
+                    <img
+                      src={companyImageUrl}
+                      alt="회사 로고"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "text.secondary",
+                        textAlign: "center",
+                        p: 2,
+                      }}
+                    >
+                      <CloudUpload sx={{ fontSize: 32, mb: 1, opacity: 0.5 }} />
+                      <Typography variant="caption" sx={{ fontSize: "0.7rem" }}>
+                        회사 로고
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+
+                {/* 빈 공간 (버튼 자리) */}
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    회사 로고 이미지가 표시됩니다.
+                  </Typography>
+                </Box>
               </Box>
             </Box>
           </Stack>

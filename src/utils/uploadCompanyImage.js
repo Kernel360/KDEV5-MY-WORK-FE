@@ -30,9 +30,8 @@ export async function uploadCompanyImage(file, companyId, onProgress) {
       throw new Error(`업로드 실패: ${uploadResponse.status} - ${uploadResponse.statusText}`);
     }
 
-    // 3단계: 업로드된 이미지 URL 반환 (presigned URL에서 실제 URL 추출)
-    const uploadedUrl = uploadUrl.split('?')[0];
-    return uploadedUrl;
+    // 3단계: 파일명만 반환
+    return file.name;
 
   } catch (error) {
     throw new Error('이미지 업로드에 실패했습니다.');

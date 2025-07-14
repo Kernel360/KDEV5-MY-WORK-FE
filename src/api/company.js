@@ -33,6 +33,19 @@ export function getCompanyImageUploadUrl(companyId, fileName) {
 }
 
 /**
+ * 회사 이미지 다운로드 URL 발급
+ * GET /api/companies/images/download-url
+ * 
+ * @param {string} companyId - 회사 UUID
+ * @returns {Promise<import("axios").AxiosResponse>} ApiResponse<{downloadUrl: string, expiration: string}>
+ */
+export function getCompanyImageDownloadUrl(companyId) {
+  return api.get(`/api/companies/images/download-url`, {
+    params: { companyId }
+  });
+}
+
+/**
  * 회사 이미지 삭제
  * DELETE /api/companies/images/{companyId}
  * 
