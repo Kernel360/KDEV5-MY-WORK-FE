@@ -8,23 +8,26 @@ import { getFileIcon } from "@/utils/getFileIcon";
 export default function FileUploadSection({
   files,
   existingAttachments = [],
-  deletedAttachmentIds = [],
   onSelect,
   onDelete,
   onRetry,
   onPreview,
   onExistingDelete,
-  onExistingRestore,
   title = "4. 파일 첨부",
   isEditing = false,
 }) {
+  const maxFiles = 3;
+  const existingFileCount = isEditing ? existingAttachments.length : 0;
+  const currentTotalFiles = existingFileCount + files.length;
+  const remainingSlots = maxFiles - currentTotalFiles;
+  const isMaxReached = remainingSlots <= 0;
   return (
     <Box>
       <Stack direction="row" alignItems="center" spacing={1}>
         <Typography variant="subtitle1" fontWeight={600}>
-          {title}
+          {title} ({currentTotalFiles}/{maxFiles})
         </Typography>
-        <Tooltip title={isEditing ? "기존 파일을 삭제하거나 새로운 파일을 추가할 수 있습니다." : "모든 파일 형식 첨부 가능합니다. (최대 5MB, 실행파일 제외)"}>
+        <Tooltip title={isEditing ? "기존 파일을 삭제하거나 새로운 파일을 추가할 수 있습니다. (최대 3개)" : "모든 파일 형식 첨부 가능합니다. (최대 5MB, 실행파일 제외, 최대 3개)"}>
           <InfoOutlined fontSize="small" color="action" />
         </Tooltip>
       </Stack>
@@ -37,79 +40,61 @@ export default function FileUploadSection({
             기존 첨부파일 ({existingAttachments.length}개)
           </Typography>
           <Stack spacing={1}>
-            {existingAttachments.map((attachment) => {
-              const isDeleted = deletedAttachmentIds.includes(attachment.postAttachmentId);
-              return (
-                <Box
-                  key={attachment.postAttachmentId}
-                  sx={{
-                    p: 2,
-                    border: "1px solid",
-                    borderColor: isDeleted ? 'error.main' : 'grey.300',
-                    borderRadius: 1,
-                    bgcolor: isDeleted ? 'error.50' : 'background.paper',
-                    opacity: isDeleted ? 0.6 : 1,
-                    "&:hover": !isDeleted ? {
-                      borderColor: "primary.main",
-                      bgcolor: "grey.50",
-                    } : {},
-                  }}
-                >
-                  <Stack direction="row" alignItems="center" spacing={2}>
-                    <Box
-                      sx={{
-                        width: 40,
-                        height: 40,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        bgcolor: "grey.100",
-                        borderRadius: 1,
-                      }}
+            {existingAttachments.map((attachment) => (
+              <Box
+                key={attachment.postAttachmentId}
+                sx={{
+                  p: 2,
+                  border: "1px solid",
+                  borderColor: 'grey.300',
+                  borderRadius: 1,
+                  bgcolor: 'background.paper',
+                  "&:hover": {
+                    borderColor: "primary.main",
+                    bgcolor: "grey.50",
+                  },
+                }}
+              >
+                <Stack direction="row" alignItems="center" spacing={2}>
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      bgcolor: "grey.100",
+                      borderRadius: 1,
+                    }}
+                  >
+                    {getFileIcon(attachment.fileName, attachment.fileType)}
+                  </Box>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography 
+                      variant="body2" 
+                      fontWeight={600}
+                      noWrap
                     >
-                      {getFileIcon(attachment.fileName, attachment.fileType)}
-                    </Box>
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography 
-                        variant="body2" 
-                        fontWeight={600}
-                        noWrap
-                        sx={{ 
-                          textDecoration: isDeleted ? 'line-through' : 'none',
-                          color: isDeleted ? 'error.main' : 'text.primary'
-                        }}
-                      >
-                        {attachment.fileName}
+                      {attachment.fileName}
+                    </Typography>
+                    {attachment.fileType && (
+                      <Typography variant="caption" color="text.secondary">
+                        {attachment.fileType}
                       </Typography>
-                      {attachment.fileType && (
-                        <Typography variant="caption" color="text.secondary">
-                          {attachment.fileType}
-                        </Typography>
-                      )}
-                    </Box>
-                    <Box>
-                      {isDeleted ? (
-                        <Button
-                          size="small"
-                          color="primary"
-                          onClick={() => onExistingRestore?.(attachment.postAttachmentId)}
-                        >
-                          복원
-                        </Button>
-                      ) : (
-                        <Button
-                          size="small"
-                          color="error"
-                          onClick={() => onExistingDelete?.(attachment.postAttachmentId)}
-                        >
-                          삭제
-                        </Button>
-                      )}
-                    </Box>
-                  </Stack>
-                </Box>
-              );
-            })}
+                    )}
+                  </Box>
+                  <Box>
+                    <Button
+                      size="small"
+                      color="error"
+                      onClick={() => onExistingDelete?.(attachment.postAttachmentId)}
+                    >
+                      삭제
+                    </Button>
+                  </Box>
+                </Stack>
+              </Box>
+            ))}
           </Stack>
         </Box>
       )}
@@ -130,16 +115,30 @@ export default function FileUploadSection({
             style={{ display: "none" }}
             id="file-upload"
             accept="*"
+            disabled={isMaxReached}
           />
-          <label htmlFor="file-upload">
-            <CustomButton
-              kind="ghost"
-              component="span"
-              startIcon={<CloudUpload />}
-            >
-              파일 선택
-            </CustomButton>
-          </label>
+          <Box>
+            <label htmlFor="file-upload">
+              <CustomButton
+                kind="ghost"
+                component="span"
+                startIcon={<CloudUpload />}
+                disabled={isMaxReached}
+              >
+                {isMaxReached ? "최대 개수 도달" : "파일 선택"}
+              </CustomButton>
+            </label>
+            {isMaxReached && (
+              <Typography variant="caption" color="error" sx={{ display: "block", mt: 1 }}>
+                최대 {maxFiles}개의 파일만 첨부할 수 있습니다.
+              </Typography>
+            )}
+            {!isMaxReached && remainingSlots < maxFiles && (
+              <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
+                {remainingSlots}개 더 추가할 수 있습니다.
+              </Typography>
+            )}
+          </Box>
         </Stack>
 
         {files.length > 0 && (
