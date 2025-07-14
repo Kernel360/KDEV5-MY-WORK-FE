@@ -15,8 +15,6 @@ import {
   Close as CloseIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  InfoOutlined,
-  CloudUpload,
 } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
@@ -375,84 +373,19 @@ export default function PostDetailDrawer({
                 />
 
                 {/* 파일 수정 섹션 */}
-                <Box>
-                  <Stack direction="row" alignItems="center" spacing={1}>
-                    <Typography variant="subtitle1" fontWeight={600}>
-                      파일 수정
-                    </Typography>
-                    <Tooltip title="기존 파일을 삭제하거나 새로운 파일을 추가할 수 있습니다.">
-                      <InfoOutlined fontSize="small" color="action" />
-                    </Tooltip>
-                  </Stack>
-                  <Divider sx={{ mt: 1, mb: 2 }} />
-
-                  {/* 기존 첨부파일 목록 */}
-                  {detail.postAttachments && detail.postAttachments.length > 0 && (
-                    <Box sx={{ mb: 3 }}>
-                      <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
-                        기존 첨부파일
-                      </Typography>
-                      <Stack spacing={1}>
-                        {detail.postAttachments.map((attachment) => {
-                          const isDeleted = deletedAttachmentIds.includes(attachment.postAttachmentId);
-                          return (
-                            <Box
-                              key={attachment.postAttachmentId}
-                              sx={{
-                                p: 2,
-                                border: 1,
-                                borderColor: isDeleted ? 'error.main' : 'grey.300',
-                                borderRadius: 1,
-                                bgcolor: isDeleted ? 'error.50' : 'background.paper',
-                                opacity: isDeleted ? 0.6 : 1,
-                              }}
-                            >
-                              <Stack direction="row" justifyContent="space-between" alignItems="center">
-                                <Typography 
-                                  variant="body2" 
-                                  sx={{ 
-                                    textDecoration: isDeleted ? 'line-through' : 'none',
-                                    color: isDeleted ? 'error.main' : 'text.primary'
-                                  }}
-                                >
-                                  {attachment.fileName}
-                                </Typography>
-                                <Box>
-                                  {isDeleted ? (
-                                    <Button
-                                      size="small"
-                                      color="primary"
-                                      onClick={() => handleExistingAttachmentRestore(attachment.postAttachmentId)}
-                                    >
-                                      복원
-                                    </Button>
-                                  ) : (
-                                    <Button
-                                      size="small"
-                                      color="error"
-                                      onClick={() => handleExistingAttachmentDelete(attachment.postAttachmentId)}
-                                    >
-                                      삭제
-                                    </Button>
-                                  )}
-                                </Box>
-                              </Stack>
-                            </Box>
-                          );
-                        })}
-                      </Stack>
-                    </Box>
-                  )}
-
-                  {/* 새로운 파일 추가 섹션 */}
-                  <FileUploadSection
-                    files={newFiles}
-                    onSelect={handleFileSelect}
-                    onDelete={handleFileDelete}
-                    onRetry={handleFileRetry}
-                    onPreview={handleFilePreviewOpen}
-                  />
-                </Box>
+                <FileUploadSection
+                  files={newFiles}
+                  existingAttachments={detail.postAttachments || []}
+                  deletedAttachmentIds={deletedAttachmentIds}
+                  onSelect={handleFileSelect}
+                  onDelete={handleFileDelete}
+                  onRetry={handleFileRetry}
+                  onPreview={handleFilePreviewOpen}
+                  onExistingDelete={handleExistingAttachmentDelete}
+                  onExistingRestore={handleExistingAttachmentRestore}
+                  title="파일 수정"
+                  isEditing={true}
+                />
 
                 <Stack direction="row" justifyContent="flex-end" spacing={2}>
                   <Button variant="outlined" onClick={handleCancelEdit}>
