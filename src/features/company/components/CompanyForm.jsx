@@ -18,41 +18,39 @@ export default function CompanyForm({
   handleChange,
   isSubmitted = false,
   imageUploadProps,
+  requiredCheck = {},
+  errorState = {},
 }) {
   // 검증 에러 상태 관리
   const [businessNumberError, setBusinessNumberError] = React.useState("");
   const [phoneError, setPhoneError] = React.useState("");
   const [emailError, setEmailError] = React.useState("");
 
+  // 필수값 안내 상태
+  const isEmpty = (v) => !v || v.trim() === "";
+
   // 사업자 번호 검증 (숫자만 확인)
   const validateBusinessNumber = (value) => {
-    if (!value) {
-      setBusinessNumberError("");
-      return true;
+    if (isEmpty(value)) {
+      setBusinessNumberError("입력 부탁드립니다");
+      return false;
     }
-
-    // 숫자만 입력되었는지 확인
     const numbersOnly = value.replace(/[^0-9]/g, '');
     if (numbersOnly.length !== 10) {
       setBusinessNumberError("사업자 번호는 10자리 숫자로 입력해주세요.");
       return false;
     }
-
     setBusinessNumberError("");
     return true;
   };
 
   // 전화번호 검증
   const validatePhoneNumber = (value) => {
-    if (!value) {
-      setPhoneError("");
-      return true;
+    if (isEmpty(value)) {
+      setPhoneError("입력 부탁드립니다");
+      return false;
     }
-
-    // 숫자만 추출하여 길이 확인
     const numbersOnly = value.replace(/[^0-9]/g, '');
-    
-    // 서울 지역번호(02)는 10자리, 나머지는 11자리
     if (numbersOnly.startsWith('02')) {
       if (numbersOnly.length !== 10) {
         setPhoneError("서울 지역번호는 10자리 숫자로 입력해주세요. (예: 02-1234-5678)");
@@ -64,25 +62,21 @@ export default function CompanyForm({
         return false;
       }
     }
-
     setPhoneError("");
     return true;
   };
 
   // 이메일 검증 (기본 형식만)
   const validateEmail = (value) => {
-    if (!value) {
-      setEmailError("");
-      return true;
+    if (isEmpty(value)) {
+      setEmailError("입력 부탁드립니다");
+      return false;
     }
-
-    // 기본적인 이메일 형식 검증
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(value)) {
       setEmailError("올바른 이메일 형식이 아닙니다.");
       return false;
     }
-
     setEmailError("");
     return true;
   };
@@ -90,8 +84,6 @@ export default function CompanyForm({
   // 필드 변경 핸들러
   const handleFieldChange = (field) => (e) => {
     const value = e.target.value;
-    
-    // 필드별 검증 실행
     switch (field) {
       case 'businessNumber':
         validateBusinessNumber(value);
@@ -102,20 +94,22 @@ export default function CompanyForm({
       case 'contactEmail':
         validateEmail(value);
         break;
+      case 'detail':
+        // 상세설명 필수 안내
+        break;
+      case 'address':
+        // 주소 필수 안내
+        break;
     }
-    
     handleChange(field)(e);
   };
 
   // 사업자 번호 포맷팅 (숫자만 입력, 10자리까지)
   const handleBusinessNumberChange = (e) => {
     let value = e.target.value.replace(/[^0-9]/g, '');
-    
-    // 10자리까지만 입력 가능
     if (value.length > 10) {
       value = value.slice(0, 10);
     }
-    
     e.target.value = value;
     handleFieldChange('businessNumber')(e);
   };
@@ -123,8 +117,6 @@ export default function CompanyForm({
   // 전화번호 포맷팅 (자동 하이픈 추가)
   const handlePhoneNumberChange = (e) => {
     let value = e.target.value.replace(/[^0-9]/g, '');
-    
-    // 서울 지역번호(02)는 10자리, 나머지는 11자리로 제한
     if (value.startsWith('02')) {
       if (value.length > 10) {
         value = value.slice(0, 10);
@@ -134,18 +126,14 @@ export default function CompanyForm({
         value = value.slice(0, 11);
       }
     }
-    
-    // 자동 포맷팅
     if (value.length >= 3) {
       if (value.startsWith('02')) {
-        // 서울 지역번호 (02-1234-5678)
         if (value.length >= 6) {
           value = value.slice(0, 2) + '-' + value.slice(2, 6) + '-' + value.slice(6);
         } else {
           value = value.slice(0, 2) + '-' + value.slice(2);
         }
       } else {
-        // 기타 번호 (010-1234-5678)
         if (value.length >= 7) {
           value = value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7);
         } else {
@@ -153,7 +141,6 @@ export default function CompanyForm({
         }
       }
     }
-    
     e.target.value = value;
     handleFieldChange('contactPhoneNumber')(e);
   };
@@ -197,20 +184,21 @@ export default function CompanyForm({
               value={form.name || ""}
               onChange={handleChange("name")}
               fullWidth
-              error={isSubmitted && !form.name}
-              helperText={
-                isSubmitted && !form.name ? "회사 이름을 입력해주세요." : ""
-              }
+              error={false}
+              helperText={isEmpty(form.name) ? "회사명 입력 부탁드립니다" : " "}
               sx={{ mb: 2 }}
             />
             <TextField
+              required
               label="상세 설명"
               placeholder="회사에 대한 상세 설명을 입력해주세요."
               multiline
               rows={4}
               value={form.detail || ""}
-              onChange={handleChange("detail")}
+              onChange={handleFieldChange("detail")}
               fullWidth
+              error={false}
+              helperText={isEmpty(form.detail) ? "상세 내용 입력 부탁드립니다" : " "}
               sx={{ mb: 2 }}
             />
             {/* 회사 타입 선택 */}
@@ -243,11 +231,16 @@ export default function CompanyForm({
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
                 <TextField
+                  required
                   label="사업자 번호"
                   value={form.businessNumber || ""}
                   onChange={handleBusinessNumberChange}
-                  error={!!businessNumberError}
-                  helperText={businessNumberError || " "}
+                  error={!!form.businessNumber && !!businessNumberError}
+                  helperText={
+                    isEmpty(form.businessNumber)
+                      ? "사업자번호 입력 부탁드립니다"
+                      : businessNumberError || " "
+                  }
                   sx={{ width: '100%' }}
                   inputProps={{
                     style: { 
@@ -279,20 +272,28 @@ export default function CompanyForm({
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <TextField
+                  required
                   label="주소"
                   placeholder="회사 주소를 입력해주세요."
                   value={form.address || ""}
-                  onChange={handleChange("address")}
+                  onChange={handleFieldChange("address")}
                   fullWidth
+                  error={false}
+                  helperText={isEmpty(form.address) ? "주소 입력 부탁드립니다" : " "}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
+                  required
                   label="회사 전화번호"
                   value={form.contactPhoneNumber || ""}
                   onChange={handlePhoneNumberChange}
-                  error={!!phoneError}
-                  helperText={phoneError || " "}
+                  error={!!form.contactPhoneNumber && !!phoneError}
+                  helperText={
+                    isEmpty(form.contactPhoneNumber)
+                      ? "회사 전화번호 입력 부탁드립니다"
+                      : phoneError || " "
+                  }
                   sx={{ width: '100%' }}
                   inputProps={{
                     style: { 
@@ -303,14 +304,19 @@ export default function CompanyForm({
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
+                  required
                   label="이메일"
                   type="email"
                   placeholder="company@example.com"
                   value={form.contactEmail || ""}
                   onChange={handleFieldChange("contactEmail")}
                   fullWidth
-                  error={!!emailError}
-                  helperText={emailError || " "}
+                  error={!!form.contactEmail && !!emailError}
+                  helperText={
+                    isEmpty(form.contactEmail)
+                      ? "이메일 입력 부탁드립니다"
+                      : emailError || " "
+                  }
                 />
               </Grid>
             </Grid>

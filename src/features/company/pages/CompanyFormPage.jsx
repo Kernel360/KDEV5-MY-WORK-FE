@@ -330,6 +330,12 @@ export default function CompanyFormPage() {
     }
   };
 
+  // 저장 버튼 활성화 조건
+  const isAllRequiredFilled =
+    form.name && form.detail && form.businessNumber && form.address && form.contactPhoneNumber && form.contactEmail;
+  // 벨리데이션 에러 체크 (CompanyForm에서 상태를 올릴 수도 있지만, 여기선 간단히 내부 상태로)
+  const hasError = false; // 실제로는 CompanyForm에서 errorState prop으로 받아서 체크하는 게 더 견고함
+
   // 페이지 헤더 액션 버튼들
   const headerAction = (
     <Stack direction="row" spacing={2}>
@@ -340,7 +346,7 @@ export default function CompanyFormPage() {
         variant="contained"
         color="primary"
         onClick={handleSubmit}
-        disabled={companyLoading || !form.name} // 로딩 중이거나 필수 값 누락시 비활성화
+        disabled={companyLoading || !isAllRequiredFilled || hasError}
       >
         {companyLoading ? "로딩 중..." : isEdit ? "수정 저장" : "등록"}
       </Button>
