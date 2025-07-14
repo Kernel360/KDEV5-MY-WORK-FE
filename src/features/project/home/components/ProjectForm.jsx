@@ -33,15 +33,13 @@ export default function ProjectForm({
   const [dateError, setDateError] = React.useState("");
 
   const handleAmountChange = (event) => {
-    const value = event.target.value;
-    if (value > 1000000) {
-      setAmountError(
-        "프로젝트 금액은 만원 단위 입니다. 100억을 넘을수 없습니다. 관리자에게 문의해주세요."
-      );
+    const value = event.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
+    if (value.length > 0 && Number(value) >= 1000000) {
+      setAmountError("프로젝트 금액은 만 원 단위입니다. 6자리를 넘을 수 없습니다. 관리자에게 문의해주세요.");
     } else {
       setAmountError("");
-      handleChange("projectAmount")({ target: { value: value } });
     }
+    handleChange("projectAmount")({ target: { value } });
   };
 
   // 기간 벨리데이션 체크 함수
@@ -134,18 +132,18 @@ export default function ProjectForm({
             <Divider sx={{ mt: 1, mb: 2 }} />
 
             <TextField
-              required
-              label="프로젝트 이름"
+              label={<span>프로젝트 이름 *</span>}
               placeholder="예) 테스트 프로젝트 A"
-              error={!form.name}
               value={form.name || ""}
               onChange={handleChange("name")}
               fullWidth
               sx={{ mb: 2 }}
+              error={false}
+              helperText={!form.name ? "프로젝트 이름을 입력해주세요." : " "}
             />
 
             <TextField
-              label="상세 설명"
+              label={<span>상세 설명 <span style={{ color: '#000' }}>*</span></span>}
               placeholder="프로젝트 설명을 입력하세요."
               value={form.detail || ""}
               onChange={handleChange("detail")}
@@ -153,6 +151,8 @@ export default function ProjectForm({
               multiline
               rows={4}
               sx={{ mb: 2 }}
+              error={false}
+              helperText={!form.detail ? "상세 설명을 간단하게 작성 부탁드립니다." : " "}
             />
 
             {/* 상태 필드는 편집 모드에서만 표시 */}
@@ -187,7 +187,7 @@ export default function ProjectForm({
             <Divider sx={{ mt: 1, mb: 2 }} />
 
             <TextField
-              label="프로젝트 금액"
+              label={<span>프로젝트 금액 <span style={{ color: '#000' }}>*</span></span>}
               placeholder="예) 1000"
               type="number"
               value={form.projectAmount || ""}
@@ -226,7 +226,7 @@ export default function ProjectForm({
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6} md={4}>
                   <DatePicker
-                    label="시작일"
+                    label={<span>시작일 <span style={{ color: '#000' }}>*</span></span>}
                     format="YYYY-MM-DD"
                     slots={{ openPickerIcon: CalendarTodayRounded }}
                     slotProps={{ openPickerIcon: { fontSize: "small" } }}
@@ -246,7 +246,7 @@ export default function ProjectForm({
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                   <DatePicker
-                    label="종료일"
+                    label={<span>종료일 <span style={{ color: '#000' }}>*</span></span>}
                     format="YYYY-MM-DD"
                     slots={{ openPickerIcon: CalendarTodayRounded }}
                     slotProps={{ openPickerIcon: { fontSize: "small" } }}

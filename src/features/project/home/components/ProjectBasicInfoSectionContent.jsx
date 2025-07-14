@@ -42,15 +42,13 @@ export default function ProjectBasicInfoSectionContent({
   ].includes(userRole);
 
   const handleAmountChange = (event) => {
-    const value = event.target.value;
-    if (value > 1000000) {
-      setAmountError(
-        "프로젝트 금액은 만원 단위 입니다. 100억을 넘을수 없습니다. 관리자에게 문의해주세요."
-      );
+    const value = event.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
+    if (value.length > 0 && Number(value) >= 1000000) {
+      setAmountError("프로젝트 금액은 만 원 단위입니다. 6자리를 넘을 수 없습니다. 관리자에게 문의해주세요.");
     } else {
       setAmountError("");
-      setProjectAmount(value);
     }
+    setProjectAmount(value);
   };
 
   // 기간 벨리데이션 체크 함수
@@ -116,11 +114,12 @@ export default function ProjectBasicInfoSectionContent({
         <Grid item xs={12} sm={isEditable ? 12 : 6}>
           {isEditable ? (
             <TextField
-              label="프로젝트명"
+              label={<span>프로젝트명 <span style={{ color: '#000' }}>*</span></span>}
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
               fullWidth
-              required
+              error={false}
+              helperText={!projectName ? "프로젝트 이름을 입력해주세요." : " "}
             />
           ) : (
             <>
@@ -135,10 +134,12 @@ export default function ProjectBasicInfoSectionContent({
         <Grid item xs={12} sm={isEditable ? 12 : 6}>
           {isEditable ? (
             <TextField
-              label="상세 설명"
+              label={<span>상세 설명 <span style={{ color: '#000' }}>*</span></span>}
               value={projectDetail}
               onChange={(e) => setProjectDetail(e.target.value)}
               fullWidth
+              error={false}
+              helperText={!projectDetail ? "상세 설명을 간단하게 작성 부탁드립니다." : " "}
             />
           ) : (
             <>
@@ -153,14 +154,14 @@ export default function ProjectBasicInfoSectionContent({
         <Grid item xs={12} sm={isEditable ? 12 : 6}>
           {isEditable ? (
             <TextField
-              label="프로젝트 금액"
+              label={<span>프로젝트 금액 <span style={{ color: '#000' }}>*</span></span>}
               value={projectAmount}
               onChange={handleAmountChange}
               fullWidth
               type="number"
               inputProps={{ min: 0 }}
               error={!!amountError}
-              helperText={amountError}
+              helperText={amountError || " "}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">만원</InputAdornment>
@@ -206,7 +207,7 @@ export default function ProjectBasicInfoSectionContent({
         <Grid item xs={12} sm={isEditable ? 12 : 6}>
           {isEditable ? (
             <DatePicker
-              label="시작일"
+              label={<span>시작일 <span style={{ color: '#000' }}>*</span></span>}
               format="YYYY-MM-DD"
               value={periodStart ? dayjs(periodStart) : null}
               onChange={handleStartDateChange}
@@ -216,9 +217,8 @@ export default function ProjectBasicInfoSectionContent({
                 <TextField 
                   {...params} 
                   fullWidth 
-                  required 
                   error={!!dateError}
-                  helperText={dateError}
+                  helperText={dateError || " "}
                 />
               )}
             />
@@ -236,7 +236,7 @@ export default function ProjectBasicInfoSectionContent({
         <Grid item xs={12} sm={isEditable ? 12 : 6}>
           {isEditable ? (
             <DatePicker
-              label="종료일"
+              label={<span>종료일 <span style={{ color: '#000' }}>*</span></span>}
               format="YYYY-MM-DD"
               value={periodEnd ? dayjs(periodEnd) : null}
               onChange={handleEndDateChange}
@@ -246,9 +246,8 @@ export default function ProjectBasicInfoSectionContent({
                 <TextField 
                   {...params} 
                   fullWidth 
-                  required 
                   error={!!dateError}
-                  helperText={dateError}
+                  helperText={dateError || " "}
                 />
               )}
             />
