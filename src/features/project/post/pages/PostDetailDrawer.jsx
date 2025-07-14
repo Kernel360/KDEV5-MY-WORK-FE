@@ -70,7 +70,6 @@ export default function PostDetailDrawer({
 
   // 파일 수정 관련 상태
   const [newFiles, setNewFiles] = useState([]); // 새로 추가된 파일들
-  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]); // 삭제할 기존 첨부파일 ID들
 
   // 첨부 이미지 뷰어 상태 (제거됨)
 
@@ -127,14 +126,12 @@ export default function PostDetailDrawer({
   const handleEditToggle = () => {
     setForm({ title: detail.title, content: detail.content });
     setNewFiles([]);
-    setDeletedAttachmentIds([]);
     setIsEditing(true);
   };
   // 편집 취소
   const handleCancelEdit = () => {
     setForm({ title: "", content: "" });
     setNewFiles([]);
-    setDeletedAttachmentIds([]);
     setIsEditing(false);
   };
   // 편집 저장
@@ -161,16 +158,7 @@ export default function PostDetailDrawer({
         })
       ).unwrap();
 
-      // 2. 기존 첨부파일 삭제 처리
-      for (const attachmentId of deletedAttachmentIds) {
-        try {
-          await dispatch(deleteAttachment(attachmentId)).unwrap();
-        } catch (error) {
-          console.error("첨부파일 삭제 실패:", error);
-        }
-      }
-
-      // 3. 새로운 파일 활성화 처리
+      // 2. 새로운 파일 활성화 처리
       const newPostAttachmentIds = getSuccessfulPostAttachmentIds(newFiles);
       if (newPostAttachmentIds.length > 0) {
         try {
@@ -185,9 +173,8 @@ export default function PostDetailDrawer({
         }
       }
 
-      // 4. 상태 초기화 및 새로고침
+      // 3. 상태 초기화 및 새로고침
       setNewFiles([]);
-      setDeletedAttachmentIds([]);
       await dispatch(fetchPostById(detail.postId)).unwrap();
       
       // 첨부파일 자동 다운로드 제거
@@ -234,6 +221,23 @@ export default function PostDetailDrawer({
     }
 
     if (uniqueFiles.length === 0) return;
+
+    // 최대 첨부파일 개수 체크 (3개 제한)
+    const existingFileCount = (detail.postAttachments || []).length;
+    const currentNewFileCount = newFiles.length;
+    const maxFiles = 3;
+    const totalCurrentFiles = existingFileCount + currentNewFileCount;
+    const availableSlots = maxFiles - totalCurrentFiles;
+
+    if (availableSlots <= 0) {
+      alert(`첨부파일은 최대 ${maxFiles}개까지만 등록할 수 있습니다.`);
+      return;
+    }
+
+    if (uniqueFiles.length > availableSlots) {
+      alert(`첨부파일은 최대 ${maxFiles}개까지만 등록할 수 있습니다. (현재 ${totalCurrentFiles}개, ${availableSlots}개 더 추가 가능)`);
+      return;
+    }
 
     const newFileItems = convertToFileItems(uniqueFiles);
     setNewFiles((prev) => [...prev, ...newFileItems]);
@@ -299,14 +303,23 @@ export default function PostDetailDrawer({
   };
 
   // 기존 첨부파일 삭제
-  const handleExistingAttachmentDelete = (attachmentId) => {
-    if (!window.confirm("기존 첨부파일을 삭제하시겠습니까?")) return;
-    setDeletedAttachmentIds((prev) => [...prev, attachmentId]);
+  const handleExistingAttachmentDelete = async (attachmentId) => {
+    if (!window.confirm("첨부파일을 삭제하시겠습니까? 삭제된 파일은 복구할 수 없습니다.")) return;
+    
+    try {
+      await dispatch(deleteAttachment(attachmentId)).unwrap();
+      // 삭제 성공 시 게시글 상세 정보 다시 가져오기
+      await dispatch(fetchPostById(detail.postId)).unwrap();
+      alert("첨부파일이 삭제되었습니다.");
+    } catch (error) {
+      console.error("첨부파일 삭제 실패:", error);
+      alert("첨부파일 삭제에 실패했습니다.");
+    }
   };
 
-  // 기존 첨부파일 삭제 취소
+  // 기존 첨부파일 삭제 취소 (즉시 삭제로 변경되어 더이상 필요없음)
   const handleExistingAttachmentRestore = (attachmentId) => {
-    setDeletedAttachmentIds((prev) => prev.filter((id) => id !== attachmentId));
+    // 이 함수는 더이상 사용되지 않음 (즉시 삭제로 변경)
   };
 
   return (
@@ -376,13 +389,11 @@ export default function PostDetailDrawer({
                 <FileUploadSection
                   files={newFiles}
                   existingAttachments={detail.postAttachments || []}
-                  deletedAttachmentIds={deletedAttachmentIds}
                   onSelect={handleFileSelect}
                   onDelete={handleFileDelete}
                   onRetry={handleFileRetry}
                   onPreview={handleFilePreviewOpen}
                   onExistingDelete={handleExistingAttachmentDelete}
-                  onExistingRestore={handleExistingAttachmentRestore}
                   title="파일 수정"
                   isEditing={true}
                 />
