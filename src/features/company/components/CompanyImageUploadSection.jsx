@@ -26,7 +26,7 @@ export default function CompanyImageUploadSection({
     <Box>
       <Stack direction="row" alignItems="center" spacing={1}>
         <Typography variant="subtitle1" fontWeight={600}>
-          4. 로고 이미지
+          4. 회사 로고
         </Typography>
         <Tooltip title="회사 로고 이미지를 업로드하세요. (JPG, PNG, GIF, 최대 5MB)">
           <InfoOutlined fontSize="small" color="action" />
@@ -108,7 +108,7 @@ export default function CompanyImageUploadSection({
               >
                 <CloudUpload sx={{ fontSize: 32, mb: 1, opacity: 0.5 }} />
                 <Typography variant="caption" sx={{ fontSize: "0.7rem" }}>
-                  로고 이미지
+                  회사 로고
                 </Typography>
               </Box>
             )}
