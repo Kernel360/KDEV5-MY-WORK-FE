@@ -25,28 +25,23 @@ export default function useCompanyImageUpload() {
    * - 실제 업로드는 외부에서 별도 처리
    * 
    * @param {Event} event - 파일 선택 이벤트
+   * @returns {boolean} 검증 성공 여부
    */
   const handleImageSelect = async (event) => {
     const file = event.target.files[0];
-    if (!file) return;
+    if (!file) return false;
 
     // 파일 검증
     const errors = validateFile(file);
     if (errors.length > 0) {
       setError(errors.join(", "));
-      return;
+      return false;
     }
 
     // 이미지 파일인지 확인
     if (!file.type.startsWith("image/")) {
       setError("이미지 파일만 업로드 가능합니다.");
-      return;
-    }
-
-    // 파일 크기 제한 (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setError("파일 크기는 5MB 이하여야 합니다.");
-      return;
+      return false;
     }
 
     setError(null);
@@ -56,6 +51,8 @@ export default function useCompanyImageUpload() {
     // 미리보기 URL 생성
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
+    
+    return true;
   };
 
   /**

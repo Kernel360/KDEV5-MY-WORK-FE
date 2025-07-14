@@ -243,7 +243,12 @@ export default function CompanyFormPage() {
     setExistingImageUrl(null);
     
     // 파일 검증 및 미리보기 설정
-    await originalHandleImageSelect(event);
+    const isValid = await originalHandleImageSelect(event);
+    
+    // 검증에 실패하면 업로드 중단
+    if (!isValid) {
+      return;
+    }
     
     // 수정 모드에서는 바로 업로드 (이미 회사 ID가 있음)
     if (isEdit && id) {
