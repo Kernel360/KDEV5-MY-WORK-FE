@@ -183,8 +183,8 @@ export default function MemberForm({
                     onChange={handleChange("name")}
                     required
                     disabled={loading}
-                    error={!form.name}
-                    helperText={!form.name ? "이름을 입력해주세요." : " "}
+                    error={false}
+                    helperText={!form.name ? "이름 입력 부탁드립니다" : " "}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -196,8 +196,8 @@ export default function MemberForm({
                     onChange={handleFieldChange("email")}
                     required
                     disabled={loading}
-                    error={!form.email || !!emailError}
-                    helperText={!form.email ? "이메일을 입력해주세요." : emailError || " "}
+                    error={!!form.email && !!emailError}
+                    helperText={!form.email ? "이메일 입력 부탁드립니다" : emailError || " "}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -207,8 +207,8 @@ export default function MemberForm({
                     onChange={handlePhoneNumberChange}
                     required
                     disabled={loading}
-                    error={!form.phoneNumber || !!phoneError}
-                    helperText={!form.phoneNumber ? "연락처를 입력해주세요." : phoneError || " "}
+                    error={!!form.phoneNumber && !!phoneError}
+                    helperText={!form.phoneNumber ? "연락처 입력 부탁드립니다" : phoneError || " "}
                     sx={{ width: '100%' }}
                     inputProps={{
                       style: { 
@@ -235,10 +235,8 @@ export default function MemberForm({
                         {...params}
                         required
                         fullWidth
-                        error={!form.birthDate}
-                        helperText={
-                          !form.birthDate ? "생년월일을 입력해주세요." : " "
-                        }
+                        error={false}
+                        helperText={!form.birthDate ? "생년월일 입력 부탁드립니다" : " "}
                         InputLabelProps={{ shrink: true }}
                       />
                     )}
@@ -265,7 +263,7 @@ export default function MemberForm({
                   fullWidth
                   required
                   disabled={loading}
-                  error={!form.companyId}
+                  error={false}
                 >
                   <InputLabel id="company-select-label">회사</InputLabel>
                   <Select
@@ -285,10 +283,10 @@ export default function MemberForm({
                   {!form.companyId && (
                     <Typography
                       variant="caption"
-                      color="error"
+                      color="text.secondary"
                       sx={{ ml: 2, mt: 0.5 }}
                     >
-                      회사를 선택해주세요.
+                      회사 선택 부탁드립니다
                     </Typography>
                   )}
                 </FormControl>
@@ -301,8 +299,8 @@ export default function MemberForm({
                   onChange={handleChange("department")}
                   required
                   disabled={loading}
-                  error={!form.department}
-                  helperText={!form.department ? "부서를 입력해주세요." : " "}
+                  error={false}
+                  helperText={!form.department ? "부서 입력 부탁드립니다" : " "}
                 />
               </Grid>
               <Grid item xs={12} sm={4}>
@@ -313,8 +311,8 @@ export default function MemberForm({
                   onChange={handleChange("position")}
                   required
                   disabled={loading}
-                  error={!form.position}
-                  helperText={!form.position ? "직책을 입력해주세요." : " "}
+                  error={false}
+                  helperText={!form.position ? "직책 입력 부탁드립니다" : " "}
                 />
               </Grid>
             </Grid>
@@ -337,7 +335,7 @@ export default function MemberForm({
                   fullWidth
                   required
                   disabled={loading}
-                  error={!form.role}
+                  error={false}
                   sx={{ minWidth: 200 }}
                 >
                   <InputLabel id="role-select-label">권한</InputLabel>
@@ -357,10 +355,10 @@ export default function MemberForm({
                   {!form.role && (
                     <Typography
                       variant="caption"
-                      color="error"
+                      color="text.secondary"
                       sx={{ ml: 2, mt: 0.5 }}
                     >
-                      권한을 선택해주세요.
+                      권한 선택 부탁드립니다
                     </Typography>
                   )}
                 </FormControl>
