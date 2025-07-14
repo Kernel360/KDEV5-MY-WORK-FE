@@ -1,4 +1,5 @@
 // utils/validateFile.js
+import { formatFileSize } from "./formatFileSize";
 
 const DANGEROUS_EXTENSIONS = [
   ".exe",
