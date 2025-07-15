@@ -1,7 +1,5 @@
 # MY-WORK
 
-<img src="./images/mywork-logo.png" width="200px" />
-
 * 🧑‍💻 배포 URL: [https://www.kbe-mywork.com](https://www.kbe-mywork.com)
 * 📄 API 문서화: [https://api.kbe-mywork.com/swagger-ui/swagger-ui.html](https://api.kbe-mywork.com/swagger-ui/swagger-ui.html)
 
