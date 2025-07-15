@@ -47,6 +47,7 @@ export default function useProjectDetailSections(
           setProjectAmount={(val) => setField("projectAmount", val)}
           projectStatus={values.status}
           setProjectStatus={(val) => setField("status", val)}
+          isCreate={false} // 상세/수정폼에서는 생성폼 아님
         />
       ),
     },

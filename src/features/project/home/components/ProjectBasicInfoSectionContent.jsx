@@ -29,6 +29,7 @@ export default function ProjectBasicInfoSectionContent({
   project,
   projectStatus,
   setProjectStatus,
+  isCreate = false, // 생성폼 여부 prop 추가
 }) {
   const [statusLoading, setStatusLoading] = React.useState(false);
   const [statusError, setStatusError] = React.useState("");
@@ -63,8 +64,8 @@ export default function ProjectBasicInfoSectionContent({
     const endDate = dayjs(endAt);
     const today = dayjs().startOf('day');
 
-    // 시작일이 오늘보다 이전인 경우
-    if (startDate.isBefore(today)) {
+    // 생성폼일 때만 시작일 벨리데이션 체크
+    if (isCreate && startDate.isBefore(today)) {
       setDateError("시작일은 오늘 이후로 설정해주세요.");
       return;
     }
