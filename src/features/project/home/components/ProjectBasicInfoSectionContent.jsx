@@ -38,8 +38,9 @@ export default function ProjectBasicInfoSectionContent({
   const canEditStatus = [
     "ROLE_SYSTEM_ADMIN",
     "ROLE_DEV_ADMIN",
-    "ROLE_CLIENT_ADMIN",
+    // "ROLE_CLIENT_ADMIN", // ClientAdmin은 상태 변경 불가
   ].includes(userRole);
+  const isClientAdmin = userRole === "ROLE_CLIENT_ADMIN";
 
   const handleAmountChange = (event) => {
     const value = event.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
@@ -180,6 +181,7 @@ export default function ProjectBasicInfoSectionContent({
           )}
         </Grid>
 
+        {/* 프로젝트 상태 */}
         {canEditStatus && (
           <Grid item xs={12} sm={12}>
             <TextField
@@ -200,6 +202,16 @@ export default function ProjectBasicInfoSectionContent({
                 </MenuItem>
               ))}
             </TextField>
+          </Grid>
+        )}
+        {isClientAdmin && (
+          <Grid item xs={12} sm={12}>
+            <Typography variant="body2" color="text.secondary">
+              프로젝트 상태
+            </Typography>
+            <Typography variant="body1">
+              {getStatusLabel(projectStatus) || "-"}
+            </Typography>
           </Grid>
         )}
 
