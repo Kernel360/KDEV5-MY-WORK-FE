@@ -53,6 +53,7 @@ export default function useProjectForm(projectId) {
     message: "",
     severity: "error",
   });
+  const [amountError, setAmountError] = useState("");
 
   // 프로젝트 + 단계 불러오기
   useEffect(() => {
@@ -258,6 +259,39 @@ export default function useProjectForm(projectId) {
   const setField = (field, value) =>
     setValues((prev) => ({ ...prev, [field]: value }));
 
+  // 기간 벨리데이션 체크 함수
+  const validateDates = (startAt, endAt) => {
+    if (!startAt || !endAt) {
+      return false;
+    }
+
+    const startDate = dayjs(startAt);
+    const endDate = dayjs(endAt);
+    const today = dayjs().startOf('day');
+
+    // 시작일이 오늘보다 이전인 경우
+    if (startDate.isBefore(today)) {
+      return false;
+    }
+
+    // 종료일이 시작일보다 이전인 경우
+    if (endDate.isBefore(startDate)) {
+      return false;
+    }
+
+    // 프로젝트 기간이 1일 미만인 경우
+    if (endDate.diff(startDate, 'day') < 1) {
+      return false;
+    }
+
+    // 프로젝트 기간이 5년(1825일)을 초과하는 경우
+    if (endDate.diff(startDate, 'day') > 1825) {
+      return false;
+    }
+
+    return true;
+  };
+
   // 변경 여부 계산
   const isEdited = useMemo(() => {
     if (!project) return false;
@@ -270,18 +304,16 @@ export default function useProjectForm(projectId) {
       project.projectAmount !== values.projectAmount ||
       project.step !== values.status;
 
+    const datesValid = validateDates(values.startAt, values.endAt);
+
     const devChanged = devAssigned.some((emp) => {
       const init = initialDevAssigned.find((i) => i.memberId === emp.memberId);
       if (init) {
-        // 초기엔 isNew/isDelete 가 모두 false 였으니, 지금 true 로 바뀌었거나
-        // 혹은 반대로 바뀐 게 있다면 true
         return emp.isNew !== init.isNew || emp.isDelete !== init.isDelete;
       }
-      // 초기 스냅샷엔 없던 멤버 → 당연히 추가된 것이므로 변화로 간주
       return emp.isNew || emp.isDelete;
     });
 
-    // ▶ clientAssigned 도 동일하게
     const clientChanged = clientAssigned.some((emp) => {
       const init = initialClientAssigned.find(
         (i) => i.memberId === emp.memberId
@@ -312,7 +344,8 @@ export default function useProjectForm(projectId) {
       pendingStep !== null ||
       devChanged ||
       clientChanged ||
-      managerChanged
+      managerChanged ||
+      !datesValid
     );
   }, [project, values, stepEdited, pendingStep, devAssigned, clientAssigned]);
 

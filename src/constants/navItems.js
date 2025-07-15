@@ -92,7 +92,7 @@ const navItems = [
     text: "로그 기록",
     icon: HistoryIcon,
     path: "/logs",
-    roles: [ROLES.SYSTEM_ADMIN, ROLES.DEV_ADMIN],
+    roles: [ROLES.SYSTEM_ADMIN],
   },
 ];
 

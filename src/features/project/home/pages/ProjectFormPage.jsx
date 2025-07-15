@@ -14,6 +14,7 @@ import PageHeader from "@/components/layouts/pageHeader/PageHeader";
 import ProjectForm from "../components/ProjectForm";
 import usePermission from "@/hooks/usePermission";
 import { v4 as uuidv4 } from "uuid";
+import dayjs from "dayjs";
 
 export default function ProjectFormPage() {
   const { id: projectId } = useParams();
@@ -51,6 +52,46 @@ export default function ProjectFormPage() {
     { projectStepId: uuidv4(), title: "설계", orderNumber: 3 },
   ]);
 
+  // 기간 벨리데이션 체크 함수
+  const validateDates = (startAt, endAt) => {
+    if (!startAt || !endAt) {
+      return false;
+    }
+
+    const startDate = dayjs(startAt);
+    const endDate = dayjs(endAt);
+    const today = dayjs().startOf('day');
+
+    // 시작일이 오늘보다 이전인 경우
+    if (startDate.isBefore(today)) {
+      return false;
+    }
+
+    // 종료일이 시작일보다 이전인 경우
+    if (endDate.isBefore(startDate)) {
+      return false;
+    }
+
+    // 프로젝트 기간이 1일 미만인 경우
+    if (endDate.diff(startDate, 'day') < 1) {
+      return false;
+    }
+
+    // 프로젝트 기간이 5년(1825일)을 초과하는 경우
+    if (endDate.diff(startDate, 'day') > 1825) {
+      return false;
+    }
+
+    return true;
+  };
+
+  // 필수 필드와 기간 벨리데이션 체크
+  const isFormValid = () => {
+    const hasRequiredFields = form.name && form.startAt && form.endAt && form.devCompanyId && form.clientCompanyId;
+    const hasValidDates = validateDates(form.startAt, form.endAt);
+    return hasRequiredFields && hasValidDates;
+  };
+
   useEffect(() => {
     if (isEdit) {
       dispatch(fetchProjectById(projectId));
@@ -83,6 +124,12 @@ export default function ProjectFormPage() {
   };
 
   const handleSubmit = async () => {
+    // 기간 벨리데이션 체크
+    if (!validateDates(form.startAt, form.endAt)) {
+      alert("기간 설정을 확인해주세요. 시작일은 오늘 이후, 종료일은 시작일 이후로 설정해주세요.");
+      return;
+    }
+
     try {
       const payload = {
         name: form.name,
@@ -158,7 +205,7 @@ export default function ProjectFormPage() {
           variant="contained"
           color="primary"
           onClick={handleSubmit}
-          disabled={projectLoading || companyLoading || !form.name}
+          disabled={projectLoading || companyLoading || !isFormValid()}
         >
           {projectLoading
             ? isEdit

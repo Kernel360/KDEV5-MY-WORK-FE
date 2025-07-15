@@ -226,7 +226,7 @@ export default function CustomTable({
                       </TableCell>
                     ))}
                     {!hideActionsColumn && 
-                      userRole === "ROLE_SYSTEM_ADMIN" &&
+                      ["ROLE_SYSTEM_ADMIN", "ROLE_DEV_ADMIN", "ROLE_CLIENT_ADMIN"].includes(userRole) &&
                       !hideDeleteButton &&
                       !row.deleted && (
                         <TableCell key="__actions__" align="center">

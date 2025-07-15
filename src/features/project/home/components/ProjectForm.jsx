@@ -30,18 +30,74 @@ export default function ProjectForm({
   setSteps = () => {},
 }) {
   const [amountError, setAmountError] = React.useState("");
+  const [dateError, setDateError] = React.useState("");
 
   const handleAmountChange = (event) => {
-    const value = event.target.value;
-    if (value > 1000000) {
-      setAmountError(
-        "프로젝트 금액은 만원 단위 입니다. 100억을 넘을수 없습니다. 관리자에게 문의해주세요."
-      );
+    const value = event.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
+    if (value.length > 0 && Number(value) >= 1000000) {
+      setAmountError("프로젝트 금액은 만 원 단위입니다. 6자리를 넘을 수 없습니다. 관리자에게 문의해주세요.");
     } else {
       setAmountError("");
-      handleChange("projectAmount")({ target: { value: value } });
     }
+    handleChange("projectAmount")({ target: { value } });
   };
+
+  // 기간 벨리데이션 체크 함수
+  const validateDates = (startAt, endAt) => {
+    if (!startAt || !endAt) {
+      setDateError("");
+      return;
+    }
+
+    const startDate = dayjs(startAt);
+    const endDate = dayjs(endAt);
+    const today = dayjs().startOf('day');
+
+    // 시작일이 오늘보다 이전인 경우
+    if (startDate.isBefore(today)) {
+      setDateError("시작일은 오늘 이후로 설정해주세요.");
+      return;
+    }
+
+    // 종료일이 시작일보다 이전인 경우
+    if (endDate.isBefore(startDate)) {
+      setDateError("종료일은 시작일 이후로 설정해주세요.");
+      return;
+    }
+
+    // 프로젝트 기간이 1일 미만인 경우
+    if (endDate.diff(startDate, 'day') < 1) {
+      setDateError("프로젝트 기간은 최소 1일 이상이어야 합니다.");
+      return;
+    }
+
+    // 프로젝트 기간이 5년(1825일)을 초과하는 경우
+    if (endDate.diff(startDate, 'day') > 1825) {
+      setDateError("프로젝트 기간은 최대 5년을 초과할 수 없습니다.");
+      return;
+    }
+
+    setDateError("");
+  };
+
+  // 시작일 변경 핸들러
+  const handleStartDateChange = (newDate) => {
+    const val = newDate ? newDate.format("YYYY-MM-DD") : "";
+    handleChange("startAt")({ target: { value: val } });
+    validateDates(val, form.endAt);
+  };
+
+  // 종료일 변경 핸들러
+  const handleEndDateChange = (newDate) => {
+    const val = newDate ? newDate.format("YYYY-MM-DD") : "";
+    handleChange("endAt")({ target: { value: val } });
+    validateDates(form.startAt, val);
+  };
+
+  // form 값이 변경될 때마다 벨리데이션 체크
+  React.useEffect(() => {
+    validateDates(form.startAt, form.endAt);
+  }, [form.startAt, form.endAt]);
 
   return (
     <Box
@@ -76,18 +132,18 @@ export default function ProjectForm({
             <Divider sx={{ mt: 1, mb: 2 }} />
 
             <TextField
-              required
-              label="프로젝트 이름"
+              label={<span>프로젝트 이름 *</span>}
               placeholder="예) 테스트 프로젝트 A"
-              error={!form.name}
               value={form.name || ""}
               onChange={handleChange("name")}
               fullWidth
               sx={{ mb: 2 }}
+              error={false}
+              helperText={!form.name ? "프로젝트 이름을 입력해주세요." : " "}
             />
 
             <TextField
-              label="상세 설명"
+              label={<span>상세 설명 <span style={{ color: '#000' }}>*</span></span>}
               placeholder="프로젝트 설명을 입력하세요."
               value={form.detail || ""}
               onChange={handleChange("detail")}
@@ -95,6 +151,8 @@ export default function ProjectForm({
               multiline
               rows={4}
               sx={{ mb: 2 }}
+              error={false}
+              helperText={!form.detail ? "상세 설명을 간단하게 작성 부탁드립니다." : " "}
             />
 
             {/* 상태 필드는 편집 모드에서만 표시 */}
@@ -129,7 +187,7 @@ export default function ProjectForm({
             <Divider sx={{ mt: 1, mb: 2 }} />
 
             <TextField
-              label="프로젝트 금액"
+              label={<span>프로젝트 금액 <span style={{ color: '#000' }}>*</span></span>}
               placeholder="예) 1000"
               type="number"
               value={form.projectAmount || ""}
@@ -159,7 +217,7 @@ export default function ProjectForm({
               <Typography variant="subtitle1" fontWeight={600}>
                 3. 기간 설정
               </Typography>
-              <Tooltip title="시작일과 종료일을 선택하세요.">
+              <Tooltip title="시작일은 오늘 이후, 종료일은 시작일 이후로 설정해주세요. 프로젝트 기간은 최소 1일, 최대 5년까지 가능합니다.">
                 <InfoOutlined fontSize="small" color="action" />
               </Tooltip>
             </Stack>
@@ -168,47 +226,54 @@ export default function ProjectForm({
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6} md={4}>
                   <DatePicker
-                    label="시작일"
+                    label={<span>시작일 <span style={{ color: '#000' }}>*</span></span>}
                     format="YYYY-MM-DD"
                     slots={{ openPickerIcon: CalendarTodayRounded }}
                     slotProps={{ openPickerIcon: { fontSize: "small" } }}
                     value={form.startAt ? dayjs(form.startAt) : null}
-                    onChange={(newDate) => {
-                      const val = newDate ? newDate.format("YYYY-MM-DD") : "";
-                      handleChange("startAt")({ target: { value: val } });
-                    }}
+                    onChange={handleStartDateChange}
                     renderInput={(params) => (
                       <TextField
                         {...params}
                         required
                         fullWidth
                         InputLabelProps={{ shrink: true }}
+                        error={!!dateError}
+                        helperText={dateError}
                       />
                     )}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                   <DatePicker
-                    label="종료일"
+                    label={<span>종료일 <span style={{ color: '#000' }}>*</span></span>}
                     format="YYYY-MM-DD"
                     slots={{ openPickerIcon: CalendarTodayRounded }}
                     slotProps={{ openPickerIcon: { fontSize: "small" } }}
                     value={form.endAt ? dayjs(form.endAt) : null}
-                    onChange={(newDate) => {
-                      const val = newDate ? newDate.format("YYYY-MM-DD") : "";
-                      handleChange("endAt")({ target: { value: val } });
-                    }}
+                    onChange={handleEndDateChange}
                     renderInput={(params) => (
                       <TextField
                         {...params}
                         required
                         fullWidth
                         InputLabelProps={{ shrink: true }}
+                        error={!!dateError}
+                        helperText={dateError}
                       />
                     )}
                   />
                 </Grid>
               </Grid>
+              {dateError && (
+                <Typography 
+                  variant="caption" 
+                  color="error" 
+                  sx={{ mt: 1, display: 'block' }}
+                >
+                  {dateError}
+                </Typography>
+              )}
             </LocalizationProvider>
           </Box>
 
