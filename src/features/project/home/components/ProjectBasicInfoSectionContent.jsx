@@ -50,7 +50,7 @@ export default function ProjectBasicInfoSectionContent({
     } else {
       setAmountError("");
     }
-    setProjectAmount(value);
+      setProjectAmount(value);
   };
 
   // 기간 벨리데이션 체크 함수
