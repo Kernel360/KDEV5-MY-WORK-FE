@@ -26,14 +26,14 @@
   </tr>
   <tr>
     <td><img src="https://avatars.githubusercontent.com/u/48561660?v=4" width="150" height="150" alt="박병기"></td>
-    <td><img src="https://avatars.githubusercontent.com/u/98391406?v=4" width="150" height="150" alt="이소은"></td>
-    <td><img src="https://avatars.githubusercontent.com/u/106977054?v=4" width="150" height="150" alt="임재현"></td>
-    <td><img src="https://avatars.githubusercontent.com/u/206319376?v=4" width="150" height="150" alt="안지현"></td> 
+    <td><img src="https://avatars.githubusercontent.com/u/98391406?v=4" width="150" height="150" alt="걍예주"></td>
+    <td><img src="https://avatars.githubusercontent.com/u/106977054?v=4" width="150" height="150" alt="이수하"></td>
+    <td><img src="https://avatars.githubusercontent.com/u/206319376?v=4" width="150" height="150" alt="함성준"></td> 
   </tr>
   <tr>
     <td><a href="https://github.com/pbg0205/">@pbg0205</a></td>
     <td><a href="https://github.com/Yeju-Kang">@Yeju-Kang</a></td>
-    <td><a href="https://github.com/myaeba">@leeesooha</a></td>
+    <td><a href="https://github.com/leeesooha">@leeesooha</a></td>
     <td><a href="https://github.com/HMHMHMJUN">@HMHMHMJUN</a></td>
   </tr>
 </table>
