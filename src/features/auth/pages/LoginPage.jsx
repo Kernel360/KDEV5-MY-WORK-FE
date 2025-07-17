@@ -290,25 +290,6 @@ export default function LoginPage() {
                 로그인
               </Button>
             </form>
-            <Stack direction="row" justifyContent="center" spacing={2} mt={2}>
-              <Link
-                href="#"
-                underline="hover"
-                color="text.secondary"
-                fontSize={14}
-              >
-                아이디 찾기
-              </Link>
-              <Divider orientation="vertical" flexItem />
-              <Link
-                href="#"
-                underline="hover"
-                color="text.secondary"
-                fontSize={14}
-              >
-                비밀번호 찾기
-              </Link>
-            </Stack>
           </Paper>
         </Box>
       </Box>
