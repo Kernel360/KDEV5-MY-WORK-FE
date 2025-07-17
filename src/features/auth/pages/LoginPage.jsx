@@ -106,7 +106,10 @@ export default function LoginPage() {
           }}
         >
           <Stack direction="row" spacing={2} alignItems="center">
-            <Avatar src="/bear_round.png" sx={{ width: 56, height: 56 }} />
+            <Avatar
+              src="https://d16zykr4498a0c.cloudfront.net/bear_round.png"
+              sx={{ width: 56, height: 56 }}
+            />
             <Typography
               variant="h3"
               fontWeight={800}
