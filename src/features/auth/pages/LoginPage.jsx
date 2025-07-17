@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { login } from "@/features/auth/authSlice";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import StarIcon from "@mui/icons-material/Star";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 export default function LoginPage() {
   const dispatch = useDispatch();
@@ -38,6 +39,47 @@ export default function LoginPage() {
     setSnackbarOpen(false);
     setSnackbarMessage("");
   };
+
+  // 클립보드 복사 함수
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setSnackbarMessage("클립보드에 복사되었습니다!");
+      setSnackbarOpen(true);
+    } catch (err) {
+      setSnackbarMessage("복사에 실패했습니다.");
+      setSnackbarOpen(true);
+    }
+  };
+
+  // 테스트 계정 데이터
+  const testAccounts = [
+    {
+      role: "시스템 관리자",
+      email: "admin@example.com",
+      password: "password1234",
+    },
+    {
+      role: "개발사 관리자",
+      email: "devAdmin@example.com",
+      password: "password1234",
+    },
+    {
+      role: "고객사 관리자",
+      email: "clientAdmin@example.com",
+      password: "password1234",
+    },
+    {
+      role: "고객사 사원",
+      email: "clientUser@example.com",
+      password: "password1234",
+    },
+    {
+      role: "개발사 사원",
+      email: "devUser@example.com",
+      password: "password1234",
+    },
+  ];
 
   useEffect(() => {
     if (accessToken) navigate("/dashboard", { replace: true });
@@ -206,21 +248,58 @@ export default function LoginPage() {
               <StarIcon
                 sx={{ fontSize: 18, mr: 0.5, verticalAlign: "middle" }}
               />
-              테스트 계정 안내 (ID / PW)
+              테스트 계정 안내
             </Typography>
-            <Typography
-              variant="body2"
-              color="status.success.main"
-              lineHeight={1.8}
-            >
-              <b>시스템 관리자:</b> admin@example.com / password1234
-              <br />
-              <b>개발사 관리자:</b> devAdmin@example.com / password1234
-              <br />
-              <b>고객사 관리자:</b> clientAdmin@example.com / password1234
-              <br />
-              <b>개발사 사원:</b> clientUser@example.com / password1234
-            </Typography>
+            <Stack spacing={1}>
+              {testAccounts.map((account, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    // p: 1.5,
+                    borderRadius: 1.5,
+                    // bgcolor: "rgba(255, 255, 255, 0.3)",
+                    transition: "all 0.2s ease",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    color="status.success.main"
+                    sx={{ fontWeight: 500, whiteSpace: "nowrap" }}
+                  >
+                    <b>{account.role}:</b>
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="status.success.main"
+                    onClick={() => copyToClipboard(account.email)}
+                    sx={{ 
+                      fontWeight: 500, 
+                      whiteSpace: "nowrap",
+                      cursor: "pointer",
+                      "&:hover": { textDecoration: "underline" }
+                    }}
+                  >
+                    아이디: {account.email}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="status.success.main"
+                    onClick={() => copyToClipboard(account.password)}
+                    sx={{ 
+                      fontWeight: 500, 
+                      whiteSpace: "nowrap",
+                      cursor: "pointer",
+                      "&:hover": { textDecoration: "underline" }
+                    }}
+                  >
+                    비밀번호: {account.password}
+                  </Typography>
+                </Box>
+              ))}
+            </Stack>
           </Paper>
 
           <Paper
@@ -302,7 +381,7 @@ export default function LoginPage() {
       >
         <Alert
           onClose={handleCloseSnackbar}
-          severity="warning"
+          severity="success"
           sx={{ width: "100%" }}
         >
           {snackbarMessage}
